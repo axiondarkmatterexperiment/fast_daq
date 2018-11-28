@@ -2,33 +2,25 @@
 # daq #
 #######
 set( headers
-    egg3_reader.hh
     event_builder.hh
-    #single_value_trigger.hh
     frequency_mask_trigger.hh
     frequency_transform.hh
     packet_receiver_socket.hh
     roach_config.hh
-    streaming_writer.hh
     terminator.hh
     tf_roach_monitor.hh
     tf_roach_receiver.hh
-    triggered_writer.hh
 )
 
 set( sources
-    egg3_reader.cc
     event_builder.cc
-    #single_value_trigger.cc
     frequency_mask_trigger.cc
     frequency_transform.cc
     packet_receiver_socket.cc
     roach_config.cc
-    streaming_writer.cc
     terminator.cc
     tf_roach_monitor.cc
     tf_roach_receiver.cc
-    triggered_writer.cc
 )
 
 option( Psyllid_ENABLE_STREAMED_FREQUENCY_OUTPUT "Flag to enable building node for streaming frequency data (inproper monarch usage)" FALSE )
