@@ -1,0 +1,3 @@
+[submodule "psyllid"]
+	path = psyllid
+	url = https://github.com/axiondarkmatterexperiment/psyllid
