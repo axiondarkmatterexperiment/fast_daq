@@ -76,6 +76,9 @@ set_option( USE_CPP11 TRUE )
 # psyllid
 pbuilder_add_submodule( Psyllid psyllid )
 
+# need definitions from Monarch
+set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} APPEND PROPERTY COMPILE_DEFINITIONS ${Monarch_COMPILE_DEFINITIONS} )
+
 ## Midge
 #pbuilder_add_submodule( Midge midge )
 #midge_process_options()
