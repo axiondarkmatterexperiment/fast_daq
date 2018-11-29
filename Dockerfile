@@ -32,7 +32,6 @@ RUN cd /usr/local/src && \
     cd build && \
     cmake .. && \
     /bin/true
-
 RUN cd /usr/local/src/build && \
     cmake -DPsyllid_ENABLE_TESTING=FALSE \
           -DMonarch_ENABLE_EXECUTABLES=FALSE \
@@ -42,7 +41,8 @@ RUN cd /usr/local/src/build && \
           .. && \
      /bin/true
 RUN cd /usr/local/src/build && \
-     make VERBOSE=1 install && \
+    make install && \
+    /bin/true
 
 # this is probalby not a good choice of default config
 RUN cp /usr/local/src/psyllid/examples/str_1ch_fpa.yaml /etc/psyllid_config.yaml
