@@ -11,6 +11,9 @@ include( PackageBuilder )
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/psyllid/midge/cmake )
 include( MidgeUtility )
 
+list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/psyllid/cmake )
+include( Psyllid )
+
 pbuilder_prepare_project()
 
 
@@ -76,6 +79,9 @@ set_option( USE_CPP11 TRUE )
 # psyllid
 pbuilder_add_submodule( Psyllid psyllid )
 
+# need definitions from Monarch
+set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} APPEND PROPERTY COMPILE_DEFINITIONS ${Monarch_COMPILE_DEFINITIONS} )
+
 ## Midge
 #pbuilder_add_submodule( Midge midge )
 #midge_process_options()
@@ -111,6 +117,9 @@ include_directories( BEFORE
 #add_subdirectory( source/data )
 add_subdirectory( source/daq )
 #add_subdirectory( source/control )
+
+# rebuild psyllid to link against fast_daq
+psyllid_build_executables()
 
 #add_subdirectory( source/applications )
 #add_subdirectory( source/test )
