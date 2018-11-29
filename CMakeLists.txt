@@ -11,6 +11,9 @@ include( PackageBuilder )
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/psyllid/midge/cmake )
 include( MidgeUtility )
 
+list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/psyllid/cmake )
+include( Psyllid )
+
 pbuilder_prepare_project()
 
 

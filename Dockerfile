@@ -33,13 +33,16 @@ RUN cd /usr/local/src && \
     cmake .. && \
     /bin/true
 
-#RUN cd /usr/local/src/build && \
-#    cmake -DPsyllid_ENABLE_TESTING=FALSE \
-#          -DMonarch_ENABLE_EXECUTABLES=FALSE \
-#          -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
-#          -DPsyllid_ENABLE_STREAMED_FREQUENCY_OUTPUT=TRUE \
-#          . && \
-#    make -j2 install
+RUN cd /usr/local/src/build && \
+    cmake -DPsyllid_ENABLE_TESTING=FALSE \
+          -DMonarch_ENABLE_EXECUTABLES=FALSE \
+          -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
+          -DPsyllid_ENABLE_EXECUTABLES=FALSE \
+          -DPsyllid_ENABLE_STREAMED_FREQUENCY_OUTPUT=TRUE \
+          .. && \
+     /bin/true
+RUN cd /usr/local/src/build && \
+     make VERBOSE=1 install && \
 
 # this is probalby not a good choice of default config
 RUN cp /usr/local/src/psyllid/examples/str_1ch_fpa.yaml /etc/psyllid_config.yaml
