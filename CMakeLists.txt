@@ -115,6 +115,9 @@ include_directories( BEFORE
 add_subdirectory( source/daq )
 #add_subdirectory( source/control )
 
+# rebuild psyllid to link against fast_daq
+psyllid_build_executables()
+
 #add_subdirectory( source/applications )
 #add_subdirectory( source/test )
 

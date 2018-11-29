@@ -51,5 +51,5 @@ set( dependencies
 # library #
 ###########
 
-midge_library( PsyllidDAQ sources dependencies )
+midge_library( FastDAQ sources dependencies )
 pbuilder_install_headers( ${headers} )
