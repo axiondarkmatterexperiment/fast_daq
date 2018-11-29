@@ -18,11 +18,6 @@ RUN apt-get update && \
 
 # note that the build dir is *not* in source, this is so that the source can me mounted onto the container without covering the build target
 
-#COPY dripline-cpp /usr/local/src/dripline-cpp
-#COPY examples /usr/local/src/examples
-#COPY external /usr/local/src/external
-#COPY monarch /usr/local/src/monarch
-#COPY midge /usr/local/src/midge
 COPY psyllid /usr/local/src/psyllid
 COPY source /usr/local/src/source
 COPY CMakeLists.txt /usr/local/src/CMakeLists.txt
@@ -36,7 +31,6 @@ RUN cd /usr/local/src/build && \
     cmake -DPsyllid_ENABLE_TESTING=FALSE \
           -DMonarch_ENABLE_EXECUTABLES=FALSE \
           -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
-          -DPsyllid_ENABLE_EXECUTABLES=FALSE \
           -DPsyllid_ENABLE_STREAMED_FREQUENCY_OUTPUT=TRUE \
           .. && \
      /bin/true
