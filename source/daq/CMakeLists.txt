@@ -42,9 +42,6 @@ if( Psyllid_BUILD_FPA )
 endif( Psyllid_BUILD_FPA )
 
 set( dependencies
-    PsyllidUtility
-    PsyllidData
-    PsyllidControl
 )
 
 ###########
