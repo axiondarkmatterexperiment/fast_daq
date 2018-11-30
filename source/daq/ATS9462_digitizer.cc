@@ -20,24 +20,24 @@ namespace fast_daq
 
     // ats9462_digitizer methods
     ats9462_digitizer::ats9462_digitizer() :
-        samples_per_sec( 180000000.0 ),
-        acquisition_length_sec( 0.1 ),
-        samples_per_buffer( 204800 ),
-        dma_buffer_count( 4883 ),
-        system_id( 1 ),
-        board_id( 1 ),
-        channel_count( 1 ),
-        bits_per_sample(),
-        max_samples_per_channel()
+        f_samples_per_sec( 180000000.0 ),
+        f_acquisition_length_sec( 0.1 ),
+        f_samples_per_buffer( 204800 ),
+        f_dma_buffer_count( 4883 ),
+        f_system_id( 1 ),
+        f_board_id( 1 ),
+        f_channel_count( 1 ),
+        f_bits_per_sample(),
+        f_max_samples_per_channel()
     {
-        board = AlazarGetBoardBySystemID( system_id, board_id );
-        if (board == NULL)
+        f_board = AlazarGetBoardBySystemID( f_system_id, f_board_id );
+        if (f_board == NULL)
         {
-            printf("Error: Unable to open board system Id %u board Id %u\n", system_id, board_id);
+            printf("Error: Unable to open board system Id %u board Id %u\n", f_system_id, f_board_id);
             //TODO do something smarter here
             throw 1;
         }
-        RETURN_CODE ret_code = AlazarGetChannelInfo(board, &max_samples_per_channel, &bits_per_sample);
+        RETURN_CODE ret_code = AlazarGetChannelInfo(f_board, &f_max_samples_per_channel, &f_bits_per_sample);
         if (ret_code != ApiSuccess)
         {
             printf("Error: AlazarGetChannelInfo failed -- %s\n", AlazarErrorToText(ret_code));
@@ -69,22 +69,22 @@ namespace fast_daq
     // Derived properties
     INT64 ats9462_digitizer::samples_per_acquisition()
     {
-        return (INT64)(samples_per_sec * acquisition_length_sec + 0.5);
+        return (INT64)(f_samples_per_sec * f_acquisition_length_sec + 0.5);
     }
 
     float ats9462_digitizer::bytes_per_sample()
     {
-        return (float)((bits_per_sample + 7) / 8);
+        return (float)((f_bits_per_sample + 7) / 8);
     }
 
     U32 ats9462_digitizer::bytes_per_buffer()
     {
-        return (U32)(bytes_per_sample() * samples_per_buffer * channel_count + 0.5);
+        return (U32)(bytes_per_sample() * f_samples_per_buffer * f_channel_count + 0.5);
     }
 
     U32  ats9462_digitizer::buffers_per_acquisition()
     {
-        return (U32)((samples_per_acquisition() + samples_per_buffer -1) / samples_per_buffer);
+        return (U32)((samples_per_acquisition() + f_samples_per_buffer -1) / f_samples_per_buffer);
     }
 
     // ats9462_digitizer_binding methods

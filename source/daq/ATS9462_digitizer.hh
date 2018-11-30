@@ -9,16 +9,17 @@
 #define ATS9462_WRAP_HH_
 
 // AlazarTech includes
+//TODO (maybe some/all of these could go in the source file?)
 #include "AlazarError.h"
 #include "AlazarApi.h"
 #include "AlazarCmd.h"
 
 // psyllid includes
-#include "memory_block.hh"
+//#include "memory_block.hh"
 #include "node_builder.hh"
 
 #include "producer.hh"
-#include "control_access.hh"
+//#include "control_access.hh"
 
 // forward declarations
 namespace psyllid
@@ -58,19 +59,18 @@ namespace fast_daq
             virtual void execute( midge::diptera* a_midge = nullptr );
             virtual void finalize();
 
+        mv_referrable( double, samples_per_sec );
+        mv_referrable( double, acquisition_length_sec );
+        mv_referrable( U32, samples_per_buffer );
+        mv_referrable( U32, dma_buffer_count );
+        mv_referrable( U32, system_id );
+        mv_referrable( U32, board_id );
+        mv_referrable( U8, channel_count );
+        mv_referrable( U8, bits_per_sample );
+        mv_referrable( U32, max_samples_per_channel );
+
         private:
-            // These should use the scarab mv_* macros once I migrate
-            double samples_per_sec;
-            double acquisition_length_sec;
-            U32 samples_per_buffer;
-            U32 dma_buffer_count;
-            U32 system_id;
-            U32 board_id;
-            U8 channel_count;
-            U8 bits_per_sample;
-            U32 max_samples_per_channel;
-        private:
-            HANDLE board;
+            HANDLE f_board;
 
         private:
             void configure_board();
