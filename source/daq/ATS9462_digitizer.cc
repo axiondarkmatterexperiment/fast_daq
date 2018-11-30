@@ -7,11 +7,19 @@
 
 #include <stdio.h>
 
+#include "time_data.hh"
+
 #include "ATS9462_digitizer.hh"
+
+
+using midge::stream;
 
 namespace fast_daq
 {
-    ats9462_wrap::ats9462_wrap() :
+    REGISTER_NODE_AND_BUILDER( ats9462_digitizer, "ats9462", ats9462_digitizer_binding );
+
+    // ats9462_digitizer methods
+    ats9462_digitizer::ats9462_digitizer() :
         samples_per_sec( 180000000.0 ),
         acquisition_length_sec( 0.1 ),
         samples_per_buffer( 204800 ),
@@ -37,32 +45,63 @@ namespace fast_daq
         }
     }
 
-    ats9462_wrap::~ats9462_wrap()
+    ats9462_digitizer::~ats9462_digitizer()
     {
     }
 
-    void ats9462_wrap::configure_board()
+    // nodea interface methods
+    void ats9462_digitizer::initialize()
+    {
+    }
+
+    void ats9462_digitizer::execute( midge::diptera* a_midge )
+    {
+    }
+
+    void ats9462_digitizer::finalize()
+    {
+    }
+
+    void ats9462_digitizer::configure_board()
     {
     }
 
     // Derived properties
-    INT64 ats9462_wrap::samples_per_acquisition()
+    INT64 ats9462_digitizer::samples_per_acquisition()
     {
         return (INT64)(samples_per_sec * acquisition_length_sec + 0.5);
     }
 
-    float ats9462_wrap::bytes_per_sample()
+    float ats9462_digitizer::bytes_per_sample()
     {
         return (float)((bits_per_sample + 7) / 8);
     }
 
-    U32 ats9462_wrap::bytes_per_buffer()
+    U32 ats9462_digitizer::bytes_per_buffer()
     {
         return (U32)(bytes_per_sample() * samples_per_buffer * channel_count + 0.5);
     }
 
-    U32  ats9462_wrap::buffers_per_acquisition()
+    U32  ats9462_digitizer::buffers_per_acquisition()
     {
         return (U32)((samples_per_acquisition() + samples_per_buffer -1) / samples_per_buffer);
     }
+
+    // ats9462_digitizer_binding methods
+    ats9462_digitizer_binding::ats9462_digitizer_binding()
+    {
+    }
+
+    ats9462_digitizer_binding::~ats9462_digitizer_binding()
+    {
+    }
+
+    void ats9462_digitizer_binding::do_apply_config(ats9462_digitizer* a_node, const scarab::param_node& a_config ) const
+    {
+    }
+
+    void ats9462_digitizer_binding::do_dump_config( const ats9462_digitizer* a_node, scarab::param_node& a_config ) const
+    {
+    }
+
 } /* namespace fast_daq */
