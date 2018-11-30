@@ -20,9 +20,9 @@ endif (Psyllid_ENABLE_STREAMED_FREQUENCY_OUTPUT)
 if ( FastDAQ_ENABLE_ATS)
     #set( headers ${headers} ATS9462_digitizer.hh )
     #set( sources ${sources} ATS9462_digitizer.cc )
-    message( STATUS "%%%%%%%%% fast DAQ enabled" )
+    message( STATUS "%%%%%%%%% ATS enabled" )
 else ( FastDAQ_ENABLE_ATS)
-    message( STATUS "%%%%%%%%% fast DAQ not enabled" )
+    message( STATUS "%%%%%%%%% ATS not enabled" )
 endif ( FastDAQ_ENABLE_ATS)
 
 ###########
