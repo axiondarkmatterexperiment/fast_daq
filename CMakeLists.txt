@@ -23,58 +23,41 @@ pbuilder_prepare_project()
 
 set_option( USE_CPP11 TRUE )
 
-## add an option to perform iterator time profiling
-#option( Psyllid_ENABLE_ITERATOR_TIMING "Flag to enable iterator time profiling" FALSE )
-#if( Psyllid_ENABLE_ITERATOR_TIMING )
-#    add_definitions( -DENABLE_ITERATOR_TIMING )
-#else( Psyllid_ENABLE_ITERATOR_TIMING )
-#    remove_definitions( -DENABLE_ITERATOR_TIMING )
-#endif( Psyllid_ENABLE_ITERATOR_TIMING )
-#
-#set( default_flag FALSE )
-#if( UNIX AND NOT APPLE )
-#    set( default_flag TRUE )
-#endif( UNIX AND NOT APPLE )
-#option( Psyllid_ENABLE_FPA "Flag to enable the fast-packet-acquisition interface (requires root)" ${default_flag} )
-#if( Psyllid_ENABLE_FPA AND UNIX AND NOT APPLE )
-#    set( Psyllid_BUILD_FPA TRUE )
-#    add_definitions( -DBUILD_FPA )
-#else( Psyllid_ENABLE_FPA AND UNIX AND NOT APPLE )
-#    set( Psyllid_BUILD_FPA FALSE )
-#    remove_definitions( -DBUILD_FPA )
-#endif( Psyllid_ENABLE_FPA AND UNIX AND NOT APPLE )
-
 ################
 # dependencies #
 ################
 
-## FFTW
-#option( Psyllid_ENABLE_FFTW "Flag to enable FFTW features" TRUE )
-#if (Psyllid_ENABLE_FFTW)
-#    find_package(FFTW REQUIRED)
-#else (Psyllid_ENABLE_FFTW)
-#    set (FFTW_FOUND FALSE)
-#endif (Psyllid_ENABLE_FFTW)
-#if (FFTW_FOUND)
-#    add_definitions(-DFFTW_FOUND)
-#    pbuilder_add_ext_libraries (${FFTW_LIBRARIES})
-#    if (FFTW_THREADS_FOUND)
-#        set (FFTW_NTHREADS 1 CACHE STRING "Number of threads to use for FFTW processes")
-#        add_definitions (-DFFTW_NTHREADS=${FFTW_NTHREADS})
-#        message (STATUS "FFTW configured to use up to ${FFTW_NTHREADS} threads.")
-#    else (FFTW_THREADS_FOUND)
-#        remove_definitions (-DFFTW_NTHREADS=${FFTW_NTHREADS})
-#    endif (FFTW_THREADS_FOUND)
-#else (FFTW_FOUND)
-#    message(STATUS "Building without FFTW")
-#    remove_definitions(-DFFTW_FOUND)
-#    remove_definitions (-DFFTW_NTHREADS=${FFTW_NTHREADS})
-#endif (FFTW_FOUND)
-#include_directories (${FFTW_INCLUDE_DIR})
+# AlazarTech
+list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
+include( ATS9462 )
+add_ats9462( ATS_FOUND )
+message( STATUS "%%%%%%%%% ats_found is: ${ATS_FOUND}" )
+option( FastDAQ_ENABLE_ATS "Flag to enable building of node to read from AlazarTech digitizer" ${ATS_FOUND} )
+message( STATUS "%%%%%%%%% so initial value of fastdaq_enable_ats is: ${FastDAQ_ENABLE_ATS}" )
 
-## Boost
-## Boost (1.48 required for container; scarab minimum is 1.46)
-#find_package( Boost 1.48.0 REQUIRED )
+# FFTW
+option( FastDAQ_ENABLE_FFTW "Flag to enable FFTW features" TRUE )
+if (FastDAQ_ENABLE_FFTW)
+    find_package(FFTW REQUIRED)
+else (FastDAQ_ENABLE_FFTW)
+    set (FFTW_FOUND FALSE)
+endif (FastDAQ_ENABLE_FFTW)
+if (FFTW_FOUND)
+    add_definitions(-DFFTW_FOUND)
+    pbuilder_add_ext_libraries (${FFTW_LIBRARIES})
+    if (FFTW_THREADS_FOUND)
+        set (FFTW_NTHREADS 1 CACHE STRING "Number of threads to use for FFTW processes")
+        add_definitions (-DFFTW_NTHREADS=${FFTW_NTHREADS})
+        message (STATUS "FFTW configured to use up to ${FFTW_NTHREADS} threads.")
+    else (FFTW_THREADS_FOUND)
+        remove_definitions (-DFFTW_NTHREADS=${FFTW_NTHREADS})
+    endif (FFTW_THREADS_FOUND)
+else (FFTW_FOUND)
+    message(STATUS "Building without FFTW")
+    remove_definitions(-DFFTW_FOUND)
+    remove_definitions (-DFFTW_NTHREADS=${FFTW_NTHREADS})
+endif (FFTW_FOUND)
+include_directories (${FFTW_INCLUDE_DIR})
 
 # psyllid
 pbuilder_add_submodule( Psyllid psyllid )
@@ -82,43 +65,20 @@ pbuilder_add_submodule( Psyllid psyllid )
 # need definitions from Monarch
 set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} APPEND PROPERTY COMPILE_DEFINITIONS ${Monarch_COMPILE_DEFINITIONS} )
 
-## Midge
-#pbuilder_add_submodule( Midge midge )
-#midge_process_options()
-#
-## Dripline
-#add_definitions( -DDRIPLINE_AUTH_FILE=.project8_authentications.json )
-#pbuilder_add_submodule( Dripline dripline-cpp )
-#
-## Monarch
-#pbuilder_add_submodule( Monarch monarch )
-## we need the definitions for HAS_ATTR_IFC and HAS_GRP_IFC from Monarch to use the proper class interfaces in M3Header and M3Stream
-#set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} APPEND PROPERTY COMPILE_DEFINITIONS ${Monarch_COMPILE_DEFINITIONS} )
-#
-## tk_spline
-#include_directories( BEFORE ${PROJECT_SOURCE_DIR}/external/tk_spline )
 
-
-#############
+############
 # fast_daq #
-#############
+############
 
 # add include directories
 include_directories( BEFORE
-    #source/control
-    #source/data
     source/daq
-    #source/utility
 )
 
-
 # build this project
-#add_subdirectory( source/utility )
-#add_subdirectory( source/data )
 add_subdirectory( source/daq )
-#add_subdirectory( source/control )
 
-# rebuild psyllid to link against fast_daq
+# build psyllid, linking against fast_daq
 psyllid_build_executables()
 
 #add_subdirectory( source/applications )
