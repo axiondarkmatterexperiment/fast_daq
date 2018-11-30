@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-#include "ATS9462_wrap.hh"
+#include "ATS9462_digitizer.hh"
 
 namespace fast_daq
 {
