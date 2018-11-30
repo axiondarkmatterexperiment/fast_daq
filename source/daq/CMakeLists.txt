@@ -2,12 +2,12 @@
 # daq #
 #######
 set( headers
-    ATS9462_digitizer.hh
+    #ATS9462_digitizer.hh
     frequency_transform.hh
 )
 
 set( sources
-    ATS9462_digitizer.cc
+    #ATS9462_digitizer.cc
     frequency_transform.cc
 )
 
@@ -18,11 +18,8 @@ if (Psyllid_ENABLE_STREAMED_FREQUENCY_OUTPUT)
 endif (Psyllid_ENABLE_STREAMED_FREQUENCY_OUTPUT)
 
 if ( FastDAQ_ENABLE_ATS)
-    #set( headers ${headers} ATS9462_digitizer.hh )
-    #set( sources ${sources} ATS9462_digitizer.cc )
-    message( STATUS "%%%%%%%%% ATS enabled" )
-else ( FastDAQ_ENABLE_ATS)
-    message( STATUS "%%%%%%%%% ATS not enabled" )
+    set( headers ${headers} ATS9462_digitizer.hh )
+    set( sources ${sources} ATS9462_digitizer.cc )
 endif ( FastDAQ_ENABLE_ATS)
 
 ###########

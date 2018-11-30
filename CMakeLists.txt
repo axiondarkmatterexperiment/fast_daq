@@ -31,9 +31,7 @@ set_option( USE_CPP11 TRUE )
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
 include( ATS9462 )
 add_ats9462( ATS_FOUND )
-message( STATUS "%%%%%%%%% ats_found is: ${ATS_FOUND}" )
 option( FastDAQ_ENABLE_ATS "Flag to enable building of node to read from AlazarTech digitizer" ${ATS_FOUND} )
-message( STATUS "%%%%%%%%% so initial value of fastdaq_enable_ats is: ${FastDAQ_ENABLE_ATS}" )
 
 # FFTW
 option( FastDAQ_ENABLE_FFTW "Flag to enable FFTW features" TRUE )
