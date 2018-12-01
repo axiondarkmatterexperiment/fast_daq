@@ -70,6 +70,8 @@ namespace fast_daq
         mv_accessible( U8, bits_per_sample );
         mv_accessible( U32, max_samples_per_channel );
         mv_accessible( uint64_t, out_length );
+        mv_accessible( double, trigger_delay_sec );
+        mv_accessible( double, trigger_timeout_sec );
 
         private:
             HANDLE f_board_handle;

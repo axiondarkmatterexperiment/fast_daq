@@ -29,7 +29,9 @@ namespace fast_daq
         f_channel_count( 1 ),
         f_bits_per_sample(),
         f_max_samples_per_channel(),
-        f_out_length()
+        f_out_length(),
+        f_trigger_delay_sec(),
+        f_trigger_timeout_sec(0.01)
     {
         f_board_handle = AlazarGetBoardBySystemID( f_system_id, f_board_id );
         if (f_board_handle == NULL)
@@ -95,10 +97,61 @@ namespace fast_daq
         ret_code = AlazarSetCaptureClock( f_board_handle, INTERNAL_CLOCK, SAMPLE_RATE_180MSPS, CLOCK_EDGE_RISING, 0);
         if ( ! check_return_code( ret_code, "AlazarSetCaptureClock" ) )
         {
-            //TODO ????
-            throw 1;
+            throw 1; //TODO ????
         }
 
+        ret_code = AlazarInputControlEx( f_board_handle, CHANNEL_A, DC_COUPLING, INPUT_RANGE_PM_800_MV, IMPEDANCE_50_OHM );
+        if ( ! check_return_code( ret_code, "AlazarInputControlEx" ) )
+        {
+            throw 1; //TODO???
+        }
+
+        ret_code = AlazarSetBWLimit( f_board_handle, CHANNEL_A, 0 );
+        if ( ! check_return_code( ret_code, "AlazarSetBWLimit" ) )
+        {
+            throw 1; //TODO???
+        }
+
+        ret_code = AlazarSetTriggerOperation( f_board_handle,
+                                              TRIG_ENGINE_OP_J,
+                                              TRIG_ENGINE_J,
+                                              TRIG_CHAN_A,
+                                              TRIGGER_SLOPE_POSITIVE,
+                                              150,
+                                              TRIG_ENGINE_K,
+                                              TRIG_DISABLE,
+                                              TRIGGER_SLOPE_POSITIVE,
+                                              128);
+        if ( ! check_return_code( ret_code, "AlazarSetTriggerOperation" ) )
+        {
+            throw 1; //TODO???
+        }
+
+        ret_code = AlazarSetExternalTrigger( f_board_handle, DC_COUPLING, ETR_5V );
+        if ( ! check_return_code( ret_code, "AlazarSetExternalTrigger" ) )
+        {
+            throw 1; //TODO???
+        }
+
+        U32 trigger_delay_samples = (U32)(f_trigger_delay_sec * f_samples_per_sec + 0.5);
+        ret_code = AlazarSetTriggerDelay( f_board_handle, trigger_delay_samples );
+        if ( ! check_return_code( ret_code, "AlazarSetTriggerDelay" ) )
+        {
+            throw 1; //TODO???
+        }
+
+        U32 trigger_timeout_clocks = (U32)(f_trigger_timeout_sec / 10.e-6 + 0.5);
+        ret_code = AlazarSetTriggerTimeOut( f_board_handle, trigger_timeout_clocks );
+        if ( ! check_return_code( ret_code, "AlazarSetTriggerTimeOut" ) )
+        {
+            throw 1; //TODO???
+        }
+
+        ret_code = AlazarConfigureAuxIO( f_board_handle, AUX_OUT_TRIGGER, 0 );
+        if ( ! check_return_code( ret_code, "AlazarConfigureAuxIO" ) )
+        {
+            throw 1; //TODO???
+        }
     }
 
     // Derived properties
