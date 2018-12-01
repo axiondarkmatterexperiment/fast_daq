@@ -28,42 +28,77 @@ namespace fast_daq
         f_board_id( 1 ),
         f_channel_count( 1 ),
         f_bits_per_sample(),
-        f_max_samples_per_channel()
+        f_max_samples_per_channel(),
+        f_out_length()
     {
-        f_board = AlazarGetBoardBySystemID( f_system_id, f_board_id );
-        if (f_board == NULL)
+        f_board_handle = AlazarGetBoardBySystemID( f_system_id, f_board_id );
+        if (f_board_handle == NULL)
         {
             printf("Error: Unable to open board system Id %u board Id %u\n", f_system_id, f_board_id);
             //TODO do something smarter here
             throw 1;
         }
-        RETURN_CODE ret_code = AlazarGetChannelInfo(f_board, &f_max_samples_per_channel, &f_bits_per_sample);
+        RETURN_CODE ret_code = AlazarGetChannelInfo(f_board_handle, &f_max_samples_per_channel, &f_bits_per_sample);
         if (ret_code != ApiSuccess)
         {
             printf("Error: AlazarGetChannelInfo failed -- %s\n", AlazarErrorToText(ret_code));
+            //TODO do something smarter here
             throw 1;
         }
     }
 
     ats9462_digitizer::~ats9462_digitizer()
     {
+        //TODO: critical that we make sure that the DMA buffers are cleaned up.
     }
 
-    // nodea interface methods
+    // node interface methods
     void ats9462_digitizer::initialize()
     {
+        // setup output buffer
+        out_buffer< 0 >().initialize( f_out_length );
+        // configure the digitizer board
+        configure_board();
     }
 
     void ats9462_digitizer::execute( midge::diptera* a_midge )
     {
+        try
+        {
+            //TODO something interesting here?
+        }
+        catch( std::exception )
+        {
+            a_midge->throw_ex( std::current_exception() );
+        }
     }
 
     void ats9462_digitizer::finalize()
     {
+        out_buffer< 0 >().finalize();
+    }
+
+    bool ats9462_digitizer::check_return_code(RETURN_CODE a_return_code, std::string an_action)
+    {
+        if (a_return_code != ApiSuccess)
+        {
+            printf("Error: %s failed -- %s\n", an_action.c_str(), AlazarErrorToText(a_return_code));
+            return false;
+        }
+        return true;
     }
 
     void ats9462_digitizer::configure_board()
     {
+        RETURN_CODE ret_code;
+        //TODO: again, here the sample rate is hard-coded, should be configured and f_samples_per_sec tied to the enum value selected
+        ret_code = AlazarSetCaptureClock( f_board_handle, INTERNAL_CLOCK, SAMPLE_RATE_180MSPS, CLOCK_EDGE_RISING, 0);
+        if ( ! check_return_code( ret_code, "AlazarSetCaptureClock" ) )
+        {
+            //TODO ????
+            throw 1;
+        }
+
     }
 
     // Derived properties
@@ -98,10 +133,14 @@ namespace fast_daq
 
     void ats9462_digitizer_binding::do_apply_config(ats9462_digitizer* a_node, const scarab::param_node& a_config ) const
     {
+        a_node->set_samples_per_buffer( a_config.get_value( "samples-per-buffer", a_node->get_samples_per_buffer() ) );
+        a_node->set_out_length( a_config.get_value( "out-length", a_node->get_out_length() ) );
     }
 
     void ats9462_digitizer_binding::do_dump_config( const ats9462_digitizer* a_node, scarab::param_node& a_config ) const
     {
+        a_config.add( "samples-per-bufer", scarab::param_value( a_node->get_samples_per_buffer() ) );
+        a_config.add( "out-length", scarab::param_value( a_node->get_out_length() ) );
     }
 
 } /* namespace fast_daq */

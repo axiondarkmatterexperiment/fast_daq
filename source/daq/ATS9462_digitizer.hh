@@ -1,5 +1,5 @@
 /*
- * ATS9464.hh
+ * ATS9464_digitizer.hh
  *
  * Created on: Nov. 28, 2018
  *     Author: laroque
@@ -44,6 +44,7 @@ namespace fast_daq
 
      Available configuration values:
      - "samples-per-buffer": int -- number of real-valued samples to include in each chunk of data
+     - "out-length": int -- number of output buffer slots
 
      Output Streams
      - 0: time_data
@@ -59,20 +60,22 @@ namespace fast_daq
             virtual void execute( midge::diptera* a_midge = nullptr );
             virtual void finalize();
 
-        mv_referrable( double, samples_per_sec );
-        mv_referrable( double, acquisition_length_sec );
-        mv_referrable( U32, samples_per_buffer );
-        mv_referrable( U32, dma_buffer_count );
-        mv_referrable( U32, system_id );
-        mv_referrable( U32, board_id );
-        mv_referrable( U8, channel_count );
-        mv_referrable( U8, bits_per_sample );
-        mv_referrable( U32, max_samples_per_channel );
+        mv_accessible( double, samples_per_sec ); //TODO this float isn't actually used, the rate has to be from the ALAZAR_SAMPLE_RATES enum in AlazarCmd.h ... should deal with this more carefully.
+        mv_accessible( double, acquisition_length_sec );
+        mv_accessible( U32, samples_per_buffer );
+        mv_accessible( U32, dma_buffer_count );
+        mv_accessible( U32, system_id );
+        mv_accessible( U32, board_id );
+        mv_accessible( U8, channel_count );
+        mv_accessible( U8, bits_per_sample );
+        mv_accessible( U32, max_samples_per_channel );
+        mv_accessible( uint64_t, out_length );
 
         private:
-            HANDLE f_board;
+            HANDLE f_board_handle;
 
         private:
+            bool check_return_code(RETURN_CODE a_return_code, std::string an_action);
             void configure_board();
 
         public:
