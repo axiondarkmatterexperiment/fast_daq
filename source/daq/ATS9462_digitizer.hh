@@ -19,7 +19,7 @@
 #include "node_builder.hh"
 
 #include "producer.hh"
-//#include "control_access.hh"
+#include "control_access.hh"
 
 // forward declarations
 namespace psyllid
@@ -49,7 +49,7 @@ namespace fast_daq
      Output Streams
      - 0: time_data
     */
-    class ats9462_digitizer : public midge::_producer< ats9462_digitizer, typelist_1( psyllid::time_data ) >
+    class ats9462_digitizer : public midge::_producer< ats9462_digitizer, typelist_1( psyllid::time_data ) >, public psyllid::control_access
     {
         public:
             ats9462_digitizer();
@@ -60,25 +60,32 @@ namespace fast_daq
             virtual void execute( midge::diptera* a_midge = nullptr );
             virtual void finalize();
 
-        mv_accessible( double, samples_per_sec ); //TODO this float isn't actually used, the rate has to be from the ALAZAR_SAMPLE_RATES enum in AlazarCmd.h ... should deal with this more carefully.
+        mv_accessible( double, samples_per_sec ); //TODO this float is only partly used, the rate has to be from the ALAZAR_SAMPLE_RATES enum in AlazarCmd.h ... should deal with this more carefully.
         mv_accessible( double, acquisition_length_sec );
         mv_accessible( U32, samples_per_buffer );
         mv_accessible( U32, dma_buffer_count );
         mv_accessible( U32, system_id );
         mv_accessible( U32, board_id );
-        mv_accessible( U8, channel_count );
-        mv_accessible( U8, bits_per_sample );
-        mv_accessible( U32, max_samples_per_channel );
         mv_accessible( uint64_t, out_length );
         mv_accessible( double, trigger_delay_sec );
         mv_accessible( double, trigger_timeout_sec );
 
         private:
+            U8 f_channel_count;
+            U32 f_channel_mask;
+            U8 f_bits_per_sample;
+            U32 f_max_samples_per_channel;
             HANDLE f_board_handle;
+            bool f_paused;
+            std::vector<U16*> f_board_buffers;
+            U32 f_buffers_completed;
 
         private:
-            bool check_return_code(RETURN_CODE a_return_code, std::string an_action);
+            bool check_return_code(RETURN_CODE a_return_code, std::string an_action, unsigned to_throw);
             void configure_board();
+            void allocate_buffers();
+            void clear_buffers();
+            void process_a_buffer();
 
         public:
             // Derived properties
@@ -90,7 +97,6 @@ namespace fast_daq
     };
 
     class ats9462_digitizer_binding : public psyllid::_node_binding< ats9462_digitizer, ats9462_digitizer_binding >
-    //class ats9462_digitizer_binding : public _node_binding< ats9462_digitizer, ats9462_digitizer_binding >
     {
         public:
             ats9462_digitizer_binding();
