@@ -230,7 +230,7 @@ namespace fast_daq
 
     void ats9462_digitizer::process_a_buffer()
     {
-        //grab the next buffer, once it is filled
+        //grab the next buffer, once it is filled by the digitizer
         U16* this_buffer = f_board_buffers.at( f_buffers_completed % f_board_buffers.size() );
         check_return_code( AlazarWaitAsyncBufferComplete( f_board_handle, this_buffer, 5000 ),
                           "AlazarWaitAsyncBufferComplete", 1 );
