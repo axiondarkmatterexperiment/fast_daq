@@ -230,6 +230,14 @@ namespace fast_daq
     void ats9462_digitizer::process_a_buffer()
     {
         //TODO this thing needs to exist
+        U16*this_buffer = f_board_buffers.at( f_buffers_completed % f_board_buffers.size() );
+        //TODO actually process buffer;
+        psyllid::time_data* time_data_out = out_stream< 0 >().data();
+        std::copy(this_buffer[0], this_buffer[f_samples_per_buffer-1], &time_data_out->get_array()[0][0]);
+        //return buffer to board and increment buffer count
+        check_return_code( AlazarPostAsyncBuffer( f_board_handle, this_buffer, bytes_per_buffer() ),
+                          "AlazarPostAsyncBuffer", 1 );
+        f_buffers_completed++;
     }
 
     // Derived properties
