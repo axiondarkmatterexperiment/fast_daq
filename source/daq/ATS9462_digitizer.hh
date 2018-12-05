@@ -21,15 +21,11 @@
 #include "producer.hh"
 #include "control_access.hh"
 
-// forward declarations
-namespace psyllid
-{
-    class time_data;
-}
-
 
 namespace fast_daq
 {
+    // forward declarations
+    class real_time_data;
     /*!
      @class ats9462_digitizer
      @author B. H. LaRoque
@@ -47,9 +43,10 @@ namespace fast_daq
      - "out-length": int -- number of output buffer slots
 
      Output Streams
-     - 0: time_data
+     - 0: real_time_data
     */
-    class ats9462_digitizer : public midge::_producer< ats9462_digitizer, typelist_1( psyllid::time_data ) >, public psyllid::control_access
+    //class ats9462_digitizer : public midge::_producer< ats9462_digitizer, typelist_1( psyllid::time_data ) >, public psyllid::control_access
+    class ats9462_digitizer : public midge::_producer< ats9462_digitizer, typelist_1( real_time_data ) >, public psyllid::control_access
     {
         public:
             ats9462_digitizer();

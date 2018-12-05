@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 #include "daq_control.hh"
-#include "time_data.hh"
+#include "real_time_data.hh"
 
 #include "ATS9462_digitizer.hh"
 
@@ -67,6 +67,7 @@ namespace fast_daq
     {
         // setup output buffer
         out_buffer< 0 >().initialize( f_out_length );
+        out_buffer< 0 >().call( &real_time_data::allocate_array, f_samples_per_buffer );
         // configure the digitizer board
         configure_board();
         allocate_buffers();
@@ -229,11 +230,17 @@ namespace fast_daq
 
     void ats9462_digitizer::process_a_buffer()
     {
-        //TODO this thing needs to exist
-        U16*this_buffer = f_board_buffers.at( f_buffers_completed % f_board_buffers.size() );
-        //TODO actually process buffer;
-        psyllid::time_data* time_data_out = out_stream< 0 >().data();
-        std::copy(this_buffer[0], this_buffer[f_samples_per_buffer-1], &time_data_out->get_array()[0][0]);
+        //grab the next buffer, once it is filled
+        U16* this_buffer = f_board_buffers.at( f_buffers_completed % f_board_buffers.size() );
+        check_return_code( AlazarWaitAsyncBufferComplete( f_board_handle, this_buffer, 5000 ),
+                          "AlazarWaitAsyncBufferComplete", 1 );
+        //copy the int array into the output stream
+        real_time_data* time_data_out = out_stream< 0 >().data();
+        std::memcpy( time_data_out->get_time_series(), &this_buffer[0], bytes_per_buffer() );
+        if( !out_stream< 0 >().set( stream::s_run ) )
+        {
+            printf( "error pushing time series to output stream" );
+        }
         //return buffer to board and increment buffer count
         check_return_code( AlazarPostAsyncBuffer( f_board_handle, this_buffer, bytes_per_buffer() ),
                           "AlazarPostAsyncBuffer", 1 );
