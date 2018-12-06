@@ -20,15 +20,31 @@
 
 using midge::stream;
 
-namespace psyllid
+namespace fast_daq
 {
     REGISTER_NODE_AND_BUILDER( frequency_transform, "frequency-transform", frequency_transform_binding );
 
     LOGGER( plog, "frequency_transform" );
 
+    std::string frequency_transform::input_type_to_string( frequency_transform::input_type_t an_input_type )
+    {
+        switch (an_input_type) {
+            case frequency_transform::input_type_t::real: return "real";
+            case frequency_transform::input_type_t::complex: return "complex";
+            default: throw psyllid::error() << "input_type value <" << input_type_to_uint(an_input_type) << "> not recognized";
+        }
+    }
+    frequency_transform::input_type_t frequency_transform::string_to_input_type( const std::string& an_input_type )
+    {
+        if( an_input_type == input_type_to_string( frequency_transform::input_type_t::real ) ) return input_type_t::real;
+        if( an_input_type == input_type_to_string( frequency_transform::input_type_t::complex ) ) return input_type_t::complex;
+        throw psyllid::error() << "string <" << an_input_type << "> not recognized as valid input_type type";
+    }
+
     frequency_transform::frequency_transform() :
             f_time_length( 10 ),
             f_freq_length( 10 ),
+            f_input_type( input_type_t::complex ),
             f_fft_size( 4096 ),
             f_transform_flag( "ESTIMATE" ),
             f_use_wisdom( true ),
@@ -112,9 +128,9 @@ namespace psyllid
         {
             LDEBUG( plog, "Executing the frequency transformer" );
 
-            time_data* time_data_in = nullptr;
-            time_data* time_data_out = nullptr;
-            freq_data* freq_data_out = nullptr;
+            psyllid::time_data* time_data_in = nullptr;
+            psyllid::time_data* time_data_out = nullptr;
+            psyllid::freq_data* freq_data_out = nullptr;
             double fft_norm = sqrt(1. / (double)f_fft_size);
 
             try
@@ -209,7 +225,7 @@ namespace psyllid
                     }
                 }
             }
-            catch( error& e )
+            catch( psyllid::error& e )
             {
                 throw;
             }
@@ -279,6 +295,7 @@ namespace psyllid
         LDEBUG( plog, "Configuring frequency_transform with:\n" << a_config );
         a_node->set_time_length( a_config.get_value( "time-length", a_node->get_time_length() ) );
         a_node->set_freq_length( a_config.get_value( "freq-length", a_node->get_freq_length() ) );
+        a_node->set_input_type( a_config.get_value( "input-type", a_node->get_input_type_str() ) );
         a_node->set_fft_size( a_config.get_value( "fft-size", a_node->get_fft_size() ) );
         a_node->set_transform_flag( a_config.get_value( "transform-flag", a_node->get_transform_flag() ) );
         a_node->set_use_wisdom( a_config.get_value( "use-wisdom", a_node->get_use_wisdom() ) );
@@ -291,6 +308,7 @@ namespace psyllid
         LDEBUG( plog, "Dumping frequency_transform configuration" );
         a_config.add( "time-length", scarab::param_value( a_node->get_time_length() ) );
         a_config.add( "freq-length", scarab::param_value( a_node->get_freq_length() ) );
+        a_config.add( "input-type", scarab::param_value( frequency_transform::input_type_to_string( a_node->get_input_type() ) ) );
         a_config.add( "fft-size", scarab::param_value( a_node->get_fft_size() ) );
         a_config.add( "transform-flag", scarab::param_value( a_node->get_transform_flag() ) );
         a_config.add( "use-wisdom", scarab::param_value( a_node->get_use_wisdom() ) );
