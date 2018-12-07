@@ -19,6 +19,8 @@ namespace fast_daq
 {
     REGISTER_NODE_AND_BUILDER( ats9462_digitizer, "ats9462", ats9462_digitizer_binding );
 
+    LOGGER( flog, "ats9462_digitizer" );
+
     /* ats9462_digitizer class */
     /***************************/
 
@@ -44,14 +46,14 @@ namespace fast_daq
         f_board_handle = AlazarGetBoardBySystemID( f_system_id, f_board_id );
         if (f_board_handle == NULL)
         {
-            printf("Error: Unable to open board system Id %u board Id %u\n", f_system_id, f_board_id);
+            LERROR( flog, "Error: Unable to open board system Id " << f_system_id << " board Id " << f_board_id );
             //TODO do something smarter here
             throw 1;
         }
         RETURN_CODE ret_code = AlazarGetChannelInfo(f_board_handle, &f_max_samples_per_channel, &f_bits_per_sample);
         if (ret_code != ApiSuccess)
         {
-            printf("Error: AlazarGetChannelInfo failed -- %s\n", AlazarErrorToText(ret_code));
+            LERROR( flog, "Error: AlazarGetChannelInfo failed -- " << AlazarErrorToText(ret_code));
             //TODO do something smarter here
             throw 1;
         }
@@ -83,7 +85,7 @@ namespace fast_daq
                 // Check for stop signal
                 if( (out_stream< 0 >().get() == midge::stream::s_stop) )
                 {
-                    printf("Output stream has stop condition; break execution loop");
+                    LINFO( flog, "Output stream has stop condition; break execution loop");
                     break;
                 }
                 // Check for midge instructions
@@ -91,7 +93,7 @@ namespace fast_daq
                 {
                     if( f_paused && use_instruction() == midge::instruction::resume )
                     {
-                        printf("ATS9462 digitizer resuming");
+                        LINFO( flog, "ATS9462 digitizer resuming");
                         if( ! out_stream< 0 >().set( midge::stream::s_start ) ) throw midge::node_nonfatal_error() << "Stream 0 error while starting";
                         f_paused = false;
                         //TODO something here to "start" a run
@@ -117,7 +119,7 @@ namespace fast_daq
                     }
                     else if( ! f_paused && use_instruction() == midge::instruction::pause )
                     {
-                        printf("ATS9462 digitizer pausing");
+                        LINFO( flog, "ATS9462 digitizer pausing");
                         if( ! out_stream< 0 >().set( midge::stream::s_stop ) ) throw midge::node_nonfatal_error() << "Stream 0 error while stopping";
                         f_paused = true;
                         //TODO something here to "end" a run
@@ -129,7 +131,7 @@ namespace fast_daq
                     //TODO some condition that if the run is complete
                     if ( f_buffers_completed >= buffers_per_acquisition() )
                     {
-                        printf("data acquired, ending run");
+                        LDEBUG( flog, "data acquired, ending run");
                         std::shared_ptr< psyllid::daq_control > t_daq_control = use_daq_control();
                         t_daq_control->stop_run();
                     }
@@ -153,7 +155,7 @@ namespace fast_daq
     {
         if (a_return_code != ApiSuccess)
         {
-            printf("Error: %s failed -- %s\n", an_action.c_str(), AlazarErrorToText(a_return_code));
+            LERROR( flog, "Error: " << an_action << " failed -- " << AlazarErrorToText(a_return_code));
             if (to_throw > 0)
             {
                 throw to_throw; //TODO is this really the right thing to be doing?
@@ -210,7 +212,7 @@ namespace fast_daq
             f_board_buffers.push_back( (U16*)valloc(bytes_per_buffer()) );
             if (f_board_buffers.back() == NULL)
             {
-                printf("\nError: unable to allocate buffer\n");
+                LERROR( flog, "Error: unable to allocate buffer" );
                 clear_buffers();
                 throw 1;
             }
@@ -239,7 +241,7 @@ namespace fast_daq
         std::memcpy( time_data_out->get_time_series(), &this_buffer[0], bytes_per_buffer() );
         if( !out_stream< 0 >().set( stream::s_run ) )
         {
-            printf( "error pushing time series to output stream" );
+            LERROR( flog, "error pushing time series to output stream" );
         }
         //return buffer to board and increment buffer count
         check_return_code( AlazarPostAsyncBuffer( f_board_handle, this_buffer, bytes_per_buffer() ),

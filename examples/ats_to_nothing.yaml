@@ -1,0 +1,53 @@
+post-to-slack: false
+
+amqp:
+    make-connection: false
+
+daq:
+    activate-at-startup: true
+    n-files: 1
+    max-file-size-mb: 500
+
+on-startup:
+  - type: get
+    rks: daq-status
+    payload: {}
+    sleep-for: 10
+  - type: cmd
+    rks: "start-run"
+    payload:
+      duration: 0
+      filenames:
+        - "/tmp/foo.egg"
+      sleep-for: 0
+  - type: wait-for
+    rks: daq-status
+    payload: {}
+    sleep-for: 100
+
+streams:
+    ch0:
+        preset:
+            type: ats-stream-custom
+            nodes:
+              - type: ats9462
+                name: ats
+              - type: dead-end
+                name: dend
+            connections:
+              - "ats.out_0:dend.in_0"
+
+        device:
+            n-channels: 1
+            bit-depth: 8
+            data-type-size: 1
+            sample-size: 2
+            record-size: 4096
+            acq-rate: 100
+            v-offset: 0.0
+            v-range: 0.5
+
+        ats:
+            samples-per-buffer: 50000
+            out-length: 10
+        dend: {}
