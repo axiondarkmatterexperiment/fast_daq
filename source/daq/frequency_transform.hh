@@ -108,7 +108,8 @@ namespace fast_daq
 
         private:
             TransformFlagMap f_transform_flag_map;
-            fftw_complex* f_fftw_input;
+            double* f_fftw_input_real;
+            fftw_complex* f_fftw_input_complex;
             fftw_complex* f_fftw_output;
             fftw_plan f_fftw_plan;
 

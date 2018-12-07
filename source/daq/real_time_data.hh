@@ -21,6 +21,7 @@ namespace fast_daq
 
         // member varaible macros
         mv_accessible( U16*, time_series );
+        mv_accessible( unsigned, array_size);
 
         public:
             void allocate_array( unsigned n_samples );

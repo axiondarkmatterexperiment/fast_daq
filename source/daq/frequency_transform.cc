@@ -26,6 +26,7 @@ namespace fast_daq
 
     LOGGER( plog, "frequency_transform" );
 
+    // supporting enum helpers
     std::string frequency_transform::input_type_to_string( frequency_transform::input_type_t an_input_type )
     {
         switch (an_input_type) {
@@ -41,6 +42,8 @@ namespace fast_daq
         throw psyllid::error() << "string <" << an_input_type << "> not recognized as valid input_type type";
     }
 
+
+    // frequency_transform class implementation
     frequency_transform::frequency_transform() :
             f_time_length( 10 ),
             f_freq_length( 10 ),
@@ -51,7 +54,8 @@ namespace fast_daq
             f_wisdom_filename( "wisdom_complexfft.fftw3" ),
             f_enable_time_output( true ),
             f_transform_flag_map(),
-            f_fftw_input(),
+            f_fftw_input_real(),
+            f_fftw_input_complex(),
             f_fftw_output(),
             f_fftw_plan(),
             f_multithreaded_is_initialized( false )
@@ -80,12 +84,7 @@ namespace fast_daq
         out_buffer< 0 >().initialize( f_time_length );
         out_buffer< 1 >().initialize( f_freq_length );
 
-        // fftw stuff
-        TransformFlagMap::const_iterator iter = f_transform_flag_map.find(f_transform_flag);
-        unsigned transform_flag = iter->second;
-        // initialize FFTW IO arrays
-        f_fftw_input = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * f_fft_size);
-        f_fftw_output = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * f_fft_size);
+
         if (f_use_wisdom)
         {
             LDEBUG( plog, "Reading wisdom from file <" << f_wisdom_filename << ">");
@@ -96,16 +95,31 @@ namespace fast_daq
         }
         //initialize multithreaded
         #ifdef FFTW_NTHREADS
-        if (! f_multithreaded_is_initialized)
-        {
-            fftw_init_threads();
-            fftw_plan_with_nthreads(FFTW_NTHREADS);
-            LDEBUG( plog, "Configuring FFTW to use up to " << FFTW_NTHREADS << " threads.");
-            f_multithreaded_is_initialized = true;
-        }
+            if (! f_multithreaded_is_initialized)
+            {
+                fftw_init_threads();
+                fftw_plan_with_nthreads(FFTW_NTHREADS);
+                LDEBUG( plog, "Configuring FFTW to use up to " << FFTW_NTHREADS << " threads.");
+                f_multithreaded_is_initialized = true;
+            }
         #endif
-        //create fftw plan
-        f_fftw_plan = fftw_plan_dft_1d(f_fft_size, f_fftw_input, f_fftw_output, FFTW_FORWARD, transform_flag | FFTW_PRESERVE_INPUT);
+        // fftw stuff
+        TransformFlagMap::const_iterator iter = f_transform_flag_map.find(f_transform_flag);
+        unsigned transform_flag = iter->second;
+        // initialize FFTW IO arrays and plan
+        f_fftw_output = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * f_fft_size);
+        switch (f_input_type)
+        {
+            case input_type_t::real:
+                f_fftw_input_real = (double*) fftw_malloc(sizeof(double) * f_fft_size);
+                f_fftw_plan = fftw_plan_dft_r2c_1d(f_fft_size, f_fftw_input_real, f_fftw_output, transform_flag | FFTW_PRESERVE_INPUT);
+                break;
+            case input_type_t::complex:
+                f_fftw_input_complex = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * f_fft_size);
+                f_fftw_plan = fftw_plan_dft_1d(f_fft_size, f_fftw_input_complex, f_fftw_output, FFTW_FORWARD, transform_flag | FFTW_PRESERVE_INPUT);
+                break;
+            default: throw psyllid::error() << "input_type not fully implemented";
+        }
         //save plan
         if (f_fftw_plan != NULL)
         {
@@ -128,7 +142,8 @@ namespace fast_daq
         {
             LDEBUG( plog, "Executing the frequency transformer" );
 
-            psyllid::time_data* time_data_in = nullptr;
+            psyllid::time_data* complex_time_data_in = nullptr;
+            real_time_data* real_time_data_in = nullptr;
             psyllid::time_data* time_data_out = nullptr;
             psyllid::freq_data* freq_data_out = nullptr;
             double fft_norm = sqrt(1. / (double)f_fft_size);
@@ -183,21 +198,48 @@ namespace fast_daq
                     if ( in_cmd == stream::s_run )
                     {
                         LDEBUG( plog, "got an s_run on slot <" << in_stream< 0 >().get_current_index() << ">" );
-                        time_data_in = in_stream< 0 >().data();
+                        unsigned t_center_bin;
+                        switch ( f_input_type )
+                        {
+                            case input_type_t::real:
+                                real_time_data_in = in_stream< 1 >().data();
+                                t_center_bin = real_time_data_in->get_array_size();
+                                break;
+                            case input_type_t::complex:
+                                complex_time_data_in = in_stream< 0 >().data();
+                                t_center_bin = complex_time_data_in->get_array_size();
+                                break;
+                        }
 
                         //time output
                         if (f_enable_time_output)
                         {
                             time_data_out = out_stream< 0 >().data();
-                            *time_data_out = *time_data_in;
+                            *time_data_out = *complex_time_data_in;
                         }
                         //frequency output
                         freq_data_out = out_stream< 1 >().data();
                         freq_data_out->set_freq_not_time( true );
                         //TODO there are many other members of the underlying roach_packet_data type; should more carefully think through all of them and if they should be on the frequency_data (is there a way to copy all the members *except* the data array?)
                         LDEBUG( plog, "next steams acquired, doing FFT" );
-                        std::copy(&time_data_in->get_array()[0][0], &time_data_in->get_array()[0][0] + f_fft_size*2, &f_fftw_input[0][0]);
-                        fftw_execute_dft(f_fftw_plan, f_fftw_input, f_fftw_output);
+
+
+
+                        switch (f_input_type)
+                        {
+                            case input_type_t::real:
+                                std::copy(&real_time_data_in->get_time_series()[0], &real_time_data_in->get_time_series()[0] + f_fft_size, &f_fftw_input_real[0]);
+                                fftw_execute(f_fftw_plan);//, f_fftw_input_real, f_fftw_output);
+                                break;
+                            case input_type_t::complex:
+                                std::copy(&complex_time_data_in->get_array()[0][0], &complex_time_data_in->get_array()[0][0] + f_fft_size*2, &f_fftw_input_complex[0][0]);
+                                //fftw_execute_dft(f_fftw_plan, f_fftw_input_complex, f_fftw_output);
+                                fftw_execute(f_fftw_plan);
+                                break;
+                            default: throw psyllid::error() << "input_type not fully implemented";
+                        }
+                        //std::copy(&time_data_in->get_array()[0][0], &time_data_in->get_array()[0][0] + f_fft_size*2, &f_fftw_input[0][0]);
+                        //fftw_execute_dft(f_fftw_plan, f_fftw_input, f_fftw_output);
                         //is this the normalization we want? (is it what the ROACH does?)
                         for (size_t i_bin=0; i_bin<f_fft_size; ++i_bin)
                         {
@@ -205,12 +247,12 @@ namespace fast_daq
                             f_fftw_output[i_bin][1] *= fft_norm;
                         }
                         //std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_array()[0][0]);
+
                         // FFT unfolding based on katydid:Source/Data/Transform/KTFrequencyTransformFFTW
-                        unsigned t_center_bin = time_data_in->get_array_size();
                         std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + (t_center_bin - 1), &freq_data_out->get_array()[0][0] + t_center_bin);
                         std::copy(&f_fftw_output[0][0] + t_center_bin, &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_array()[0][0]);
-                        freq_data_out->set_pkt_in_batch(time_data_in->get_pkt_in_batch());
-                        freq_data_out->set_pkt_in_session(time_data_in->get_pkt_in_session());
+                        //freq_data_out->set_pkt_in_batch(time_data_in->get_pkt_in_batch());
+                        //freq_data_out->set_pkt_in_session(time_data_in->get_pkt_in_session());
 
                         if ( f_enable_time_output && !out_stream< 0 >().set( stream::s_run ) )
                         {
@@ -257,10 +299,15 @@ namespace fast_daq
     {
         out_buffer< 0 >().finalize();
         out_buffer< 1 >().finalize();
-        if (f_fftw_input != NULL )
+        if (f_fftw_input_real != NULL )
         {
-            fftw_free(f_fftw_input);
-            f_fftw_input = NULL;
+            fftw_free(f_fftw_input_real);
+            f_fftw_input_real = NULL;
+        }
+        if (f_fftw_input_complex != NULL )
+        {
+            fftw_free(f_fftw_input_complex);
+            f_fftw_input_complex = NULL;
         }
         if (f_fftw_output != NULL)
         {

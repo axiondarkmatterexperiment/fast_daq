@@ -9,7 +9,9 @@
 
 namespace fast_daq
 {
-    real_time_data::real_time_data()
+    real_time_data::real_time_data() :
+        f_time_series(),
+        f_array_size()
     {
     }
 
@@ -27,5 +29,6 @@ namespace fast_daq
         {
             f_time_series = new U16[n_samples];
         }
+        f_array_size = n_samples;
     }
 } /* namespace fast_daq */
