@@ -22,9 +22,13 @@ if ( FastDAQ_ENABLE_ATS)
     set( headers ${headers} ATS9462_digitizer.hh )
     set( sources ${sources} ATS9462_digitizer.cc )
     # purely-real time-series data
-    set( headers ${headers} real_time_data.hh )
-    set( sources ${sources} real_time_data.cc )
+    #set( headers ${headers} real_time_data.hh )
+    #set( sources ${sources} real_time_data.cc )
 endif ( FastDAQ_ENABLE_ATS)
+
+set( dependencies
+    FastDaqData
+)
 
 ###########
 # library #

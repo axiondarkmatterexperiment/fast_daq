@@ -70,10 +70,12 @@ set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} APPEND PROPERTY COMPILE_DEFI
 
 # add include directories
 include_directories( BEFORE
+    source/data
     source/daq
 )
 
 # build this project
+add_subdirectory( source/data )
 add_subdirectory( source/daq )
 
 # build psyllid, linking against fast_daq
