@@ -153,6 +153,7 @@ namespace fast_daq
                 LINFO( plog, "Starting main loop (frequency transform)" );
                 while (! is_canceled() )
                 {
+                    LDEBUG( plog, "check output stream signals" );
                     // stop if output stream buffers have s_stop
                     if (f_enable_time_output && out_stream< 0 >().get() == stream::s_stop)
                     {
@@ -165,10 +166,22 @@ namespace fast_daq
                         break;
                     }
                     // grab the next input data and check slot status
+                    LDEBUG( plog, "check input stream signals for <" << get_input_type_str() << ">" );
                     midge::enum_t in_cmd = stream::s_none;
-                    in_cmd = in_stream< 0 >().get();
+                    switch ( f_input_type )
+                    {
+                        case input_type_t::complex:
+                            LDEBUG( plog, "seriously, getting 0" );
+                            in_cmd = in_stream< 0 >().get();
+                        case input_type_t::real:
+                            LDEBUG( plog, "seriously, getting 1" );
+                            in_cmd = in_stream< 1 >().get();
+                    }
+                    LDEBUG( plog, "got it, it is: " << in_cmd );
+
                     if ( in_cmd == stream::s_none)
                     {
+                        LDEBUG( plog, "got an s_none on slot <" << in_stream< 0 >().get_current_index() << ">" );
                         continue;
                     }
                     if ( in_cmd == stream::s_error )
@@ -210,6 +223,7 @@ namespace fast_daq
                                 t_center_bin = complex_time_data_in->get_array_size();
                                 break;
                         }
+                        LDEBUG( plog, "got input data" );
 
                         //time output
                         if (f_enable_time_output)
@@ -221,9 +235,7 @@ namespace fast_daq
                         freq_data_out = out_stream< 1 >().data();
                         freq_data_out->set_freq_not_time( true );
                         //TODO there are many other members of the underlying roach_packet_data type; should more carefully think through all of them and if they should be on the frequency_data (is there a way to copy all the members *except* the data array?)
-                        LDEBUG( plog, "next steams acquired, doing FFT" );
-
-
+                        LDEBUG( plog, "next stream acquired, doing FFT" );
 
                         switch (f_input_type)
                         {

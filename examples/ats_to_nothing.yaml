@@ -32,8 +32,11 @@ streams:
                 name: ats
               - type: dead-end
                 name: dend
+              #- type: frequency-transform
+              #  name: fft
             connections:
               - "ats.out_0:dend.in_0"
+              #- "ats.out_0:fft.in_1"
 
         device:
             n-channels: 1
@@ -50,3 +53,6 @@ streams:
             out-length: 10
             dma-buffer-count: 100
         dend: {}
+        #fft:
+        #    input-type: real
+        #    fft-size: 50000 # needs to match above in ats
