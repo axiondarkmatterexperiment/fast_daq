@@ -41,6 +41,7 @@ namespace fast_daq
      Available configuration values:
      - "samples-per-buffer": int -- number of real-valued samples to include in each chunk of data
      - "out-length": int -- number of output buffer slots
+     - "dma-buffer-count": int -- the number of DMA buffers to use between the digitzer board and the application
 
      Output Streams
      - 0: real_time_data
@@ -82,6 +83,7 @@ namespace fast_daq
             void configure_board();
             void allocate_buffers();
             void clear_buffers();
+            void process_instructions();
             void process_a_buffer();
 
         public:

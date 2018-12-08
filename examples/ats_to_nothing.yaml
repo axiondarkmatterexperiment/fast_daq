@@ -5,21 +5,19 @@ amqp:
 
 daq:
     activate-at-startup: true
-    n-files: 1
+    n-files: 0
     max-file-size-mb: 500
 
 on-startup:
-  - type: get
-    rks: daq-status
-    payload: {}
-    sleep-for: 10
+  - type: set
+    rks: use-monarch
+    payload:
+        values: [ false ]
   - type: cmd
     rks: "start-run"
     payload:
       duration: 0
-      filenames:
-        - "/tmp/foo.egg"
-      sleep-for: 0
+    sleep-for: 0
   - type: wait-for
     rks: daq-status
     payload: {}
@@ -50,4 +48,5 @@ streams:
         ats:
             samples-per-buffer: 50000
             out-length: 10
+            dma-buffer-count: 100
         dend: {}

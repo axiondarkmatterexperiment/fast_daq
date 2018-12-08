@@ -91,51 +91,22 @@ namespace fast_daq
                 // Check for midge instructions
                 if( have_instruction() )
                 {
-                    if( f_paused && use_instruction() == midge::instruction::resume )
-                    {
-                        LINFO( flog, "ATS9462 digitizer resuming");
-                        if( ! out_stream< 0 >().set( midge::stream::s_start ) ) throw midge::node_nonfatal_error() << "Stream 0 error while starting";
-                        f_paused = false;
-                        //TODO something here to "start" a run
-                        //initial run setup for the board
-                        U32 adma_flags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_TRIGGERED_STREAMING;
-                        check_return_code( AlazarBeforeAsyncRead( f_board_handle, f_channel_mask,
-                                                                      0, //per example, "Must be 0"
-                                                                      f_samples_per_buffer,
-                                                                      1, //per example, "Must be 1"
-                                                                      0x7FFFFFFF, //per example "Ignored. Behave as if infinite"
-                                                                      adma_flags
-                                                                    ),
-                                          "AlazarBeforeAsyncRead", 1 );
-                        //give the board all buffers
-                        for (U16* a_buffer : f_board_buffers)
-                        {
-                            check_return_code( AlazarPostAsyncBuffer( f_board_handle, a_buffer, bytes_per_buffer() ),
-                                              "AlazarPostAsyncBuffer", 1 );
-                        }
-                        //arm the trigger, should start immediately
-                        check_return_code( AlazarStartCapture( f_board_handle ),
-                                          "AlazarStartCapture", 1 );
-                    }
-                    else if( ! f_paused && use_instruction() == midge::instruction::pause )
-                    {
-                        LINFO( flog, "ATS9462 digitizer pausing");
-                        if( ! out_stream< 0 >().set( midge::stream::s_stop ) ) throw midge::node_nonfatal_error() << "Stream 0 error while stopping";
-                        f_paused = true;
-                        //TODO something here to "end" a run
-                    }
+                    process_instructions();
                 }
-                // If not continue to process
+                // If not paused continue to process
                 if ( ! f_paused )
                 {
                     //TODO some condition that if the run is complete
                     if ( f_buffers_completed >= buffers_per_acquisition() )
                     {
-                        LDEBUG( flog, "data acquired, ending run");
+                        LINFO( flog, "All requested buffers ("<<f_buffers_completed<<") completed, calling stop_run" );
                         std::shared_ptr< psyllid::daq_control > t_daq_control = use_daq_control();
                         t_daq_control->stop_run();
                     }
-                    process_a_buffer();
+                    else
+                    {
+                        process_a_buffer();
+                    }
                 }
             }
         }
@@ -147,6 +118,7 @@ namespace fast_daq
 
     void ats9462_digitizer::finalize()
     {
+        LDEBUG( flog, "in finalize... ");
         clear_buffers();
         out_buffer< 0 >().finalize();
     }
@@ -206,6 +178,7 @@ namespace fast_daq
 
     void ats9462_digitizer::allocate_buffers()
     {
+        LWARN( flog, "$$$$ hey hey hey! I'm allocating buffers now, there will be <" << f_dma_buffer_count << "> of them" );
         for (uint buffer_index = 0; buffer_index<f_dma_buffer_count; buffer_index++)
         {
             //TODO need to make sure that bytes_per_buffer cannot be changed via anything configurable, unless this is redone
@@ -221,17 +194,72 @@ namespace fast_daq
 
     void ats9462_digitizer::clear_buffers()
     {
-        for (U16* a_buffer : f_board_buffers)
+        LDEBUG( flog, "clearing up DMA buffers" );
+        check_return_code( AlazarAbortAsyncRead( f_board_handle ),
+                          "AlazarAbortAsyncRead", 1 );
+        LDEBUG( flog, "async read abort sent to board" );
+        for (std::vector<U16*>::iterator a_buffer=f_board_buffers.begin(); a_buffer != f_board_buffers.end(); )
         {
-            if (a_buffer != NULL)
+            if (*a_buffer != nullptr)
             {
-                free(a_buffer);
+                free(*a_buffer);
             }
+            f_board_buffers.erase(a_buffer);
+        }
+    }
+
+    void ats9462_digitizer::process_instructions()
+    {
+        if( f_paused && use_instruction() == midge::instruction::resume )
+        {
+            LINFO( flog, "ATS9462 digitizer resuming");
+            if( ! out_stream< 0 >().set( midge::stream::s_start ) ) throw midge::node_nonfatal_error() << "Stream 0 error while starting";
+            f_buffers_completed = 0;
+            f_paused = false;
+            LINFO( flog, "run status members set" );
+            //TODO something here to "start" a run
+            //initial run setup for the board
+            U32 adma_flags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_TRIGGERED_STREAMING;
+            check_return_code( AlazarBeforeAsyncRead( f_board_handle, f_channel_mask,
+                                                          0, //per example, "Must be 0"
+                                                          f_samples_per_buffer,
+                                                          1, //per example, "Must be 1"
+                                                          0x7FFFFFFF, //per example "Ignored. Behave as if infinite"
+                                                          adma_flags
+                                                        ),
+                              "AlazarBeforeAsyncRead", 1 );
+            LINFO( flog, "board pre-read complete" );
+            //give the board all buffers
+            for (U16* a_buffer : f_board_buffers)
+            {
+                check_return_code( AlazarPostAsyncBuffer( f_board_handle, a_buffer, bytes_per_buffer() ),
+                                  "AlazarPostAsyncBuffer", 1 );
+            }
+            LINFO( flog, "buffers posted to board" );
+            //arm the trigger, should start immediately
+            check_return_code( AlazarStartCapture( f_board_handle ),
+                              "AlazarStartCapture", 1 );
+            LDEBUG( flog, "digitizer trigger armed, buffer collection should begin" );
+        }
+        else if( ! f_paused && use_instruction() == midge::instruction::pause )
+        {
+            LINFO( flog, "ATS9462 digitizer pausing");
+            if( ! out_stream< 0 >().set( midge::stream::s_stop ) ) throw midge::node_nonfatal_error() << "Stream 0 error while stopping";
+            f_paused = true;
+            //TODO something here to "end" a run
+            check_return_code( AlazarAbortAsyncRead( f_board_handle ),
+                              "AlazarAbortAsyncRead", 1 );
+            LDEBUG( flog, "abort async read sent to board" );
+        }
+        else
+        {
+            LWARN( flog, "unable to process message" );
         }
     }
 
     void ats9462_digitizer::process_a_buffer()
     {
+        LTRACE( flog, "in process_a_buffer" );
         //grab the next buffer, once it is filled by the digitizer
         U16* this_buffer = f_board_buffers.at( f_buffers_completed % f_board_buffers.size() );
         check_return_code( AlazarWaitAsyncBufferComplete( f_board_handle, this_buffer, 5000 ),
@@ -285,12 +313,14 @@ namespace fast_daq
     {
         a_node->set_samples_per_buffer( a_config.get_value( "samples-per-buffer", a_node->get_samples_per_buffer() ) );
         a_node->set_out_length( a_config.get_value( "out-length", a_node->get_out_length() ) );
+        a_node->set_dma_buffer_count( a_config.get_value( "dma-buffer-count", a_node->get_dma_buffer_count() ) );
     }
 
     void ats9462_digitizer_binding::do_dump_config( const ats9462_digitizer* a_node, scarab::param_node& a_config ) const
     {
         a_config.add( "samples-per-bufer", scarab::param_value( a_node->get_samples_per_buffer() ) );
         a_config.add( "out-length", scarab::param_value( a_node->get_out_length() ) );
+        a_config.add( "dma-buffer-count", scarab::param_value( a_node->get_dma_buffer_count() ) );
     }
 
 } /* namespace fast_daq */

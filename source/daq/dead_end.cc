@@ -43,13 +43,15 @@ namespace fast_daq
     {
         try
         {
+            unsigned t_received = 0;
             while (! is_canceled() )
             {
                 // Check for midge instructions
                 if( have_instruction() )
                 {
-                    LDEBUG( flog, "WARNING: dead_end does not support any instructions");
+                    //LDEBUG( flog, "WARNING: dead_end does not support any instructions");
                 }
+
                 // check the slot status
                 midge::enum_t input_command = stream::s_none;
                 input_command = in_stream< 0 >().get();
@@ -59,21 +61,24 @@ namespace fast_daq
                 }
                 else if ( input_command == stream::s_error )
                 {
-                    LDEBUG( flog, " got an s_error on slot <" << in_stream< 0 >().get_current_index() << "> of stream <" << 0 << ">");
+                    LWARN( flog, " got an s_error on slot <" << in_stream< 0 >().get_current_index() << "> of stream <" << 0 << ">");
                 }
                 else if ( input_command == stream::s_stop )
                 {
-                    LDEBUG( flog, " got an s_stop on slot <" << in_stream< 0 >().get_current_index() << "> of stream <" << 0 << ">");
+                    LINFO( flog, " got an s_stop on slot <" << in_stream< 0 >().get_current_index() << "> of stream <" << 0 << ">");
+                    LDEBUG( flog, "received a total of [" << t_received << "] stream< 0 > values" );
                     continue;
                 }
                 else if ( input_command == stream::s_start )
                 {
                     LDEBUG( flog, " got an s_start on slot <" << in_stream< 0 >().get_current_index() << "> of stream <" << 0 << ">");
+                    t_received = 0;
                     continue;
                 }
                 else if ( input_command == stream::s_run )
                 {
-                    LDEBUG( flog, " got an s_run on slot <" << in_stream< 0 >().get_current_index() << "> of stream <" << 0 << ">");
+                    LTRACE( flog, " got an s_run on slot <" << in_stream< 0 >().get_current_index() << "> of stream <" << 0 << ">");
+                    t_received++;
                     continue;
                 }
             }
