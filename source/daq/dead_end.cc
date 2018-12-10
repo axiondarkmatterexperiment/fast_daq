@@ -7,6 +7,8 @@
 
 #include <stdio.h>
 
+#include "freq_data.hh"
+
 #include "logger.hh"
 
 //#include "daq_control.hh"
@@ -26,7 +28,8 @@ namespace fast_daq
     /***************************/
 
     // dead_end methods
-    dead_end::dead_end() //:
+    dead_end::dead_end() :
+        f_input_index( 0 )
     {
     }
 
@@ -54,30 +57,45 @@ namespace fast_daq
 
                 // check the slot status
                 midge::enum_t input_command = stream::s_none;
-                input_command = in_stream< 0 >().get();
+                unsigned stream_index = 0;
+                unsigned stream_id = 0;
+                switch (f_input_index)
+                {
+                    case 0:
+                        input_command = in_stream< 0 >().get();
+                        stream_index = in_stream< 0 >().get_current_index();
+                        stream_id = 0;
+                        break;
+                    case 1:
+                        input_command = in_stream< 1 >().get();
+                        stream_index = in_stream< 1 >().get_current_index();
+                        stream_id = 1;
+                        break;
+                    default: throw psyllid::error() << "input index <" << f_input_index << "> not recognized";
+                }
                 if ( input_command == midge::stream::s_none )
                 {
                     continue;
                 }
                 else if ( input_command == stream::s_error )
                 {
-                    LWARN( flog, " got an s_error on slot <" << in_stream< 0 >().get_current_index() << "> of stream <" << 0 << ">");
+                    LWARN( flog, " got an s_error on slot <" << stream_index << "> of stream <" << stream_id << ">");
                 }
                 else if ( input_command == stream::s_stop )
                 {
-                    LINFO( flog, " got an s_stop on slot <" << in_stream< 0 >().get_current_index() << "> of stream <" << 0 << ">");
-                    LDEBUG( flog, "received a total of [" << t_received << "] stream< 0 > values" );
+                    LINFO( flog, " got an s_stop on slot <" << stream_index << "> of stream <" << stream_id << ">");
+                    LDEBUG( flog, "received a total of [" << t_received << "] stream< " << stream_id << " > values" );
                     continue;
                 }
                 else if ( input_command == stream::s_start )
                 {
-                    LDEBUG( flog, " got an s_start on slot <" << in_stream< 0 >().get_current_index() << "> of stream <" << 0 << ">");
+                    LDEBUG( flog, " got an s_start on slot <" << stream_index << "> of stream <" << stream_id << ">");
                     t_received = 0;
                     continue;
                 }
                 else if ( input_command == stream::s_run )
                 {
-                    LTRACE( flog, " got an s_run on slot <" << in_stream< 0 >().get_current_index() << "> of stream <" << 0 << ">");
+                    LTRACE( flog, " got an s_run on slot <" << stream_index << "> of stream <" << stream_id << ">");
                     t_received++;
                     continue;
                 }
@@ -106,12 +124,12 @@ namespace fast_daq
 
     void dead_end_binding::do_apply_config(dead_end* a_node, const scarab::param_node& a_config ) const
     {
-        //a_node->set_samples_per_buffer( a_config.get_value( "samples-per-buffer", a_node->get_samples_per_buffer() ) );
+        a_node->set_input_index( a_config.get_value( "input-index", a_node->get_input_index() ) );
     }
 
     void dead_end_binding::do_dump_config( const dead_end* a_node, scarab::param_node& a_config ) const
     {
-        //a_config.add( "samples-per-bufer", scarab::param_value( a_node->get_samples_per_buffer() ) );
+        a_config.add( "input-index", scarab::param_value( a_node->get_input_index() ) );
     }
 
 } /* namespace fast_daq */

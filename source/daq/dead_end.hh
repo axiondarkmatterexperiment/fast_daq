@@ -17,6 +17,13 @@
 #include "shared_cancel.hh"
 
 
+// forward declarations namespace psyllid
+namespace psyllid
+{
+    class freq_data;
+}
+
+
 namespace fast_daq
 {
     // forward declarations
@@ -36,15 +43,14 @@ namespace fast_daq
      Node type: "dead-end"
 
      Available configuration values:
+     - input-index: (int) -- index of the input stream to read (default==0); note that only 1 input may be used
 
      Input Streams
      - 0: real_time_data
-
-     Output Streams
-        None
+     - 1: freq_data
 
     */
-    class dead_end : public midge::_consumer< dead_end, typelist_1( real_time_data ) >
+    class dead_end : public midge::_consumer< dead_end, typelist_2( real_time_data, psyllid::freq_data ) >
     {
         public:
             dead_end();
@@ -55,19 +61,7 @@ namespace fast_daq
             virtual void execute( midge::diptera* a_midge = nullptr );
             virtual void finalize();
 
-        /*
-        mv_accessible( double, samples_per_sec );
-        */
-
-        private:
-            /*
-            U8 f_channel_count;
-            */
-
-        /*
-        private:
-            bool check_return_code(RETURN_CODE a_return_code, std::string an_action, unsigned to_throw);
-        */
+        mv_accessible( unsigned, input_index );
 
     };
 
