@@ -52,7 +52,7 @@ namespace fast_daq
             f_transform_flag( "ESTIMATE" ),
             f_use_wisdom( true ),
             f_wisdom_filename( "wisdom_complexfft.fftw3" ),
-            f_enable_time_output( true ),
+            f_enable_time_output( false ), //Start with this false
             f_transform_flag_map(),
             f_fftw_input_real(),
             f_fftw_input_complex(),
@@ -67,6 +67,7 @@ namespace fast_daq
     {
     }
 
+    // TODO this should be the only mode, the time output doesn't make sense here
     void frequency_transform::switch_to_freq_only()
     {
         LDEBUG( plog, "switching to frequency output only mode" );
@@ -76,6 +77,8 @@ namespace fast_daq
     void frequency_transform::switch_to_time_and_freq()
     {
         LDEBUG( plog, "switching to frequency and time output mode" );
+        LWARN( plog, "why are you switching on time output, that's not okay, we don't do that... throwing" );
+        throw 1; //TODO: seems like the wrong thing to throw, but I'm intending to deprecate this entire behavior.
         f_enable_time_output = true;
     }
 
@@ -144,22 +147,14 @@ namespace fast_daq
 
             psyllid::time_data* complex_time_data_in = nullptr;
             real_time_data* real_time_data_in = nullptr;
-            psyllid::time_data* time_data_out = nullptr;
-            psyllid::freq_data* freq_data_out = nullptr;
+            //psyllid::time_data* time_data_out = nullptr;
+            //psyllid::freq_data* freq_data_out = nullptr;
+            frequency_data* freq_data_out = nullptr;
             double fft_norm = sqrt(1. / (double)f_fft_size);
 
             try
             {
                 LINFO( plog, "Starting main loop (frequency transform)" );
-                //TDO remove
-                LWARN( plog, "return codes are:\n" << \
-                             "  s_none: " << stream::s_none << "\n" <<
-                             "  s_error: " << stream::s_error <<  "\n" <<
-                             "  s_exit: " << stream::s_exit <<  "\n" <<
-                             "  s_stop: " << stream::s_stop <<  "\n" <<
-                             "  s_start: " << stream::s_start <<  "\n" <<
-                             "  s_run: " << stream::s_run <<  "\n"
-                     );
                 while (! is_canceled() )
                 {
                     LDEBUG( plog, "check output stream signals" );
@@ -242,16 +237,8 @@ namespace fast_daq
                         }
                         LDEBUG( plog, "got input data" );
 
-                        //time output
-                        if (f_enable_time_output)
-                        {
-                            time_data_out = out_stream< 0 >().data();
-                            *time_data_out = *complex_time_data_in;
-                        }
                         //frequency output
-                        freq_data_out = out_stream< 1 >().data();
-                        freq_data_out->set_freq_not_time( true );
-                        //TODO there are many other members of the underlying roach_packet_data type; should more carefully think through all of them and if they should be on the frequency_data (is there a way to copy all the members *except* the data array?)
+                        freq_data_out = out_stream< 0 >().data();
                         LDEBUG( plog, "next output stream slot acquired" );
 
                         switch (f_input_type)
@@ -270,43 +257,34 @@ namespace fast_daq
                         }
                         LDEBUG( plog, "executed the FFTW plan" );
                         //fftw_execute( f_fftw_plan );
-                        //std::copy(&time_data_in->get_array()[0][0], &time_data_in->get_array()[0][0] + f_fft_size*2, &f_fftw_input[0][0]);
                         //fftw_execute_dft(f_fftw_plan, f_fftw_input, f_fftw_output);
-                        //is this the normalization we want? (is it what the ROACH does?)
+
+                        //take care of FFT normalization
+                        //is this the normalization we want?
                         for (size_t i_bin=0; i_bin<f_fft_size; ++i_bin)
                         {
                             f_fftw_output[i_bin][0] *= fft_norm;
                             f_fftw_output[i_bin][1] *= fft_norm;
                         }
-                        //std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_array()[0][0]);
 
+                        // FFT unfolding based on katydid:Source/Data/Transform/KTFrequencyTransformFFTW
 //TODO remove these lines
 LDEBUG( plog, "here's the fftw plan" );
 fftw_print_plan( f_fftw_plan );
 printf("\n");
                         //TODO here here the plan is broken by the next line... I think
-                        // FFT unfolding based on katydid:Source/Data/Transform/KTFrequencyTransformFFTW
-                        LDEBUG( plog, "center bin is: " << t_center_bin );
-                        LDEBUG( plog, "first and last values are: " << f_fftw_output[0][0] << " : " << f_fftw_output[0][0] + (t_center_bin - 1) );
-                        std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + (t_center_bin - 1), &freq_data_out->get_array()[0][0] + t_center_bin);
+                        std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + (t_center_bin - 1), &freq_data_out->get_data_array()[0][0] + t_center_bin);
 //TODO remove these lines
 LDEBUG( plog, "here's the fftw plan" );
 fftw_print_plan( f_fftw_plan );
 printf("\n....\n");
-                        std::copy(&f_fftw_output[0][0] + t_center_bin, &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_array()[0][0]);
-                        ////freq_data_out->set_pkt_in_batch(time_data_in->get_pkt_in_batch());
-                        ////freq_data_out->set_pkt_in_session(time_data_in->get_pkt_in_session());
+                        std::copy(&f_fftw_output[0][0] + t_center_bin, &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_data_array()[0][0]);
 //TODO remove these lines
 LDEBUG( plog, "here's the fftw plan" );
 fftw_print_plan( f_fftw_plan );
 printf("\n");
 
-                        if ( f_enable_time_output && !out_stream< 0 >().set( stream::s_run ) )
-                        {
-                            LERROR( plog, "frequency_transform error setting time output stream to s_run" );
-                            break;
-                        }
-                        if ( !out_stream< 1 >().set( stream::s_run ) )
+                        if ( !out_stream< 0 >().set( stream::s_run ) )
                         {
                             LERROR( plog, "frequency_transform error setting frequency output stream to s_run" );
                             break;
@@ -322,10 +300,9 @@ printf("\n");
             LINFO( plog, "FREQUENCY TRANSFORM is exiting" );
 
             // normal exit condition
-            LDEBUG( plog, "Stopping output streams" );
-            bool t_t_stop_ok = f_enable_time_output && out_stream< 0 >().set( stream::s_stop );
-            bool t_f_stop_ok = out_stream< 1 >().set( stream::s_stop );
-            if( ! t_t_stop_ok && ! t_f_stop_ok) return;
+            LDEBUG( plog, "Stopping output stream" );
+            bool t_f_stop_ok = out_stream< 0 >().set( stream::s_stop );
+            if( ! t_f_stop_ok ) return;
 
             LDEBUG( plog, "Exiting output streams" );
             out_stream< 0 >().set( stream::s_exit );
@@ -346,7 +323,7 @@ printf("\n");
     {
         LINFO( plog, "in finalize(), freeing fftw data objects" );
         out_buffer< 0 >().finalize();
-        out_buffer< 1 >().finalize();
+        //out_buffer< 1 >().finalize();
         if (f_fftw_input_real != NULL )
         {
             fftw_free(f_fftw_input_real);

@@ -3,10 +3,12 @@
 ########
 
 set( headers
+    frequency_data.hh
     real_time_data.hh
 )
 
 set( sources
+    frequency_data.cc
     real_time_data.cc
 )
 

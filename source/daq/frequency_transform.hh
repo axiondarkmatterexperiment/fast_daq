@@ -9,11 +9,12 @@
 #define PSYLLID_FREQUENCY_TRANSFORM_HH_
 
 //psyllid
-#include "freq_data.hh"
+//#include "freq_data.hh"
 #include "node_builder.hh"
 #include "time_data.hh"
 
 //fast_daq
+#include "frequency_data.hh"
 #include "real_time_data.hh"
 
 //midge
@@ -60,10 +61,9 @@ namespace fast_daq
      - 1: real_time_data
 
      Output Streams:
-     - 0: time_data
-     - 1: freq_data
+     - 0: frequency_data
     */
-    class frequency_transform : public midge::_transformer< frequency_transform, typelist_2( psyllid::time_data, real_time_data ), typelist_2( psyllid::time_data, psyllid::freq_data ) >
+    class frequency_transform : public midge::_transformer< frequency_transform, typelist_2( psyllid::time_data, real_time_data ), typelist_1( frequency_data ) >
     {
         public:
             enum class input_type_t
