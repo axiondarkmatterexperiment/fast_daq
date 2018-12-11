@@ -26,7 +26,7 @@ namespace fast_daq
 
     // ats9462_digitizer methods
     ats9462_digitizer::ats9462_digitizer() :
-        f_samples_per_sec( 180000000.0 ),
+        f_samples_per_sec( 50000000.0 ),
         f_acquisition_length_sec( 0.1 ),
         f_samples_per_buffer( 204800 ),
         f_dma_buffer_count( 4883 ),
@@ -140,7 +140,7 @@ namespace fast_daq
     void ats9462_digitizer::configure_board()
     {
         //TODO: again, here the sample rate is hard-coded, should be configured and f_samples_per_sec tied to the enum value selected
-        check_return_code( AlazarSetCaptureClock( f_board_handle, INTERNAL_CLOCK, SAMPLE_RATE_180MSPS, CLOCK_EDGE_RISING, 0),
+        check_return_code( AlazarSetCaptureClock( f_board_handle, INTERNAL_CLOCK, SAMPLE_RATE_50MSPS, CLOCK_EDGE_RISING, 0),
                           "AlazarSetCaptureClock", 1 );
 
         check_return_code( AlazarInputControlEx( f_board_handle, CHANNEL_A, DC_COUPLING, INPUT_RANGE_PM_800_MV, IMPEDANCE_50_OHM ),

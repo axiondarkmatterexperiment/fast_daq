@@ -272,12 +272,12 @@ LDEBUG( plog, "here's the fftw plan" );
 fftw_print_plan( f_fftw_plan );
 printf("\n");
                         //TODO here here the plan is broken by the next line... I think
-                        std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + (t_center_bin - 1), &freq_data_out->get_data_array()[0][0] + t_center_bin);
+                        //std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + (t_center_bin - 1), &freq_data_out->get_data_array()[0][0] + t_center_bin);
 //TODO remove these lines
 LDEBUG( plog, "here's the fftw plan" );
 fftw_print_plan( f_fftw_plan );
 printf("\n....\n");
-                        std::copy(&f_fftw_output[0][0] + t_center_bin, &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_data_array()[0][0]);
+                        //std::copy(&f_fftw_output[0][0] + t_center_bin, &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_data_array()[0][0]);
 //TODO remove these lines
 LDEBUG( plog, "here's the fftw plan" );
 fftw_print_plan( f_fftw_plan );

@@ -40,7 +40,7 @@ streams:
             connections:
               #- "ats.out_0:dend.in_0"
               - "ats.out_0:fft.in_1"
-              - "fft.out_1:dend.in_1"
+              - "fft.out_0:dend.in_1"
 
         device:
             n-channels: 1
@@ -53,11 +53,11 @@ streams:
             v-range: 0.5
 
         ats:
-            samples-per-buffer: 50000
+            samples-per-buffer: 8000
             out-length: 10
             dma-buffer-count: 100
         dend:
             input-index: 1
         fft:
             input-type: real
-            fft-size: 50000 # needs to match above in ats
+            fft-size: 8000 # needs to match above in ats
