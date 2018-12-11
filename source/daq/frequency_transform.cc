@@ -84,8 +84,7 @@ namespace fast_daq
 
     void frequency_transform::initialize()
     {
-        out_buffer< 0 >().initialize( f_time_length );
-        out_buffer< 1 >().initialize( f_freq_length );
+        out_buffer< 0 >().initialize( f_freq_length );
 
 
         if (f_use_wisdom)
@@ -159,12 +158,14 @@ namespace fast_daq
                 {
                     LDEBUG( plog, "check output stream signals" );
                     // stop if output stream buffers have s_stop
+                    /* //TODO
                     if (f_enable_time_output && out_stream< 0 >().get() == stream::s_stop)
                     {
                         LWARN( plog, "time output stream has stop condition" );
                         break;
                     }
-                    if (out_stream< 1 >().get() == stream::s_stop)
+                    */
+                    if (out_stream< 0 >().get() == stream::s_stop)
                     {
                         LWARN( plog, "frequency output stream has stop condition" );
                         break;
@@ -209,15 +210,13 @@ namespace fast_daq
                     if ( in_cmd == stream::s_stop )
                     {
                         LDEBUG( plog, "got an s_stop on slot <" << in_stream_index << ">" );
-                        if ( f_enable_time_output && ! out_stream< 0 >().set( stream::s_stop ) ) throw midge::node_nonfatal_error() << "Stream 0 error while stopping";
-                        if ( ! out_stream< 1 >().set( stream::s_stop ) ) throw midge::node_nonfatal_error() << "Stream 1 error while stopping";
+                        if ( ! out_stream< 0 >().set( stream::s_stop ) ) throw midge::node_nonfatal_error() << "Stream 0 error while stopping";
                         continue;
                     }
                     if ( in_cmd == stream::s_start )
                     {
                         LDEBUG( plog, "got an s_start on slot <" << in_stream_index << ">" );
-                        if ( f_enable_time_output && ! out_stream< 0 >().set( stream::s_start ) ) throw midge::node_nonfatal_error() << "Stream 0 error while starting";
-                        if ( ! out_stream< 1 >().set( stream::s_start ) ) throw midge::node_nonfatal_error() << "Stream 1 error while starting";
+                        if ( ! out_stream< 0 >().set( stream::s_start ) ) throw midge::node_nonfatal_error() << "Stream 0 error while starting";
                         continue;
                     }
                     if ( in_cmd == stream::s_run )
@@ -306,7 +305,6 @@ printf("\n");
 
             LDEBUG( plog, "Exiting output streams" );
             out_stream< 0 >().set( stream::s_exit );
-            out_stream< 1 >().set( stream::s_exit );
 
             return;
         }
