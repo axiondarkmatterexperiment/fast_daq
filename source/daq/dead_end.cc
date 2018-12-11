@@ -7,13 +7,13 @@
 
 #include <stdio.h>
 
-#include "freq_data.hh"
-
+//scarab includes
 #include "logger.hh"
 
-//#include "daq_control.hh"
-#include "real_time_data.hh"
+//fast_daq includes
 #include "dead_end.hh"
+#include "frequency_data.hh"
+#include "real_time_data.hh"
 
 
 using midge::stream;

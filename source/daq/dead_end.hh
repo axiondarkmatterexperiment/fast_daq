@@ -17,17 +17,11 @@
 #include "shared_cancel.hh"
 
 
-// forward declarations namespace psyllid
-namespace psyllid
-{
-    class freq_data;
-}
-
-
 namespace fast_daq
 {
     // forward declarations
     class real_time_data;
+    class frequency_data;
     /*!
      @class dead_end
      @author B. H. LaRoque
@@ -47,10 +41,10 @@ namespace fast_daq
 
      Input Streams
      - 0: real_time_data
-     - 1: freq_data
+     - 1: frequency_data
 
     */
-    class dead_end : public midge::_consumer< dead_end, typelist_2( real_time_data, psyllid::freq_data ) >
+    class dead_end : public midge::_consumer< dead_end, typelist_2( real_time_data, frequency_data ) >
     {
         public:
             dead_end();
