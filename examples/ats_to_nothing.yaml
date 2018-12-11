@@ -1,0 +1,60 @@
+post-to-slack: false
+
+amqp:
+    make-connection: false
+
+daq:
+    activate-at-startup: true
+    n-files: 0
+    max-file-size-mb: 500
+
+on-startup:
+  - type: set
+    rks: use-monarch
+    payload:
+        values: [ false ]
+  - type: cmd
+    rks: "start-run"
+    payload:
+      duration: 0
+    sleep-for: 0
+  - type: wait-for
+    rks: daq-status
+    payload: {}
+    sleep-for: 100
+
+streams:
+    ch0:
+        preset:
+            type: ats-stream-custom
+            nodes:
+              - type: ats9462
+                name: ats
+              - type: dead-end
+                name: dend
+              - type: frequency-transform
+                name: fft
+            connections:
+              #- "ats.out_0:dend.in_0"
+              - "ats.out_0:fft.in_1"
+              - "fft.out_0:dend.in_1"
+
+        device:
+            n-channels: 1
+            bit-depth: 8
+            data-type-size: 1
+            sample-size: 2
+            record-size: 4096
+            acq-rate: 100
+            v-offset: 0.0
+            v-range: 0.5
+
+        ats:
+            samples-per-buffer: 50000
+            out-length: 20 # number of buffers of node output to the next node
+            dma-buffer-count: 100 #number of buffers between the ATS local memory and the node
+        dend:
+            input-index: 1
+        fft:
+            input-type: real
+            fft-size: 50000 # needs to match above in ats

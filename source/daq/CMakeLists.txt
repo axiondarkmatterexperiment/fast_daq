@@ -2,18 +2,24 @@
 # daq #
 #######
 set( headers
+    dead_end.hh
     frequency_transform.hh
 )
 
 set( sources
+    dead_end.cc
     frequency_transform.cc
 )
 
-option( Psyllid_ENABLE_STREAMED_FREQUENCY_OUTPUT "Flag to enable building node for streaming frequency data (inproper monarch usage)" FALSE )
-if (Psyllid_ENABLE_STREAMED_FREQUENCY_OUTPUT)
-    set( headers ${sources} streaming_frequency_writer.hh)
-    set( sources ${sources} streaming_frequency_writer.cc)
-endif (Psyllid_ENABLE_STREAMED_FREQUENCY_OUTPUT)
+if ( FastDAQ_ENABLE_ATS)
+    # digitizer node
+    set( headers ${headers} ATS9462_digitizer.hh )
+    set( sources ${sources} ATS9462_digitizer.cc )
+endif ( FastDAQ_ENABLE_ATS)
+
+set( dependencies
+    FastDaqData
+)
 
 ###########
 # library #
