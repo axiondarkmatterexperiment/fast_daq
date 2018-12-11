@@ -267,7 +267,7 @@ printf("\n");
                         //TODO here here the plan is broken by the next line... I think
                         //std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + (t_center_bin - 1), &freq_data_out->get_data_array()[0][0] + t_center_bin);
                         // can I copy just 1 value to the front of the output array?
-                        std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + ( 1), &freq_data_out->get_data_array()[0][0] );
+                        std::copy(&f_fftw_output[0][0], &f_fftw_output[0][1], &freq_data_out->get_data_array()[0][0] );
 //TODO remove these lines
 LDEBUG( plog, "here's the fftw plan" );
 fftw_print_plan( f_fftw_plan );
