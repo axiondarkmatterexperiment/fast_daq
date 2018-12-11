@@ -151,8 +151,21 @@ namespace fast_daq
             try
             {
                 LINFO( plog, "Starting main loop (frequency transform)" );
+                //TDO remove
+                LWARN( plog, "return codes are:\n" << \
+                             "  s_none: " << stream::s_none << "\n" <<
+                             "  s_error: " << stream::s_error <<  "\n" <<
+                             "  s_exit: " << stream::s_exit <<  "\n" <<
+                             "  s_stop: " << stream::s_stop <<  "\n" <<
+                             "  s_start: " << stream::s_start <<  "\n" <<
+                             "  s_run: " << stream::s_run <<  "\n"
+                     );
                 while (! is_canceled() )
                 {
+//TODO remove these lines
+LDEBUG( plog, "here's the fftw plan" );
+fftw_print_plan( f_fftw_plan );
+printf("\n");
                     LDEBUG( plog, "check output stream signals" );
                     // stop if output stream buffers have s_stop
                     if (f_enable_time_output && out_stream< 0 >().get() == stream::s_stop)
@@ -168,49 +181,65 @@ namespace fast_daq
                     // grab the next input data and check slot status
                     LDEBUG( plog, "check input stream signals for <" << get_input_type_str() << ">" );
                     midge::enum_t in_cmd = stream::s_none;
+                    unsigned in_stream_index = 0;
+                    unsigned in_stream_id = 0;
+//TODO remove these lines
+LDEBUG( plog, "here's the fftw plan" );
+fftw_print_plan( f_fftw_plan );
+printf("\n");
                     switch ( f_input_type )
                     {
                         case input_type_t::complex:
                             LDEBUG( plog, "seriously, getting 0" );
                             in_cmd = in_stream< 0 >().get();
+                            in_stream_index = in_stream< 0 >().get_current_index();
+                            in_stream_id = 0;
+                            break;
                         case input_type_t::real:
                             LDEBUG( plog, "seriously, getting 1" );
                             in_cmd = in_stream< 1 >().get();
+                            in_stream_index = in_stream< 1 >().get_current_index();
+                            in_stream_id = 1;
+                            break;
                     }
-                    LDEBUG( plog, "got it, it is: " << in_cmd );
+                    LDEBUG( plog, "input command is [" << in_cmd << "]");
 
                     if ( in_cmd == stream::s_none)
                     {
-                        LDEBUG( plog, "got an s_none on slot <" << in_stream< 0 >().get_current_index() << ">" );
+                        LDEBUG( plog, "got an s_none on slot <" << in_stream_index << ">" );
                         continue;
                     }
                     if ( in_cmd == stream::s_error )
                     {
-                        LDEBUG( plog, "got an s_error on slot <" << in_stream< 0 >().get_current_index() << ">" );
+                        LDEBUG( plog, "got an s_error on slot <" << in_stream_index << ">" );
                         break;
                     }
                     if ( in_cmd == stream::s_exit )
                     {
-                        LDEBUG( plog, "got an s_exit on slot <" << in_stream< 0 >().get_current_index() << ">" );
+                        LDEBUG( plog, "got an s_exit on slot <" << in_stream_index << ">" );
                         break;
                     }
                     if ( in_cmd == stream::s_stop )
                     {
-                        LDEBUG( plog, "got an s_stop on slot <" << in_stream< 0 >().get_current_index() << ">" );
+                        LDEBUG( plog, "got an s_stop on slot <" << in_stream_index << ">" );
                         if ( f_enable_time_output && ! out_stream< 0 >().set( stream::s_stop ) ) throw midge::node_nonfatal_error() << "Stream 0 error while stopping";
                         if ( ! out_stream< 1 >().set( stream::s_stop ) ) throw midge::node_nonfatal_error() << "Stream 1 error while stopping";
                         continue;
                     }
                     if ( in_cmd == stream::s_start )
                     {
-                        LDEBUG( plog, "got an s_start on slot <" << in_stream< 0 >().get_current_index() << ">" );
+                        LDEBUG( plog, "got an s_start on slot <" << in_stream_index << ">" );
                         if ( f_enable_time_output && ! out_stream< 0 >().set( stream::s_start ) ) throw midge::node_nonfatal_error() << "Stream 0 error while starting";
                         if ( ! out_stream< 1 >().set( stream::s_start ) ) throw midge::node_nonfatal_error() << "Stream 1 error while starting";
                         continue;
                     }
                     if ( in_cmd == stream::s_run )
                     {
-                        LDEBUG( plog, "got an s_run on slot <" << in_stream< 0 >().get_current_index() << ">" );
+                        LDEBUG( plog, "got an s_run on slot <" << in_stream_index << ">" );
+//TODO remove these lines
+LDEBUG( plog, "here's the fftw plan" );
+fftw_print_plan( f_fftw_plan );
+printf("\n");
                         unsigned t_center_bin;
                         switch ( f_input_type )
                         {
@@ -224,6 +253,10 @@ namespace fast_daq
                                 break;
                         }
                         LDEBUG( plog, "got input data" );
+//TODO remove these lines
+LDEBUG( plog, "here's the fftw plan" );
+fftw_print_plan( f_fftw_plan );
+printf("\n");
 
                         //time output
                         if (f_enable_time_output)
@@ -235,21 +268,49 @@ namespace fast_daq
                         freq_data_out = out_stream< 1 >().data();
                         freq_data_out->set_freq_not_time( true );
                         //TODO there are many other members of the underlying roach_packet_data type; should more carefully think through all of them and if they should be on the frequency_data (is there a way to copy all the members *except* the data array?)
-                        LDEBUG( plog, "next stream acquired, doing FFT" );
+                        LDEBUG( plog, "next output stream slot acquired" );
+//TODO remove these lines
+LDEBUG( plog, "here's the fftw plan" );
+fftw_print_plan( f_fftw_plan );
+printf("\n");
 
                         switch (f_input_type)
                         {
                             case input_type_t::real:
+                                LDEBUG( plog, "copy real input data" );
                                 std::copy(&real_time_data_in->get_time_series()[0], &real_time_data_in->get_time_series()[0] + f_fft_size, &f_fftw_input_real[0]);
-                                fftw_execute(f_fftw_plan);//, f_fftw_input_real, f_fftw_output);
+                                LDEBUG( plog, "run real-to-complex transform" );
+                                LDEBUG( plog, "real in[0]: " << real_time_data_in->get_time_series()[0] );
+                                LDEBUG( plog, "fftw_in[0]: " << f_fftw_input_real[0] );
+                                LDEBUG( plog, "real in[0]: " << real_time_data_in->get_time_series()[1] );
+                                LDEBUG( plog, "fftw_in[0]: " << f_fftw_input_real[1] );
+                                LDEBUG( plog, "real in[0]: " << real_time_data_in->get_time_series()[2] );
+                                LDEBUG( plog, "fftw_in[0]: " << f_fftw_input_real[2] );
+                                LDEBUG( plog, "real in[0]: " << real_time_data_in->get_time_series()[3] );
+                                LDEBUG( plog, "fftw_in[0]: " << f_fftw_input_real[3] );
+                                LDEBUG( plog, "output[0]: " << f_fftw_output[0][0] << ", " << f_fftw_output[0][1] );
+                                LDEBUG( plog, "output[0]: " << f_fftw_output[1][0] << ", " << f_fftw_output[1][1] );
+                                LDEBUG( plog, "output[0]: " << f_fftw_output[2][0] << ", " << f_fftw_output[2][1] );
+                                LDEBUG( plog, "printing the fftw plan from: " << f_fftw_plan );
+//TODO remove these lines
+LDEBUG( plog, "here's the fftw plan");
+fftw_print_plan( f_fftw_plan );
+printf("\n");
+                                fftw_execute_dft_r2c(f_fftw_plan, f_fftw_input_real, f_fftw_output);
                                 break;
                             case input_type_t::complex:
+                                LDEBUG( plog, "grab complex data" );
                                 std::copy(&complex_time_data_in->get_array()[0][0], &complex_time_data_in->get_array()[0][0] + f_fft_size*2, &f_fftw_input_complex[0][0]);
-                                //fftw_execute_dft(f_fftw_plan, f_fftw_input_complex, f_fftw_output);
-                                fftw_execute(f_fftw_plan);
+                                fftw_execute_dft(f_fftw_plan, f_fftw_input_complex, f_fftw_output);
                                 break;
                             default: throw psyllid::error() << "input_type not fully implemented";
                         }
+//TODO remove these lines
+LDEBUG( plog, "here's the fftw plan" );
+fftw_print_plan( f_fftw_plan );
+printf("\n");
+                        LDEBUG( plog, "executed the FFTW plan" );
+                        //fftw_execute( f_fftw_plan );
                         //std::copy(&time_data_in->get_array()[0][0], &time_data_in->get_array()[0][0] + f_fft_size*2, &f_fftw_input[0][0]);
                         //fftw_execute_dft(f_fftw_plan, f_fftw_input, f_fftw_output);
                         //is this the normalization we want? (is it what the ROACH does?)
@@ -260,11 +321,24 @@ namespace fast_daq
                         }
                         //std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_array()[0][0]);
 
+//TODO remove these lines
+LDEBUG( plog, "here's the fftw plan" );
+fftw_print_plan( f_fftw_plan );
+printf("\n");
+                        //TODO here here the plan is broken by the next line... I think
                         // FFT unfolding based on katydid:Source/Data/Transform/KTFrequencyTransformFFTW
                         std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + (t_center_bin - 1), &freq_data_out->get_array()[0][0] + t_center_bin);
+//TODO remove these lines
+LDEBUG( plog, "here's the fftw plan" );
+fftw_print_plan( f_fftw_plan );
+printf("\n");
                         std::copy(&f_fftw_output[0][0] + t_center_bin, &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_array()[0][0]);
                         //freq_data_out->set_pkt_in_batch(time_data_in->get_pkt_in_batch());
                         //freq_data_out->set_pkt_in_session(time_data_in->get_pkt_in_session());
+//TODO remove these lines
+LDEBUG( plog, "here's the fftw plan" );
+fftw_print_plan( f_fftw_plan );
+printf("\n");
 
                         if ( f_enable_time_output && !out_stream< 0 >().set( stream::s_run ) )
                         {
@@ -309,6 +383,7 @@ namespace fast_daq
 
     void frequency_transform::finalize()
     {
+        LINFO( plog, "in finalize(), freeing fftw data objects" );
         out_buffer< 0 >().finalize();
         out_buffer< 1 >().finalize();
         if (f_fftw_input_real != NULL )
