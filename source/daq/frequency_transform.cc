@@ -85,7 +85,7 @@ namespace fast_daq
     void frequency_transform::initialize()
     {
         out_buffer< 0 >().initialize( f_freq_length );
-
+        out_buffer< 0 >().call( &frequency_data::allocate_array, ( 1 + (f_fft_size-1)/2 ) ); // round up for odd size values
 
         if (f_use_wisdom)
         {
@@ -220,7 +220,7 @@ namespace fast_daq
                         {
                             case input_type_t::real:
                                 real_time_data_in = in_stream< 1 >().data();
-                                t_center_bin = real_time_data_in->get_array_size();
+                                t_center_bin = real_time_data_in->get_array_size() / 2;
                                 break;
                             case input_type_t::complex:
                                 complex_time_data_in = in_stream< 0 >().data();
@@ -238,18 +238,16 @@ namespace fast_daq
                             case input_type_t::real:
                                 LDEBUG( plog, "copy real input data" );
                                 std::copy(&real_time_data_in->get_time_series()[0], &real_time_data_in->get_time_series()[0] + f_fft_size, &f_fftw_input_real[0]);
-                                fftw_execute_dft_r2c(f_fftw_plan, f_fftw_input_real, f_fftw_output);
                                 break;
                             case input_type_t::complex:
                                 LDEBUG( plog, "grab complex data" );
+                                LWARN( plog, "complex input transforms are currently not tested" );
                                 std::copy(&complex_time_data_in->get_array()[0][0], &complex_time_data_in->get_array()[0][0] + f_fft_size*2, &f_fftw_input_complex[0][0]);
-                                fftw_execute_dft(f_fftw_plan, f_fftw_input_complex, f_fftw_output);
                                 break;
                             default: throw psyllid::error() << "input_type not fully implemented";
                         }
                         LDEBUG( plog, "executed the FFTW plan" );
-                        //fftw_execute( f_fftw_plan );
-                        //fftw_execute_dft(f_fftw_plan, f_fftw_input, f_fftw_output);
+                        fftw_execute( f_fftw_plan );
 
                         //take care of FFT normalization
                         //is this the normalization we want?
@@ -260,23 +258,17 @@ namespace fast_daq
                         }
 
                         // FFT unfolding based on katydid:Source/Data/Transform/KTFrequencyTransformFFTW
-//TODO remove these lines
-LDEBUG( plog, "here's the fftw plan" );
-fftw_print_plan( f_fftw_plan );
-printf("\n");
-                        //TODO here here the plan is broken by the next line... I think
-                        //std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + (t_center_bin - 1), &freq_data_out->get_data_array()[0][0] + t_center_bin);
-                        // can I copy just 1 value to the front of the output array?
-                        std::copy(&f_fftw_output[0][0], &f_fftw_output[0][1], &freq_data_out->get_data_array()[0][0] );
-//TODO remove these lines
-LDEBUG( plog, "here's the fftw plan" );
-fftw_print_plan( f_fftw_plan );
-printf("\n....\n");
-                        //std::copy(&f_fftw_output[0][0] + t_center_bin, &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_data_array()[0][0]);
-//TODO remove these lines
-//LDEBUG( plog, "here's the fftw plan" );
-//fftw_print_plan( f_fftw_plan );
-//printf("\n");
+                        switch (f_input_type)
+                        {
+                            case input_type_t::real:
+                                std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + 2*freq_data_out->get_array_size(), &freq_data_out->get_data_array()[0][0] );
+                                break;
+                            case input_type_t::complex:
+                                std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + (t_center_bin - 1), &freq_data_out->get_data_array()[0][0] + t_center_bin);
+                                std::copy(&f_fftw_output[0][0] + t_center_bin, &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_data_array()[0][0]);
+                                break;
+                            default: throw psyllid::error() << "input_type not fully implemented";
+                        }
 
                         if ( !out_stream< 0 >().set( stream::s_run ) )
                         {
