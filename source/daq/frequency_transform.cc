@@ -52,7 +52,7 @@ namespace fast_daq
             f_transform_flag( "ESTIMATE" ),
             f_use_wisdom( true ),
             f_wisdom_filename( "wisdom_complexfft.fftw3" ),
-            f_enable_time_output( false ), //Start with this false
+            //f_enable_time_output( false ), //Start with this false
             f_transform_flag_map(),
             f_fftw_input_real(),
             f_fftw_input_complex(),
@@ -65,21 +65,6 @@ namespace fast_daq
 
     frequency_transform::~frequency_transform()
     {
-    }
-
-    // TODO this should be the only mode, the time output doesn't make sense here
-    void frequency_transform::switch_to_freq_only()
-    {
-        LDEBUG( plog, "switching to frequency output only mode" );
-        f_enable_time_output = false;
-    }
-
-    void frequency_transform::switch_to_time_and_freq()
-    {
-        LDEBUG( plog, "switching to frequency and time output mode" );
-        LWARN( plog, "why are you switching on time output, that's not okay, we don't do that... throwing" );
-        throw 1; //TODO: seems like the wrong thing to throw, but I'm intending to deprecate this entire behavior.
-        f_enable_time_output = true;
     }
 
     void frequency_transform::initialize()
@@ -146,8 +131,6 @@ namespace fast_daq
 
             psyllid::time_data* complex_time_data_in = nullptr;
             real_time_data* real_time_data_in = nullptr;
-            //psyllid::time_data* time_data_out = nullptr;
-            //psyllid::freq_data* freq_data_out = nullptr;
             frequency_data* freq_data_out = nullptr;
             double fft_norm = sqrt(1. / (double)f_fft_size);
 
@@ -167,20 +150,17 @@ namespace fast_daq
                     LDEBUG( plog, "check input stream signals for <" << get_input_type_str() << ">" );
                     midge::enum_t in_cmd = stream::s_none;
                     unsigned in_stream_index = 0;
-                    //unsigned in_stream_id = 0;
                     switch ( f_input_type )
                     {
                         case input_type_t::complex:
                             LDEBUG( plog, "seriously, getting 0" );
                             in_cmd = in_stream< 0 >().get();
                             in_stream_index = in_stream< 0 >().get_current_index();
-                            //in_stream_id = 0;
                             break;
                         case input_type_t::real:
                             LDEBUG( plog, "seriously, getting 1" );
                             in_cmd = in_stream< 1 >().get();
                             in_stream_index = in_stream< 1 >().get_current_index();
-                            //in_stream_id = 1;
                             break;
                     }
                     LDEBUG( plog, "input command is [" << in_cmd << "]");
@@ -257,13 +237,13 @@ namespace fast_daq
                             f_fftw_output[i_bin][1] *= fft_norm;
                         }
 
-                        // FFT unfolding based on katydid:Source/Data/Transform/KTFrequencyTransformFFTW
                         switch (f_input_type)
                         {
                             case input_type_t::real:
                                 std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + 2*freq_data_out->get_array_size(), &freq_data_out->get_data_array()[0][0] );
                                 break;
                             case input_type_t::complex:
+                                // FFT unfolding based on katydid:Source/Data/Transform/KTFrequencyTransformFFTW
                                 std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + (t_center_bin - 1), &freq_data_out->get_data_array()[0][0] + t_center_bin);
                                 std::copy(&f_fftw_output[0][0] + t_center_bin, &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_data_array()[0][0]);
                                 break;
@@ -308,7 +288,6 @@ namespace fast_daq
     {
         LINFO( plog, "in finalize(), freeing fftw data objects" );
         out_buffer< 0 >().finalize();
-        //out_buffer< 1 >().finalize();
         if (f_fftw_input_real != NULL )
         {
             fftw_free(f_fftw_input_real);
@@ -373,25 +352,10 @@ namespace fast_daq
         return;
     }
 
-    bool frequency_transform_binding::do_run_command( frequency_transform* a_node, const std::string& a_cmd, const scarab::param_node& ) const
+    bool frequency_transform_binding::do_run_command( frequency_transform* /* a_node */, const std::string& a_cmd, const scarab::param_node& ) const
     {
-        if ( a_cmd == "freq-only" )
-        {
-            LDEBUG( plog, "should enable freq-only mode" );
-            a_node->switch_to_freq_only();
-            return true;
-        }
-        else if ( a_cmd == "time-and-freq" )
-        {
-            LDEBUG( plog, "should enable time-and-freq mode" );
-            a_node->switch_to_time_and_freq();
-            return true;
-        }
-        else
-        {
-            LWARN( plog, "unrecognized command: <" << a_cmd << ">" );
-            return false;
-        }
+        LWARN( plog, "unrecognized command: <" << a_cmd << ">" );
+        return false;
     }
 
 } /* namespace psyllid */

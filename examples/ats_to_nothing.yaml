@@ -14,9 +14,6 @@ on-startup:
     payload:
         values: [ false ]
   - type: cmd
-    rks: run-daq-cmd.ch0.fft.freq-only
-    payload: {}
-  - type: cmd
     rks: "start-run"
     payload:
       duration: 0

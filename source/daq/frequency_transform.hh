@@ -9,7 +9,6 @@
 #define PSYLLID_FREQUENCY_TRANSFORM_HH_
 
 //psyllid
-//#include "freq_data.hh"
 #include "node_builder.hh"
 #include "time_data.hh"
 
@@ -51,10 +50,6 @@ namespace fast_daq
      - "transform-flag": string -- FFTW flag to indicate how much optimization of the fftw_plan is desired
      - "use-wisdom": bool -- whether to use a plan from a wisdom file and save the plan to that file
      - "wisdom-filename": string -- if "use-wisdom" is true, resolvable path to the wisdom file
-
-    Available DAQ commands:
-    - "freq-only" (no args) -- Switch the execution mode to frequency only
-    - "time-and-freq" (no args) -- Switch the execution mode to time-and-frequency
 
      Input Stream:
      - 0: time_data (IQ)
@@ -99,9 +94,6 @@ namespace fast_daq
             bool f_enable_time_output;
 
         public:
-            void switch_to_freq_only();
-            void switch_to_time_and_freq();
-
             virtual void initialize();
             virtual void execute( midge::diptera* a_midge = nullptr );
             virtual void finalize();
@@ -115,8 +107,6 @@ namespace fast_daq
 
             bool f_multithreaded_is_initialized;
 
-            //uint64_t f_time_session_pkt_counter;
-            //uint64_t f_freq_session_pkt_counter;
         private:
             void setup_internal_maps();
 
@@ -138,20 +128,7 @@ namespace fast_daq
     {
         return input_type_to_string( f_input_type );
     }
-    /*
-    inline std::string frequency_transform::input_type_to_string( input_type_t an_input_type )
-    {
-        return static_cast< uint32_t >( an_input_type );
-    }
-    inline frequency_transform::input_type_t frequency_transform::string_to_input_type( const std::string& an_input_type )
-    {
-        return static_cast< frequency_transform::input_type_t >( an_input_type );
-    }
-    inline void frequency_transform::set_input_type( const std::string& an_input_type )
-    {
-        set_input_type( string_to_input_type( an_input_type ) );
-    }
-    */
+
 
     class frequency_transform_binding : public psyllid::_node_binding< frequency_transform, frequency_transform_binding >
     {
