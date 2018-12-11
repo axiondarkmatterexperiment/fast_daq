@@ -53,11 +53,11 @@ streams:
             v-range: 0.5
 
         ats:
-            samples-per-buffer: 8000
-            out-length: 10
-            dma-buffer-count: 100
+            samples-per-buffer: 50000
+            out-length: 20 # number of buffers of node output to the next node
+            dma-buffer-count: 100 #number of buffers between the ATS local memory and the node
         dend:
             input-index: 1
         fft:
             input-type: real
-            fft-size: 8000 # needs to match above in ats
+            fft-size: 50000 # needs to match above in ats

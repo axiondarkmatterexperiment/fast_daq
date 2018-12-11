@@ -158,13 +158,6 @@ namespace fast_daq
                 {
                     LDEBUG( plog, "check output stream signals" );
                     // stop if output stream buffers have s_stop
-                    /* //TODO
-                    if (f_enable_time_output && out_stream< 0 >().get() == stream::s_stop)
-                    {
-                        LWARN( plog, "time output stream has stop condition" );
-                        break;
-                    }
-                    */
                     if (out_stream< 0 >().get() == stream::s_stop)
                     {
                         LWARN( plog, "frequency output stream has stop condition" );
@@ -273,15 +266,17 @@ fftw_print_plan( f_fftw_plan );
 printf("\n");
                         //TODO here here the plan is broken by the next line... I think
                         //std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + (t_center_bin - 1), &freq_data_out->get_data_array()[0][0] + t_center_bin);
+                        // can I copy just 1 value to the front of the output array?
+                        std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + ( 1), &freq_data_out->get_data_array()[0][0] );
 //TODO remove these lines
 LDEBUG( plog, "here's the fftw plan" );
 fftw_print_plan( f_fftw_plan );
 printf("\n....\n");
                         //std::copy(&f_fftw_output[0][0] + t_center_bin, &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_data_array()[0][0]);
 //TODO remove these lines
-LDEBUG( plog, "here's the fftw plan" );
-fftw_print_plan( f_fftw_plan );
-printf("\n");
+//LDEBUG( plog, "here's the fftw plan" );
+//fftw_print_plan( f_fftw_plan );
+//printf("\n");
 
                         if ( !out_stream< 0 >().set( stream::s_run ) )
                         {
