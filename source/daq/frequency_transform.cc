@@ -162,10 +162,6 @@ namespace fast_daq
                      );
                 while (! is_canceled() )
                 {
-//TODO remove these lines
-LDEBUG( plog, "here's the fftw plan" );
-fftw_print_plan( f_fftw_plan );
-printf("\n");
                     LDEBUG( plog, "check output stream signals" );
                     // stop if output stream buffers have s_stop
                     if (f_enable_time_output && out_stream< 0 >().get() == stream::s_stop)
@@ -182,24 +178,20 @@ printf("\n");
                     LDEBUG( plog, "check input stream signals for <" << get_input_type_str() << ">" );
                     midge::enum_t in_cmd = stream::s_none;
                     unsigned in_stream_index = 0;
-                    unsigned in_stream_id = 0;
-//TODO remove these lines
-LDEBUG( plog, "here's the fftw plan" );
-fftw_print_plan( f_fftw_plan );
-printf("\n");
+                    //unsigned in_stream_id = 0;
                     switch ( f_input_type )
                     {
                         case input_type_t::complex:
                             LDEBUG( plog, "seriously, getting 0" );
                             in_cmd = in_stream< 0 >().get();
                             in_stream_index = in_stream< 0 >().get_current_index();
-                            in_stream_id = 0;
+                            //in_stream_id = 0;
                             break;
                         case input_type_t::real:
                             LDEBUG( plog, "seriously, getting 1" );
                             in_cmd = in_stream< 1 >().get();
                             in_stream_index = in_stream< 1 >().get_current_index();
-                            in_stream_id = 1;
+                            //in_stream_id = 1;
                             break;
                     }
                     LDEBUG( plog, "input command is [" << in_cmd << "]");
@@ -236,10 +228,6 @@ printf("\n");
                     if ( in_cmd == stream::s_run )
                     {
                         LDEBUG( plog, "got an s_run on slot <" << in_stream_index << ">" );
-//TODO remove these lines
-LDEBUG( plog, "here's the fftw plan" );
-fftw_print_plan( f_fftw_plan );
-printf("\n");
                         unsigned t_center_bin;
                         switch ( f_input_type )
                         {
@@ -253,10 +241,6 @@ printf("\n");
                                 break;
                         }
                         LDEBUG( plog, "got input data" );
-//TODO remove these lines
-LDEBUG( plog, "here's the fftw plan" );
-fftw_print_plan( f_fftw_plan );
-printf("\n");
 
                         //time output
                         if (f_enable_time_output)
@@ -269,33 +253,12 @@ printf("\n");
                         freq_data_out->set_freq_not_time( true );
                         //TODO there are many other members of the underlying roach_packet_data type; should more carefully think through all of them and if they should be on the frequency_data (is there a way to copy all the members *except* the data array?)
                         LDEBUG( plog, "next output stream slot acquired" );
-//TODO remove these lines
-LDEBUG( plog, "here's the fftw plan" );
-fftw_print_plan( f_fftw_plan );
-printf("\n");
 
                         switch (f_input_type)
                         {
                             case input_type_t::real:
                                 LDEBUG( plog, "copy real input data" );
                                 std::copy(&real_time_data_in->get_time_series()[0], &real_time_data_in->get_time_series()[0] + f_fft_size, &f_fftw_input_real[0]);
-                                LDEBUG( plog, "run real-to-complex transform" );
-                                LDEBUG( plog, "real in[0]: " << real_time_data_in->get_time_series()[0] );
-                                LDEBUG( plog, "fftw_in[0]: " << f_fftw_input_real[0] );
-                                LDEBUG( plog, "real in[0]: " << real_time_data_in->get_time_series()[1] );
-                                LDEBUG( plog, "fftw_in[0]: " << f_fftw_input_real[1] );
-                                LDEBUG( plog, "real in[0]: " << real_time_data_in->get_time_series()[2] );
-                                LDEBUG( plog, "fftw_in[0]: " << f_fftw_input_real[2] );
-                                LDEBUG( plog, "real in[0]: " << real_time_data_in->get_time_series()[3] );
-                                LDEBUG( plog, "fftw_in[0]: " << f_fftw_input_real[3] );
-                                LDEBUG( plog, "output[0]: " << f_fftw_output[0][0] << ", " << f_fftw_output[0][1] );
-                                LDEBUG( plog, "output[0]: " << f_fftw_output[1][0] << ", " << f_fftw_output[1][1] );
-                                LDEBUG( plog, "output[0]: " << f_fftw_output[2][0] << ", " << f_fftw_output[2][1] );
-                                LDEBUG( plog, "printing the fftw plan from: " << f_fftw_plan );
-//TODO remove these lines
-LDEBUG( plog, "here's the fftw plan");
-fftw_print_plan( f_fftw_plan );
-printf("\n");
                                 fftw_execute_dft_r2c(f_fftw_plan, f_fftw_input_real, f_fftw_output);
                                 break;
                             case input_type_t::complex:
@@ -305,10 +268,6 @@ printf("\n");
                                 break;
                             default: throw psyllid::error() << "input_type not fully implemented";
                         }
-//TODO remove these lines
-LDEBUG( plog, "here's the fftw plan" );
-fftw_print_plan( f_fftw_plan );
-printf("\n");
                         LDEBUG( plog, "executed the FFTW plan" );
                         //fftw_execute( f_fftw_plan );
                         //std::copy(&time_data_in->get_array()[0][0], &time_data_in->get_array()[0][0] + f_fft_size*2, &f_fftw_input[0][0]);
@@ -327,14 +286,16 @@ fftw_print_plan( f_fftw_plan );
 printf("\n");
                         //TODO here here the plan is broken by the next line... I think
                         // FFT unfolding based on katydid:Source/Data/Transform/KTFrequencyTransformFFTW
+                        LDEBUG( plog, "center bin is: " << t_center_bin );
+                        LDEBUG( plog, "first and last values are: " << f_fftw_output[0][0] << " : " << f_fftw_output[0][0] + (t_center_bin - 1) );
                         std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + (t_center_bin - 1), &freq_data_out->get_array()[0][0] + t_center_bin);
 //TODO remove these lines
 LDEBUG( plog, "here's the fftw plan" );
 fftw_print_plan( f_fftw_plan );
-printf("\n");
+printf("\n....\n");
                         std::copy(&f_fftw_output[0][0] + t_center_bin, &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_array()[0][0]);
-                        //freq_data_out->set_pkt_in_batch(time_data_in->get_pkt_in_batch());
-                        //freq_data_out->set_pkt_in_session(time_data_in->get_pkt_in_session());
+                        ////freq_data_out->set_pkt_in_batch(time_data_in->get_pkt_in_batch());
+                        ////freq_data_out->set_pkt_in_session(time_data_in->get_pkt_in_session());
 //TODO remove these lines
 LDEBUG( plog, "here's the fftw plan" );
 fftw_print_plan( f_fftw_plan );
