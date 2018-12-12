@@ -26,7 +26,7 @@ namespace fast_daq
 
     // ats9462_digitizer methods
     ats9462_digitizer::ats9462_digitizer() :
-        f_samples_per_sec( 50000000.0 ),
+        f_samples_per_sec( 50000000 ), //default is 50MS/s
         f_acquisition_length_sec( 0.1 ),
         f_samples_per_buffer( 204800 ),
         f_dma_buffer_count( 4883 ),
@@ -35,6 +35,7 @@ namespace fast_daq
         f_out_length(),
         f_trigger_delay_sec(),
         f_trigger_timeout_sec( 0.01 ),
+        f_sample_rate_to_code(),
         f_channel_count( 1 ),
         f_channel_mask( CHANNEL_A ),
         f_bits_per_sample(),
@@ -43,6 +44,7 @@ namespace fast_daq
         f_board_buffers(),
         f_buffers_completed( 0 )
     {
+        set_internal_maps();
         f_board_handle = AlazarGetBoardBySystemID( f_system_id, f_board_id );
         if (f_board_handle == NULL)
         {
@@ -57,6 +59,30 @@ namespace fast_daq
             //TODO do something smarter here
             throw 1;
         }
+    }
+
+    void ats9462_digitizer::set_internal_maps()
+    {
+        f_sample_rate_to_code.insert( rate_mapping_t( 1000, SAMPLE_RATE_1KSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 2000, SAMPLE_RATE_2KSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 5000, SAMPLE_RATE_5KSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 10000, SAMPLE_RATE_10KSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 20000, SAMPLE_RATE_20KSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 50000, SAMPLE_RATE_50KSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 100000, SAMPLE_RATE_100KSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 200000, SAMPLE_RATE_200KSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 500000, SAMPLE_RATE_500KSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 1000000, SAMPLE_RATE_1MSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 2000000, SAMPLE_RATE_2MSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 5000000, SAMPLE_RATE_5MSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 10000000, SAMPLE_RATE_10MSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 20000000, SAMPLE_RATE_20MSPS ) );
+        //f_sample_rate_to_code.insert( rate_mapping_t( 25000000, SAMPLE_RATE_25MSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 50000000, SAMPLE_RATE_50MSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 100000000, SAMPLE_RATE_100MSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 125000000, SAMPLE_RATE_125MSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 160000000, SAMPLE_RATE_160MSPS ) );
+        f_sample_rate_to_code.insert( rate_mapping_t( 180000000, SAMPLE_RATE_180MSPS ) );
     }
 
     ats9462_digitizer::~ats9462_digitizer()
@@ -139,8 +165,9 @@ namespace fast_daq
 
     void ats9462_digitizer::configure_board()
     {
-        //TODO: again, here the sample rate is hard-coded, should be configured and f_samples_per_sec tied to the enum value selected
-        check_return_code( AlazarSetCaptureClock( f_board_handle, INTERNAL_CLOCK, SAMPLE_RATE_50MSPS, CLOCK_EDGE_RISING, 0),
+        ALAZAR_SAMPLE_RATES this_rate;
+        this_rate = f_sample_rate_to_code.left.at(10000000);
+        check_return_code( AlazarSetCaptureClock( f_board_handle, INTERNAL_CLOCK, this_rate, CLOCK_EDGE_RISING, 0),
                           "AlazarSetCaptureClock", 1 );
 
         check_return_code( AlazarInputControlEx( f_board_handle, CHANNEL_A, DC_COUPLING, INPUT_RANGE_PM_800_MV, IMPEDANCE_50_OHM ),
@@ -164,7 +191,7 @@ namespace fast_daq
         check_return_code( AlazarSetExternalTrigger( f_board_handle, DC_COUPLING, ETR_5V ),
                           "AlazarSetExternalTrigger", 1 );
 
-        U32 trigger_delay_samples = (U32)(f_trigger_delay_sec * f_samples_per_sec + 0.5);
+        U32 trigger_delay_samples = (U32)(f_trigger_delay_sec * double(f_samples_per_sec) + 0.5);
         check_return_code( AlazarSetTriggerDelay( f_board_handle, trigger_delay_samples ),
                           "AlazarSetTriggerDelay", 1 );
 
@@ -280,7 +307,7 @@ namespace fast_daq
     // Derived properties
     INT64 ats9462_digitizer::samples_per_acquisition()
     {
-        return (INT64)(f_samples_per_sec * f_acquisition_length_sec + 0.5);
+        return (INT64)(double(f_samples_per_sec) * f_acquisition_length_sec + 0.5);
     }
 
     float ats9462_digitizer::bytes_per_sample()
@@ -314,6 +341,7 @@ namespace fast_daq
         a_node->set_samples_per_buffer( a_config.get_value( "samples-per-buffer", a_node->get_samples_per_buffer() ) );
         a_node->set_out_length( a_config.get_value( "out-length", a_node->get_out_length() ) );
         a_node->set_dma_buffer_count( a_config.get_value( "dma-buffer-count", a_node->get_dma_buffer_count() ) );
+        a_node->set_samples_per_sec( a_config.get_value( "samples-per_sec", a_node->get_samples_per_sec() ) );
     }
 
     void ats9462_digitizer_binding::do_dump_config( const ats9462_digitizer* a_node, scarab::param_node& a_config ) const
@@ -321,6 +349,7 @@ namespace fast_daq
         a_config.add( "samples-per-bufer", scarab::param_value( a_node->get_samples_per_buffer() ) );
         a_config.add( "out-length", scarab::param_value( a_node->get_out_length() ) );
         a_config.add( "dma-buffer-count", scarab::param_value( a_node->get_dma_buffer_count() ) );
+        a_config.add( "samples-per-sec", scarab::param_value( a_node->get_samples_per_sec() ) );
     }
 
 } /* namespace fast_daq */

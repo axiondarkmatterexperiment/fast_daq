@@ -53,8 +53,10 @@ streams:
             samples-per-buffer: 50000
             out-length: 20 # number of buffers of node output to the next node
             dma-buffer-count: 100 #number of buffers between the ATS local memory and the node
+            samples-per-sec: 25000000
         dend:
-            input-index: 1
+            #input-index: 0 # for simple_time input
+            input-index: 1 # for frequency_data
         fft:
             input-type: real
             fft-size: 50000 # needs to match above in ats
