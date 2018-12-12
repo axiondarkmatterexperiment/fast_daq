@@ -47,9 +47,12 @@ namespace fast_daq
      - "freq-length": uint -- The size of the output frequency-data buffer
      - "input-type": string -- must either by "real" or "complex" (corresponds to using input stream 1 or 0 respectively)
      - "fft-size": unsigned -- The length of the fft input/output array (each element is 2-component)
+     - "samples-per-sec": int -- the sampling rate for the upstream node
      - "transform-flag": string -- FFTW flag to indicate how much optimization of the fftw_plan is desired
      - "use-wisdom": bool -- whether to use a plan from a wisdom file and save the plan to that file
      - "wisdom-filename": string -- if "use-wisdom" is true, resolvable path to the wisdom file
+     - "freq-in-center-bin": double -- determine the center output bin to be the bin containing this frequency in Hz (default = 0; special case meaning center of the full band)
+     - "min-output-bandwidth": double -- the output band will be an integer number of bins covering at least this width, centered on the bin identified by the freq-in-center-bin parameter (default = 0; special case meaning the full band)
 
      Input Stream:
      - 0: time_data (IQ)
@@ -86,10 +89,20 @@ namespace fast_daq
         mv_accessible( input_type_t, input_type );
         public:
             std::string get_input_type_str() const;
-        mv_accessible( unsigned, fft_size ); // I really wish I could get this from the egg header
+        mv_accessible( unsigned, fft_size ); // I really wish I could get this the upstream node
+        mv_accessible( uint32_t, samples_per_sec ); // I really wish this also came from the upstream ndoe
+        // the upstream node could put it on the data objects when it inits them
         mv_accessible( std::string, transform_flag );
         mv_accessible( bool, use_wisdom );
         mv_accessible( std::string, wisdom_filename );
+        // center frequency and band require custom sets
+        mv_accessible( double, centerish_freq );
+        mv_accessible( double, min_output_bandwidth );
+
+        // derrive scalers
+        private:
+            unsigned first_output_index();
+            unsigned num_output_bins();
 
         private:
             bool f_enable_time_output;

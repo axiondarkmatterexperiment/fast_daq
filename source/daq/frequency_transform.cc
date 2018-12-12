@@ -49,10 +49,12 @@ namespace fast_daq
             f_freq_length( 10 ),
             f_input_type( input_type_t::complex ),
             f_fft_size( 4096 ),
+            f_samples_per_sec(),
             f_transform_flag( "ESTIMATE" ),
             f_use_wisdom( true ),
             f_wisdom_filename( "wisdom_complexfft.fftw3" ),
-            //f_enable_time_output( false ), //Start with this false
+            f_centerish_freq( 0. ),
+            f_min_output_bandwidth( 0. ),
             f_transform_flag_map(),
             f_fftw_input_real(),
             f_fftw_input_complex(),
@@ -65,6 +67,26 @@ namespace fast_daq
 
     frequency_transform::~frequency_transform()
     {
+    }
+
+    //TODO should these two functions store to a member and be called when impacting members are changed instead?
+    unsigned frequency_transform::first_output_index()
+    {
+        double t_bin_width_hz = ( f_samples_per_sec / 2. ) / f_fft_size;
+        unsigned center_bin = static_cast<unsigned>( f_centerish_freq / t_bin_width_hz );
+        unsigned to_return = center_bin - (num_output_bins() / 2);
+        // even number of bins && target is in upper half
+        if ( ! (num_output_bins() % 2) && ( ( f_centerish_freq - (num_output_bins() / 2)*t_bin_width_hz ) > (t_bin_width_hz/2.) ) )
+        {
+            to_return += 1;
+        }
+        return to_return;
+    }
+
+    unsigned frequency_transform::num_output_bins()
+    {
+        double t_bin_width_hz = ( f_samples_per_sec / 2. ) / f_fft_size;
+        return static_cast<int>( f_min_output_bandwidth / t_bin_width_hz - 1. ) + 1;
     }
 
     void frequency_transform::initialize()
@@ -333,9 +355,12 @@ namespace fast_daq
         a_node->set_freq_length( a_config.get_value( "freq-length", a_node->get_freq_length() ) );
         a_node->set_input_type( a_config.get_value( "input-type", a_node->get_input_type_str() ) );
         a_node->set_fft_size( a_config.get_value( "fft-size", a_node->get_fft_size() ) );
+        a_node->set_samples_per_sec( a_config.get_value( "samples-per-sec", a_node->get_samples_per_sec() ) );
         a_node->set_transform_flag( a_config.get_value( "transform-flag", a_node->get_transform_flag() ) );
         a_node->set_use_wisdom( a_config.get_value( "use-wisdom", a_node->get_use_wisdom() ) );
         a_node->set_wisdom_filename( a_config.get_value( "wisdom-filename", a_node->get_wisdom_filename() ) );
+        a_node->set_centerish_freq( a_config.get_value( "centerish-freq", a_node->get_centerish_freq() ) );
+        a_node->set_min_output_bandwidth( a_config.get_value( "min-output-bandwidth", a_node->get_min_output_bandwidth() ) );
         return;
     }
 
@@ -346,9 +371,12 @@ namespace fast_daq
         a_config.add( "freq-length", scarab::param_value( a_node->get_freq_length() ) );
         a_config.add( "input-type", scarab::param_value( frequency_transform::input_type_to_string( a_node->get_input_type() ) ) );
         a_config.add( "fft-size", scarab::param_value( a_node->get_fft_size() ) );
+        a_config.add( "samples-per-sec", scarab::param_value( a_node->get_samples_per_sec() ) );
         a_config.add( "transform-flag", scarab::param_value( a_node->get_transform_flag() ) );
         a_config.add( "use-wisdom", scarab::param_value( a_node->get_use_wisdom() ) );
         a_config.add( "wisdom-filename", scarab::param_value( a_node->get_wisdom_filename() ) );
+        a_config.add( "centerish-freq", scarab::param_value( a_node->get_centerish_freq() ) );
+        a_config.add( "min-output-bandwidth", scarab::param_value( a_node->get_min_output_bandwidth() ) );
         return;
     }
 
