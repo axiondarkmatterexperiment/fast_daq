@@ -61,6 +61,7 @@ namespace fast_daq
     class frequency_transform : public midge::_transformer< frequency_transform, typelist_2( psyllid::time_data, real_time_data ), typelist_1( frequency_data ) >
     {
         public:
+            // internal enums
             enum class input_type_t
             {
                 real,
