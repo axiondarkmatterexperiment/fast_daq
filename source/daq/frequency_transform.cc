@@ -101,7 +101,7 @@ namespace fast_daq
     void frequency_transform::initialize()
     {
         out_buffer< 0 >().initialize( f_freq_length );
-        out_buffer< 0 >().call( &frequency_data::allocate_array, ( 1 + (f_fft_size-1)/2 ) ); // round up for odd size values
+        out_buffer< 0 >().call( &frequency_data::allocate_array, num_output_bins() );
 
         if (f_use_wisdom)
         {
