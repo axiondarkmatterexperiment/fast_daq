@@ -49,7 +49,7 @@ namespace fast_daq
             f_freq_length( 10 ),
             f_input_type( input_type_t::complex ),
             f_fft_size( 4096 ),
-            f_samples_per_sec(),
+            f_samples_per_sec( 0 ),
             f_transform_flag( "ESTIMATE" ),
             f_use_wisdom( true ),
             f_wisdom_filename( "wisdom_complexfft.fftw3" ),
@@ -92,7 +92,7 @@ namespace fast_daq
         unsigned to_return = f_fft_size;
         if ( f_min_output_bandwidth > 0. )
         {
-            double t_bin_width_hz = ( f_samples_per_sec / 2. ) / f_fft_size;
+            double t_bin_width_hz = ( static_cast<double>(f_samples_per_sec) / 2. ) / static_cast<double>(f_fft_size);
             to_return = static_cast<int>( f_min_output_bandwidth / t_bin_width_hz - 1. ) + 1;
         }
         return std::min(to_return, f_fft_size);

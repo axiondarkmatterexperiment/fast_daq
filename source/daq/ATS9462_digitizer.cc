@@ -77,6 +77,7 @@ namespace fast_daq
         f_sample_rate_to_code.insert( rate_mapping_t( 5000000, SAMPLE_RATE_5MSPS ) );
         f_sample_rate_to_code.insert( rate_mapping_t( 10000000, SAMPLE_RATE_10MSPS ) );
         f_sample_rate_to_code.insert( rate_mapping_t( 20000000, SAMPLE_RATE_20MSPS ) );
+        // 25MSPS is in the header, but doesn't seem to work with our board...
         //f_sample_rate_to_code.insert( rate_mapping_t( 25000000, SAMPLE_RATE_25MSPS ) );
         f_sample_rate_to_code.insert( rate_mapping_t( 50000000, SAMPLE_RATE_50MSPS ) );
         f_sample_rate_to_code.insert( rate_mapping_t( 100000000, SAMPLE_RATE_100MSPS ) );
@@ -166,7 +167,8 @@ namespace fast_daq
     void ats9462_digitizer::configure_board()
     {
         ALAZAR_SAMPLE_RATES this_rate;
-        this_rate = f_sample_rate_to_code.left.at(10000000);
+        LWARN( flog, "sample rate is " << f_samples_per_sec );
+        this_rate = f_sample_rate_to_code.left.at(f_samples_per_sec);
         check_return_code( AlazarSetCaptureClock( f_board_handle, INTERNAL_CLOCK, this_rate, CLOCK_EDGE_RISING, 0),
                           "AlazarSetCaptureClock", 1 );
 
@@ -205,7 +207,7 @@ namespace fast_daq
 
     void ats9462_digitizer::allocate_buffers()
     {
-        LWARN( flog, "$$$$ hey hey hey! I'm allocating buffers now, there will be <" << f_dma_buffer_count << "> of them" );
+        LINFO( flog, "allocating DMA buffers" );
         for (uint buffer_index = 0; buffer_index<f_dma_buffer_count; buffer_index++)
         {
             //TODO need to make sure that bytes_per_buffer cannot be changed via anything configurable, unless this is redone
@@ -341,7 +343,7 @@ namespace fast_daq
         a_node->set_samples_per_buffer( a_config.get_value( "samples-per-buffer", a_node->get_samples_per_buffer() ) );
         a_node->set_out_length( a_config.get_value( "out-length", a_node->get_out_length() ) );
         a_node->set_dma_buffer_count( a_config.get_value( "dma-buffer-count", a_node->get_dma_buffer_count() ) );
-        a_node->set_samples_per_sec( a_config.get_value( "samples-per_sec", a_node->get_samples_per_sec() ) );
+        a_node->set_samples_per_sec( a_config.get_value( "samples-per-sec", a_node->get_samples_per_sec() ) );
     }
 
     void ats9462_digitizer_binding::do_dump_config( const ats9462_digitizer* a_node, scarab::param_node& a_config ) const
