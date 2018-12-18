@@ -44,7 +44,7 @@ namespace fast_daq
      - 1: frequency_data
 
     */
-    class dead_end : public midge::_consumer< dead_end, typelist_2( real_time_data, frequency_data ) >
+    class dead_end : public midge::_consumer< dead_end, midge::type_list< real_time_data, frequency_data > >
     {
         public:
             dead_end();

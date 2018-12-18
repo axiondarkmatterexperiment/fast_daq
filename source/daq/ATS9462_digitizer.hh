@@ -54,7 +54,7 @@ namespace fast_daq
      - 0: real_time_data
 
     */
-    class ats9462_digitizer : public midge::_producer< ats9462_digitizer, typelist_1( real_time_data ) >, public psyllid::control_access
+    class ats9462_digitizer : public midge::_producer< ats9462_digitizer, midge::type_list< real_time_data > >, public psyllid::control_access
     {
         private:
             typedef boost::bimap< uint32_t, ALAZAR_SAMPLE_RATES > sample_rate_code_map_t;
