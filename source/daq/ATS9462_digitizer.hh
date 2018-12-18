@@ -8,6 +8,9 @@
 #ifndef ATS9462_WRAP_HH_
 #define ATS9462_WRAP_HH_
 
+#include <boost/config.hpp>
+#include <boost/bimap.hpp>
+
 // AlazarTech includes
 //TODO (maybe some/all of these could go in the source file?)
 #include "AlazarError.h"
@@ -34,7 +37,10 @@ namespace fast_daq
 
      @details
 
-     At least for this first pass, the digitizer will only support a single channel
+     A node for continuous streaming of time samples from the digitizer. Many intuitive features are *not* currently supported:
+     - there is no support for selecting inputs (only A is supported)
+     - there is no support for driving the sampling using the external input
+     - there is no support for making changes to the board's configuration after the initial startup (you can set values but they will not be applied and behavior is undefined).
 
      Node type: "ats9462"
 
@@ -42,23 +48,32 @@ namespace fast_daq
      - "samples-per-buffer": int -- number of real-valued samples to include in each chunk of data
      - "out-length": int -- number of output buffer slots
      - "dma-buffer-count": int -- the number of DMA buffers to use between the digitzer board and the application
+     - "samples-per-sec": int -- number of samples per second (must be in the set of allowed rates in the digitizer library) (default=25000000)
 
      Output Streams
      - 0: real_time_data
+
     */
-    //class ats9462_digitizer : public midge::_producer< ats9462_digitizer, typelist_1( psyllid::time_data ) >, public psyllid::control_access
-    class ats9462_digitizer : public midge::_producer< ats9462_digitizer, typelist_1( real_time_data ) >, public psyllid::control_access
+    class ats9462_digitizer : public midge::_producer< ats9462_digitizer, midge::type_list< real_time_data > >, public psyllid::control_access
     {
+        private:
+            typedef boost::bimap< uint32_t, ALAZAR_SAMPLE_RATES > sample_rate_code_map_t;
+            typedef sample_rate_code_map_t::value_type rate_mapping_t;
+
         public:
             ats9462_digitizer();
             virtual ~ats9462_digitizer();
+
+        private:
+            void set_internal_maps();
 
         public: //node API
             virtual void initialize();
             virtual void execute( midge::diptera* a_midge = nullptr );
             virtual void finalize();
 
-        mv_accessible( double, samples_per_sec ); //TODO this float is only partly used, the rate has to be from the ALAZAR_SAMPLE_RATES enum in AlazarCmd.h ... should deal with this more carefully.
+        //TODO implement custom setters that do not allow changes after the board has been configured (for those parameters set in board configuration)
+        mv_accessible( U32, samples_per_sec );
         mv_accessible( double, acquisition_length_sec );
         mv_accessible( U32, samples_per_buffer );
         mv_accessible( U32, dma_buffer_count );
@@ -69,6 +84,7 @@ namespace fast_daq
         mv_accessible( double, trigger_timeout_sec );
 
         private:
+            sample_rate_code_map_t f_sample_rate_to_code;
             U8 f_channel_count;
             U32 f_channel_mask;
             U8 f_bits_per_sample;
