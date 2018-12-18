@@ -22,6 +22,8 @@ namespace fast_daq
     // forward declarations
     class real_time_data;
     class frequency_data;
+    class power_data;
+
     /*!
      @class dead_end
      @author B. H. LaRoque
@@ -42,9 +44,10 @@ namespace fast_daq
      Input Streams
      - 0: real_time_data
      - 1: frequency_data
+     - 2: power_data
 
     */
-    class dead_end : public midge::_consumer< midge::type_list< real_time_data, frequency_data > >
+    class dead_end : public midge::_consumer< midge::type_list< real_time_data, frequency_data, power_data > >
     {
         public:
             dead_end();

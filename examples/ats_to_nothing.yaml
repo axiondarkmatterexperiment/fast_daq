@@ -34,10 +34,14 @@ streams:
                 name: dend
               - type: frequency-transform
                 name: fft
+              - type: power-averager
+                name: avg
             connections:
               #- "ats.out_0:dend.in_0"
               - "ats.out_0:fft.in_1"
-              - "fft.out_0:dend.in_1"
+              #- "fft.out_0:dend.in_1"
+              - "fft.out_0:avg.in_0"
+              - "avg.out_0:dend.in_2"
 
         device:
             n-channels: 1
@@ -60,6 +64,11 @@ streams:
             freq-in-center-bin: 10.7e6 # 10.7 MHz
             min-output-bandwidth: 100.e3 # 100 kHz total output (with 100 Hz bins, that means 1000 total bins in the output)
             samples-per-sec: 50000000 # 50 MSPS (must match ats above)
+        avg:
+            spectrum-size: 1000 # needs to match the number of bins the fft node above produces
+            num-output-buffers: 5
+            num-to-average: 8
         dend:
             #input-index: 0 # for simple_time input
-            input-index: 1 # for frequency_data
+            #input-index: 1 # for frequency_data
+            input-index: 2 # for power_data
