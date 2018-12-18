@@ -4,11 +4,13 @@
 set( headers
     dead_end.hh
     frequency_transform.hh
+    power_averager.hh
 )
 
 set( sources
     dead_end.cc
     frequency_transform.cc
+    power_averager.cc
 )
 
 if ( FastDAQ_ENABLE_ATS)

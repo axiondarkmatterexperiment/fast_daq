@@ -13,7 +13,7 @@
 #include "node_builder.hh"
 
 //#include "control_access.hh"
-#include "consumer.hh"
+#include "transformer.hh"
 #include "shared_cancel.hh"
 
 
@@ -22,6 +22,7 @@ namespace fast_daq
     // forward declarations
     class real_time_data;
     class frequency_data;
+    class power_data;
     /*!
      @class power_averager
      @author B. H. LaRoque
@@ -47,7 +48,7 @@ namespace fast_daq
     - 0: power_data
 
     */
-    class power_averager : public midge::_transformer< power_averager, typelist_1(  frequency_data ), typelest_1( power_data ) >
+    class power_averager : public midge::_transformer< midge::type_list<  frequency_data >, midge::type_list< power_data > >
     {
         public:
             power_averager();
@@ -60,6 +61,7 @@ namespace fast_daq
 
         mv_accessible( unsigned, num_output_buffers );
         mv_accessible( unsigned, spectrum_size );
+        mv_accessible( unsigned, num_to_average );
         private:
             double* f_accumulator_array;
 
