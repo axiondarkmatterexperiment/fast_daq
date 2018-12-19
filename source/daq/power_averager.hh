@@ -27,13 +27,15 @@ namespace fast_daq
      @class power_averager
      @author B. H. LaRoque
 
-     @brief A node whih has input streams for a range of data types and does nothing with it.
+     @brief A node to incoherently average power spectra
 
      @details
 
-     Intended purely for debugging purposes, this class receives data but produces no output.
-     You may add further actions to check particular input data, but it should be in a helper function which
-     can be disabled (and should be disabled by default).
+     Collects a configurable number of power spectra inputs (as complex voltages) and computes
+     an incoherent average of power. If an acquisition ends before the configured number of elements
+     is received, the average as-collected average is sent (re-weighted for the number of terms collected...
+     because the average is computed by scaling each term before adding to the sum, because that's
+     generally more reliable when using finite precision).
 
      Node type: "power-averager"
 
