@@ -170,31 +170,24 @@ namespace fast_daq
                 LINFO( flog, "Starting main loop (frequency transform)" );
                 while (! is_canceled() )
                 {
-                    LDEBUG( flog, "check output stream signals" );
-                    // stop if output stream buffers have s_stop
-                    if (out_stream< 0 >().get() == stream::s_stop)
-                    {
-                        LWARN( flog, "frequency output stream has stop condition" );
-                        break;
-                    }
                     // grab the next input data and check slot status
-                    LDEBUG( flog, "check input stream signals for <" << get_input_type_str() << ">" );
+                    //LDEBUG( flog, "check input stream signals for <" << get_input_type_str() << ">" );
                     midge::enum_t in_cmd = stream::s_none;
                     unsigned in_stream_index = 0;
                     switch ( f_input_type )
                     {
                         case input_type_t::complex:
-                            LDEBUG( flog, "seriously, getting 0" );
+                            LTRACE( flog, "seriously, getting 0" );
                             in_cmd = in_stream< 0 >().get();
                             in_stream_index = in_stream< 0 >().get_current_index();
                             break;
                         case input_type_t::real:
-                            LDEBUG( flog, "seriously, getting 1" );
+                            LTRACE( flog, "seriously, getting 1" );
                             in_cmd = in_stream< 1 >().get();
                             in_stream_index = in_stream< 1 >().get_current_index();
                             break;
                     }
-                    LDEBUG( flog, "input command is [" << in_cmd << "]");
+                    //LDEBUG( flog, "input command is [" << in_cmd << "]");
 
                     if ( in_cmd == stream::s_none)
                     {
@@ -238,26 +231,23 @@ namespace fast_daq
                                 t_center_bin = complex_time_data_in->get_array_size();
                                 break;
                         }
-                        LDEBUG( flog, "got input data" );
 
                         //frequency output
                         freq_data_out = out_stream< 0 >().data();
-                        LDEBUG( flog, "next output stream slot acquired" );
 
                         switch (f_input_type)
                         {
                             case input_type_t::real:
-                                LDEBUG( flog, "copy real input data" );
+                                LTRACE( flog, "copy real input data" );
                                 std::copy(&real_time_data_in->get_time_series()[0], &real_time_data_in->get_time_series()[0] + f_fft_size, &f_fftw_input_real[0]);
                                 break;
                             case input_type_t::complex:
-                                LDEBUG( flog, "grab complex data" );
+                                LTRACE( flog, "grab complex data" );
                                 LWARN( flog, "complex input transforms are currently not tested" );
                                 std::copy(&complex_time_data_in->get_array()[0][0], &complex_time_data_in->get_array()[0][0] + f_fft_size*2, &f_fftw_input_complex[0][0]);
                                 break;
                             default: throw psyllid::error() << "input_type not fully implemented";
                         }
-                        LDEBUG( flog, "executed the FFTW plan" );
                         fftw_execute( f_fftw_plan );
 
                         //take care of FFT normalization
@@ -271,7 +261,7 @@ namespace fast_daq
                         switch (f_input_type)
                         {
                             case input_type_t::real:
-                                std::copy(&f_fftw_output[first_output_index()][0], &f_fftw_output[first_output_index()][0] + num_output_bins(), &freq_data_out->get_data_array()[0][0] );
+                                std::copy(&f_fftw_output[first_output_index()][0], &f_fftw_output[first_output_index()+num_output_bins()][1], &freq_data_out->get_data_array()[0][0] );
                                 break;
                             case input_type_t::complex:
                                 // FFT unfolding based on katydid:Source/Data/Transform/KTFrequencyTransformFFTW
@@ -368,7 +358,8 @@ namespace fast_daq
         a_node->set_transform_flag( a_config.get_value( "transform-flag", a_node->get_transform_flag() ) );
         a_node->set_use_wisdom( a_config.get_value( "use-wisdom", a_node->get_use_wisdom() ) );
         a_node->set_wisdom_filename( a_config.get_value( "wisdom-filename", a_node->get_wisdom_filename() ) );
-        a_node->set_centerish_freq( a_config.get_value( "centerish-freq", a_node->get_centerish_freq() ) );
+        //TODO make these names consistent
+        a_node->set_centerish_freq( a_config.get_value( "freq-in-center-bin", a_node->get_centerish_freq() ) );
         a_node->set_min_output_bandwidth( a_config.get_value( "min-output-bandwidth", a_node->get_min_output_bandwidth() ) );
         return;
     }
@@ -384,7 +375,8 @@ namespace fast_daq
         a_config.add( "transform-flag", scarab::param_value( a_node->get_transform_flag() ) );
         a_config.add( "use-wisdom", scarab::param_value( a_node->get_use_wisdom() ) );
         a_config.add( "wisdom-filename", scarab::param_value( a_node->get_wisdom_filename() ) );
-        a_config.add( "centerish-freq", scarab::param_value( a_node->get_centerish_freq() ) );
+        //TODO make these names consistent
+        a_config.add( "freq-in-center-bin", scarab::param_value( a_node->get_centerish_freq() ) );
         a_config.add( "min-output-bandwidth", scarab::param_value( a_node->get_min_output_bandwidth() ) );
         return;
     }

@@ -13,7 +13,7 @@
 #include "node_builder.hh"
 
 //#include "control_access.hh"
-#include "consumer.hh"
+#include "transformer.hh"
 #include "shared_cancel.hh"
 
 
@@ -22,6 +22,7 @@ namespace fast_daq
     // forward declarations
     class real_time_data;
     class frequency_data;
+    class power_data;
     /*!
      @class power_averager
      @author B. H. LaRoque
@@ -34,11 +35,12 @@ namespace fast_daq
      You may add further actions to check particular input data, but it should be in a helper function which
      can be disabled (and should be disabled by default).
 
-     Node type: "dead-end"
+     Node type: "power-averager"
 
      Available configuration values:
      - num-output-buffers: (int) -- number of output buffer slots (default==5)
      - spectrum-size: (int) -- number of bins in the output spectrum
+     - num-to-average: (int) -- number of buffers to average together
 
      Input Streams
      - 1: frequency_data
@@ -47,7 +49,7 @@ namespace fast_daq
     - 0: power_data
 
     */
-    class power_averager : public midge::_transformer< power_averager, typelist_1(  frequency_data ), typelest_1( power_data ) >
+    class power_averager : public midge::_transformer< midge::type_list<  frequency_data >, midge::type_list< power_data > >
     {
         public:
             power_averager();
@@ -58,10 +60,18 @@ namespace fast_daq
             virtual void execute( midge::diptera* a_midge = nullptr );
             virtual void finalize();
 
+        private:
+            void handle_start();
+            void handle_run();
+            void handle_stop();
+            void send_output();
+
         mv_accessible( unsigned, num_output_buffers );
         mv_accessible( unsigned, spectrum_size );
+        mv_accessible( unsigned, num_to_average );
         private:
-            double* f_accumulator_array;
+            std::vector< double > f_average_spectrum;
+            unsigned f_input_counter;
 
     };
 

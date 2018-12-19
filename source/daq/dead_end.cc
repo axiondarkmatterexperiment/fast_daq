@@ -14,6 +14,7 @@
 #include "dead_end.hh"
 #include "frequency_data.hh"
 #include "real_time_data.hh"
+#include "power_data.hh"
 
 
 using midge::stream;
@@ -71,7 +72,14 @@ namespace fast_daq
                         stream_index = in_stream< 1 >().get_current_index();
                         stream_id = 1;
                         break;
-                    default: throw psyllid::error() << "input index <" << f_input_index << "> not recognized";
+                    case 2:
+                        input_command = in_stream< 2 >().get();
+                        stream_index = in_stream< 2 >().get_current_index();
+                        stream_id = 2;
+                        break;
+                    default:
+                        LERROR( flog, "input type not recognized!" );
+                        throw psyllid::error() << "input index <" << f_input_index << "> not recognized";
                 }
                 if ( input_command == midge::stream::s_none )
                 {
