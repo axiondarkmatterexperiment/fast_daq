@@ -61,7 +61,7 @@ streams:
         fft:
             input-type: real
             fft-size: 250000 # needs to match above in ats
-            freq-in-center-bin: 10.7e6 # 10.7 MHz
+            freq-in-center-bin: 10.575e6 # 10.7 MHz
             min-output-bandwidth: 100.e3 # 100 kHz total output (with 100 Hz bins, that means 1000 total bins in the output)
             samples-per-sec: 50000000 # 50 MSPS (must match ats above)
         avg:
