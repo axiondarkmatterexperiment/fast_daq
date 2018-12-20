@@ -59,12 +59,10 @@ namespace fast_daq
         {
             while (! is_canceled() )
             {
-                LWARN( flog, "averager in loop" );
                 // Check for midge instructions
                 if( have_instruction() )
                 {
                     //LDEBUG( flog, "WARNING: power_averager does not support any instructions");
-                    LWARN( flog, "averager has instruction" );
                 }
                 else { LWARN(flog, "no instruction" );}
 
@@ -160,6 +158,7 @@ namespace fast_daq
 
     void power_averager::send_output()
     {
+        // Rescale averaging N if needed
         if ( f_input_counter != f_num_to_average )
         {
             // If number of collected points is less than expected average, rescale
@@ -168,11 +167,21 @@ namespace fast_daq
                 *bin_i = (static_cast<double>(f_num_to_average) / static_cast<double>(f_input_counter)) * *bin_i;
             }
         }
-        LDEBUG( flog, "should send output data, they are:" );
-        unsigned bin_count = 1;
-        for (std::vector< double >::iterator bin_i = f_average_spectrum.begin(); bin_i != f_average_spectrum.end(); bin_i++)
+        // Copy data into output stream and re-zero the averager container
+        //power_data out_data = out_stream< 0 >().data();
+        double* out_data_array = out_stream< 0 >().data()->get_data_array();
+        for (unsigned bin_i=0; bin_i < f_average_spectrum.size(); bin_i++)
         {
-            LDEBUG( flog, "    ("<<bin_count++<<")> " << *bin_i );
+            out_data_array[bin_i] = f_average_spectrum[bin_i];
+            f_average_spectrum[bin_i] = 0;
+        }
+        f_input_counter = 0;
+        LINFO( flog, "sending out a spectrum" );
+        if (!out_stream< 0 >().set( stream::s_run))
+        {
+            LERROR( flog, "unable to set s_run on output stream" );
+            //TODO this should be something smarter
+            throw 1;
         }
     }
 

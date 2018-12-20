@@ -69,7 +69,7 @@ namespace fast_daq
                 }
                 else if ( input_command == stream::s_stop )
                 {
-                    LINFO( flog, " got an s_stop on slot <" << stream_index << ">");
+                    LWARN( flog, " got an s_stop on slot <" << stream_index << ">");
                     continue;
                 }
                 else if ( input_command == stream::s_start )
@@ -108,12 +108,12 @@ namespace fast_daq
     {
     }
 
-    void spectrum_relay_binding::do_apply_config(spectrum_relay* a_node, const scarab::param_node& a_config ) const
+    void spectrum_relay_binding::do_apply_config(spectrum_relay* /* a_node */, const scarab::param_node& /* a_config */ ) const
     {
         //a_node->set_input_index( a_config.get_value( "input-index", a_node->get_input_index() ) );
     }
 
-    void spectrum_relay_binding::do_dump_config( const spectrum_relay* a_node, scarab::param_node& a_config ) const
+    void spectrum_relay_binding::do_dump_config( const spectrum_relay* /* a_node */, scarab::param_node& /* a_config */ ) const
     {
         //a_config.add( "input-index", scarab::param_value( a_node->get_input_index() ) );
     }
