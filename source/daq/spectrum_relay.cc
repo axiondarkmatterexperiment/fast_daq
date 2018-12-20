@@ -80,6 +80,9 @@ namespace fast_daq
                 else if ( input_command == stream::s_run )
                 {
                     LTRACE( flog, " got an s_run on slot <" << stream_index << ">");
+                    LWARN( flog, "got some data, that's nice" );
+                    power_data* data_in = in_stream< 0 >().data();
+                    f_msg_relay->slack_notice( std::string("got a spectrum" ) );
                     continue;
                 }
             }
