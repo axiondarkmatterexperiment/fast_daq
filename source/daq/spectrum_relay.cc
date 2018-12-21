@@ -81,8 +81,8 @@ namespace fast_daq
                 {
                     LTRACE( flog, " got an s_run on slot <" << stream_index << ">");
                     LWARN( flog, "got some data, that's nice" );
-                    power_data* data_in = in_stream< 0 >().data();
-                    f_msg_relay->slack_notice( std::string("got a spectrum" ) );
+                    //power_data* data_in = in_stream< 0 >().data();
+                    f_msg_relay->slack_warn( std::string("got a spectrum" ) );
                     continue;
                 }
             }
