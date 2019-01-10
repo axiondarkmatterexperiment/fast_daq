@@ -1,7 +1,9 @@
 post-to-slack: false
 
 amqp:
-    make-connection: false
+    broker: rabbit_broker
+    queue: psyllid
+    #make-connection: false
 
 daq:
     activate-at-startup: true
@@ -13,15 +15,24 @@ on-startup:
     rks: use-monarch
     payload:
         values: [ false ]
+  - type: wait-for
+    rks: daq-status
+    payload: {}
+    sleep-for: 100
+  - type: set
+    rks: use-monarch
+    payload:
+        values: [ false ]
+    sleep-for: 10
   - type: cmd
     rks: "start-run"
     payload:
       duration: 0
     sleep-for: 0
-  - type: wait-for
-    rks: daq-status
-    payload: {}
-    sleep-for: 100
+  #- type: wait-for
+  #  rks: daq-status
+  #  payload: {}
+  #  sleep-for: 100
 
 streams:
     ch0:
@@ -36,12 +47,15 @@ streams:
                 name: fft
               - type: power-averager
                 name: avg
+              - type: spectrum-relay
+                name: relay
             connections:
               #- "ats.out_0:dend.in_0"
               - "ats.out_0:fft.in_1"
               #- "fft.out_0:dend.in_1"
               - "fft.out_0:avg.in_0"
               - "avg.out_0:dend.in_2"
+              - "avg.out_0:relay.in_0"
 
         device:
             n-channels: 1
@@ -72,3 +86,5 @@ streams:
             #input-index: 0 # for simple_time input
             #input-index: 1 # for frequency_data
             input-index: 2 # for power_data
+        relay:
+            spectrum-alert-rk: "data.medium-res-spec"

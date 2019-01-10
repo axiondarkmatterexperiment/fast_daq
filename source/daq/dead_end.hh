@@ -1,5 +1,5 @@
 /*
- * ead_end.hh
+ * dead_end.hh
  *
  * Created on: Dec. 7, 2018
  *     Author: laroque
