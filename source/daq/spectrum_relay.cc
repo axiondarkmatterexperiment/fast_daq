@@ -32,6 +32,7 @@ namespace fast_daq
 
     // spectrum_relay methods
     spectrum_relay::spectrum_relay() :
+        f_spectrum_alert_rk( "spectrum-data" ),
         f_dl_relay( psyllid::global_config::get_instance()->retrieve()["amqp"].as_node() )
     {
     }
@@ -83,7 +84,6 @@ namespace fast_daq
                 {
                     //TODO clean this
                     LTRACE( flog, " got an s_run on slot <" << stream_index << ">");
-                    LERROR( flog, "got some data, that's nice" );
                     power_data* data_in = in_stream< 0 >().data();
                     scarab::param_node t_payload = scarab::param_node();
                     t_payload.add("value_raw", scarab::param_array());
@@ -116,7 +116,7 @@ namespace fast_daq
     {
         //scarab::param_node t_msg = scarab::param_node();
         //t_msg.add( "message", scarab::param_value( "something to say and send" ) );
-        f_dl_relay.send_async( dripline::msg_alert::create( a_payload, "data.from.psyllid" ) );
+        f_dl_relay.send_async( dripline::msg_alert::create( a_payload, f_spectrum_alert_rk ) );
         LINFO( flog, "sent an alert with rk <" << a_routing_key << ">" );
     }
 
@@ -131,14 +131,14 @@ namespace fast_daq
     {
     }
 
-    void spectrum_relay_binding::do_apply_config(spectrum_relay* /* a_node */, const scarab::param_node& /* a_config */ ) const
+    void spectrum_relay_binding::do_apply_config(spectrum_relay* a_node, const scarab::param_node& a_config ) const
     {
-        //a_node->set_input_index( a_config.get_value( "input-index", a_node->get_input_index() ) );
+        a_node->set_spectrum_alert_rk( a_config.get_value( "spectrum-alert-rk", a_node->get_spectrum_alert_rk() ) );
     }
 
-    void spectrum_relay_binding::do_dump_config( const spectrum_relay* /* a_node */, scarab::param_node& /* a_config */ ) const
+    void spectrum_relay_binding::do_dump_config( const spectrum_relay* a_node, scarab::param_node& a_config ) const
     {
-        //a_config.add( "input-index", scarab::param_value( a_node->get_input_index() ) );
+        a_config.add( "spectrum-alert-rk", scarab::param_value( a_node->get_spectrum_alert_rk() ) );
     }
 
 } /* namespace fast_daq */

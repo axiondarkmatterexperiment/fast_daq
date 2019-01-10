@@ -37,7 +37,7 @@ namespace fast_daq
      Node type: "spectrum-relay"
 
      Available configuration values:
-     - None
+     - "spectrum-alert-rk": string -- A valid AMQP routing key to which each medium-res spectrum will be broadcast
 
      Input Streams
      - 1: power_data
@@ -48,6 +48,8 @@ namespace fast_daq
         public:
             spectrum_relay();
             virtual ~spectrum_relay();
+
+        mv_accessible( std::string, spectrum_alert_rk );
 
         public: //node API
             virtual void initialize();
