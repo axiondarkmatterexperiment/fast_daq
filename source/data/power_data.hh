@@ -19,6 +19,7 @@ namespace fast_daq
             virtual ~power_data();
 
         // member varaible macros
+        //TODO this should probably be an std::vector, not an double*
         mv_accessible( double*, data_array );
         mv_accessible( unsigned, array_size);
 

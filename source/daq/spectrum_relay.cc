@@ -11,6 +11,7 @@
 #include "logger.hh"
 
 //psyllid
+#include "global_config.hh"
 #include "message_relayer.hh"
 
 //fast_daq includes
@@ -31,7 +32,7 @@ namespace fast_daq
 
     // spectrum_relay methods
     spectrum_relay::spectrum_relay() :
-        f_msg_relay( psyllid::message_relayer::get_instance() )
+        f_dl_relay( psyllid::global_config::get_instance()->retrieve()["amqp"].as_node() )
     {
     }
 
@@ -42,6 +43,7 @@ namespace fast_daq
     // node interface methods
     void spectrum_relay::initialize()
     {
+        f_dl_relay_thread = std::thread( &dripline::relayer::execute_relayer, &f_dl_relay );
     }
 
     void spectrum_relay::execute( midge::diptera* a_midge )
@@ -79,10 +81,18 @@ namespace fast_daq
                 }
                 else if ( input_command == stream::s_run )
                 {
+                    //TODO clean this
                     LTRACE( flog, " got an s_run on slot <" << stream_index << ">");
-                    LWARN( flog, "got some data, that's nice" );
-                    //power_data* data_in = in_stream< 0 >().data();
-                    f_msg_relay->slack_warn( std::string("got a spectrum" ) );
+                    LERROR( flog, "got some data, that's nice" );
+                    power_data* data_in = in_stream< 0 >().data();
+                    scarab::param_node t_payload = scarab::param_node();
+                    t_payload.add("value_raw", scarab::param_array());
+                    //TODO if the data were in an std::vector, I could std::for_each instead of this
+                    for (unsigned i_bin=0; i_bin<data_in->get_array_size(); i_bin++)
+                    {
+                        t_payload["value_raw"].as_array().push_back( data_in->get_data_array()[i_bin] );
+                    }
+                    send_alert_message("data.target", t_payload);
                     continue;
                 }
             }
@@ -95,6 +105,19 @@ namespace fast_daq
 
     void spectrum_relay::finalize()
     {
+        f_dl_relay.cancel();
+        if ( f_dl_relay_thread.joinable() )
+        {
+            f_dl_relay_thread.join();
+        }
+    }
+
+    void spectrum_relay::send_alert_message( std::string a_routing_key, scarab::param_node a_payload )
+    {
+        //scarab::param_node t_msg = scarab::param_node();
+        //t_msg.add( "message", scarab::param_value( "something to say and send" ) );
+        f_dl_relay.send_async( dripline::msg_alert::create( a_payload, "data.from.psyllid" ) );
+        LINFO( flog, "sent an alert with rk <" << a_routing_key << ">" );
     }
 
     /* spectrum_relay_binding class */

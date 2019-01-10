@@ -16,11 +16,6 @@
 #include "consumer.hh"
 #include "shared_cancel.hh"
 
-// forward declarations
-namespace psyllid
-{
-    class message_relayer;
-}
 
 namespace fast_daq
 {
@@ -60,7 +55,11 @@ namespace fast_daq
             virtual void finalize();
 
         private:
-            psyllid::message_relayer* f_msg_relay;
+            dripline::relayer f_dl_relay;
+            std::thread f_dl_relay_thread;
+
+        private:
+            void send_alert_message( std::string a_routing_key, scarab::param_node a_payload );
     };
 
     class spectrum_relay_binding : public psyllid::_node_binding< spectrum_relay, spectrum_relay_binding >
