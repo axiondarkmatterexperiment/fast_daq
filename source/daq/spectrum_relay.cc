@@ -11,6 +11,7 @@
 #include "logger.hh"
 
 //psyllid
+#include "daq_control.hh"
 #include "global_config.hh"
 #include "message_relayer.hh"
 
@@ -85,14 +86,7 @@ namespace fast_daq
                     //TODO clean this
                     LTRACE( flog, " got an s_run on slot <" << stream_index << ">");
                     power_data* data_in = in_stream< 0 >().data();
-                    scarab::param_node t_payload = scarab::param_node();
-                    t_payload.add("value_raw", scarab::param_array());
-                    //TODO if the data were in an std::vector, I could std::for_each instead of this
-                    for (unsigned i_bin=0; i_bin<data_in->get_array_size(); i_bin++)
-                    {
-                        t_payload["value_raw"].as_array().push_back( data_in->get_data_array()[i_bin] );
-                    }
-                    send_alert_message("data.target", t_payload);
+                    broadcast_spectrum( data_in );
                     continue;
                 }
             }
@@ -112,11 +106,25 @@ namespace fast_daq
         }
     }
 
+    void spectrum_relay::broadcast_spectrum( power_data* a_spectrum )
+    {
+        scarab::param_node t_payload = scarab::param_node();
+        t_payload.add( "value_raw", scarab::param_array() );
+        //TODO if the data were in an std::vector, I could std::for_each instead of this
+        for (unsigned i_bin=0; i_bin < a_spectrum->get_array_size(); i_bin++)
+        {
+            t_payload["value_raw"].as_array().push_back( a_spectrum->get_data_array()[i_bin] );
+        }
+        std::shared_ptr< psyllid::daq_control > t_daq_control = use_daq_control();
+        std::string description = t_daq_control->get_description();
+        t_payload.add( "run_details", description );
+        send_alert_message( f_spectrum_alert_rk, t_payload );
+    }
+
     void spectrum_relay::send_alert_message( std::string a_routing_key, scarab::param_node a_payload )
     {
         //scarab::param_node t_msg = scarab::param_node();
-        //t_msg.add( "message", scarab::param_value( "something to say and send" ) );
-        f_dl_relay.send_async( dripline::msg_alert::create( a_payload, f_spectrum_alert_rk ) );
+        f_dl_relay.send_async( dripline::msg_alert::create( a_payload, a_routing_key ) );
         LINFO( flog, "sent an alert with rk <" << a_routing_key << ">" );
     }
 
