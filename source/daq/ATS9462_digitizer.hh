@@ -49,6 +49,7 @@ namespace fast_daq
      - "out-length": int -- number of output buffer slots
      - "dma-buffer-count": int -- the number of DMA buffers to use between the digitzer board and the application
      - "samples-per-sec": int -- number of samples per second (must be in the set of allowed rates in the digitizer library) (default=25000000)
+     - "acquisition-length-sec": double -- the duration of the run in seconds (will be used to compute the integer number of buffers to collect)
 
      Output Streams
      - 0: real_time_data

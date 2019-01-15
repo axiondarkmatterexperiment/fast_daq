@@ -116,8 +116,8 @@ namespace fast_daq
             t_payload["value_raw"].as_array().push_back( a_spectrum->get_data_array()[i_bin] );
         }
         std::shared_ptr< psyllid::daq_control > t_daq_control = use_daq_control();
-        std::string description = t_daq_control->get_description();
-        t_payload.add( "run_details", description );
+        //std::string description = t_daq_control->get_description();
+        t_payload.add( "run_details", t_daq_control->get_description() );
         send_alert_message( f_spectrum_alert_rk, t_payload );
     }
 
