@@ -77,7 +77,6 @@ namespace fast_daq
 
     unsigned frequency_transform::first_output_index()
     {
-        //double t_bin_width_hz = ( f_samples_per_sec / 2. ) / f_fft_size;
         double t_bin_width_hz = bin_width_hz();
         unsigned center_bin = ((f_fft_size - 1) / 2) + 1;
         if ( f_centerish_freq > 0. )
@@ -103,7 +102,6 @@ namespace fast_daq
         unsigned to_return = f_fft_size;
         if ( f_min_output_bandwidth > 0. )
         {
-            //double t_bin_width_hz = ( static_cast<double>(f_samples_per_sec) / 2. ) / static_cast<double>(f_fft_size);
             double t_bin_width_hz = bin_width_hz();
             to_return = static_cast<int>( f_min_output_bandwidth / t_bin_width_hz - 1. ) + 1;
         }
