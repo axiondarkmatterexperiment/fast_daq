@@ -11,7 +11,9 @@ namespace fast_daq
 {
     power_data::power_data() :
         f_data_array(),
-        f_array_size()
+        f_array_size(),
+        f_bin_width(),
+        f_minimum_frequency()
     {
     }
 

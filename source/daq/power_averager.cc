@@ -34,6 +34,8 @@ namespace fast_daq
         f_num_output_buffers( 1 ),
         f_spectrum_size(),
         f_num_to_average( 0 ),
+        f_bin_width(),
+        f_minimum_frequency(),
         f_average_spectrum(),
         f_input_counter( 0 )
     {
@@ -48,9 +50,7 @@ namespace fast_daq
     {
         out_buffer< 0 >().initialize( f_num_output_buffers );
         out_buffer< 0 >().call( &power_data::allocate_array, f_spectrum_size );
-        LWARN( flog, "spectrum size should be: " << f_spectrum_size );
         f_average_spectrum.resize( f_spectrum_size, 0. );
-        LWARN( flog, "the power spectrum average spectrum is now of size: " << f_average_spectrum.size() );
     }
 
     void power_averager::execute( midge::diptera* a_midge )
@@ -129,6 +129,10 @@ namespace fast_daq
     {
         frequency_data* data_in = in_stream< 0 >().data();
         frequency_data::complex_t* data_array_in = data_in->get_data_array();
+        //TODO I shouldn't be doing this on each pass, just the first...
+        //     ... even better, do it with a call upon getting s_start, or in init, or something
+        f_bin_width = data_in->get_bin_width();
+        f_minimum_frequency = data_in->get_minimum_frequency();
         if (data_in->get_array_size() != f_average_spectrum.size())
         {
             LERROR( flog, "input array size [" << data_in->get_array_size() <<"] != output array size ["<<f_average_spectrum.size()<<"]");
@@ -169,7 +173,10 @@ namespace fast_daq
         }
         // Copy data into output stream and re-zero the averager container
         //power_data out_data = out_stream< 0 >().data();
-        double* out_data_array = out_stream< 0 >().data()->get_data_array();
+        power_data* out_data_ptr = out_stream< 0 >().data();
+        double* out_data_array = out_data_ptr->get_data_array();
+        out_data_ptr->set_bin_width( f_bin_width );
+        out_data_ptr->set_minimum_frequency( f_minimum_frequency );
         for (unsigned bin_i=0; bin_i < f_average_spectrum.size(); bin_i++)
         {
             out_data_array[bin_i] = f_average_spectrum[bin_i];

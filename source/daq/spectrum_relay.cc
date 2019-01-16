@@ -123,7 +123,9 @@ namespace fast_daq
         {
             t_payload["value_raw"].as_array().push_back( a_spectrum->get_data_array()[i_bin] );
         }
-        //t_payload.add( "run_details", t_daq_control->get_description() );
+        t_payload.add( "minimum_frequency", a_spectrum->get_minimum_frequency() );
+        t_payload.add( "maximum_frequency", a_spectrum->get_minimum_frequency() + a_spectrum->get_array_size() * a_spectrum->get_bin_width() );
+        t_payload.add( "frequency_resolution", a_spectrum->get_bin_width() );
         send_alert_message( f_spectrum_alert_rk, t_payload );
     }
 
