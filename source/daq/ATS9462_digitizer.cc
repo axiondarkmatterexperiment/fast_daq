@@ -29,6 +29,7 @@ namespace fast_daq
         f_samples_per_sec( 50000000 ), //default is 50MS/s
         f_acquisition_length_sec( 0.1 ),
         f_samples_per_buffer( 204800 ),
+        f_input_mag_range( 400 ),
         f_dma_buffer_count( 4883 ),
         f_system_id( 1 ),
         f_board_id( 1 ),
@@ -63,6 +64,9 @@ namespace fast_daq
 
     void ats9462_digitizer::set_internal_maps()
     {
+        // see /usr/include/AlazarCmd.h enums for a full list of valid values
+
+        // Sampling rates
         f_sample_rate_to_code.insert( rate_mapping_t( 1000, SAMPLE_RATE_1KSPS ) );
         f_sample_rate_to_code.insert( rate_mapping_t( 2000, SAMPLE_RATE_2KSPS ) );
         f_sample_rate_to_code.insert( rate_mapping_t( 5000, SAMPLE_RATE_5KSPS ) );
@@ -84,6 +88,10 @@ namespace fast_daq
         f_sample_rate_to_code.insert( rate_mapping_t( 125000000, SAMPLE_RATE_125MSPS ) );
         f_sample_rate_to_code.insert( rate_mapping_t( 160000000, SAMPLE_RATE_160MSPS ) );
         f_sample_rate_to_code.insert( rate_mapping_t( 180000000, SAMPLE_RATE_180MSPS ) );
+
+        // input ranges (note that left values are mV)
+        f_input_range_to_code.insert( input_range_mapping_t( 400, INPUT_RANGE_PM_400_MV ) );
+        f_input_range_to_code.insert( input_range_mapping_t( 800, INPUT_RANGE_PM_800_MV ) );
     }
 
     ats9462_digitizer::~ats9462_digitizer()
@@ -166,14 +174,14 @@ namespace fast_daq
 
     void ats9462_digitizer::configure_board()
     {
-        ALAZAR_SAMPLE_RATES this_rate;
-        LWARN( flog, "sample rate is " << f_samples_per_sec );
-        this_rate = f_sample_rate_to_code.left.at(f_samples_per_sec);
+        ALAZAR_SAMPLE_RATES this_rate = f_sample_rate_to_code.left.at( f_samples_per_sec );
         check_return_code( AlazarSetCaptureClock( f_board_handle, INTERNAL_CLOCK, this_rate, CLOCK_EDGE_RISING, 0),
                           "AlazarSetCaptureClock", 1 );
 
+        ALAZAR_INPUT_RANGES this_input_range = f_input_range_to_code.left.at( f_input_mag_range );
         //check_return_code( AlazarInputControlEx( f_board_handle, CHANNEL_A, DC_COUPLING, INPUT_RANGE_PM_800_MV, IMPEDANCE_50_OHM ),
-        check_return_code( AlazarInputControlEx( f_board_handle, CHANNEL_A, DC_COUPLING, INPUT_RANGE_PM_400_MV, IMPEDANCE_50_OHM ),
+        //check_return_code( AlazarInputControlEx( f_board_handle, CHANNEL_A, DC_COUPLING, INPUT_RANGE_PM_400_MV, IMPEDANCE_50_OHM ),
+        check_return_code( AlazarInputControlEx( f_board_handle, CHANNEL_A, DC_COUPLING, this_input_range, IMPEDANCE_50_OHM ),
                           "AlazarInputControlEx", 1 );
 
         check_return_code( AlazarSetBWLimit( f_board_handle, CHANNEL_A, 0 ),

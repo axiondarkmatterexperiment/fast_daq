@@ -60,6 +60,9 @@ namespace fast_daq
         private:
             typedef boost::bimap< uint32_t, ALAZAR_SAMPLE_RATES > sample_rate_code_map_t;
             typedef sample_rate_code_map_t::value_type rate_mapping_t;
+            // Note that the input range left values are [mV], ie input is +/- # mV
+            typedef boost::bimap< uint32_t, ALAZAR_INPUT_RANGES > input_range_code_map_t;
+            typedef input_range_code_map_t::value_type input_range_mapping_t;
 
         public:
             ats9462_digitizer();
@@ -77,6 +80,7 @@ namespace fast_daq
         mv_accessible( U32, samples_per_sec );
         mv_accessible( double, acquisition_length_sec );
         mv_accessible( U32, samples_per_buffer );
+        mv_accessible( U32, input_mag_range );
         mv_accessible( U32, dma_buffer_count );
         mv_accessible( U32, system_id );
         mv_accessible( U32, board_id );
@@ -86,6 +90,7 @@ namespace fast_daq
 
         private:
             sample_rate_code_map_t f_sample_rate_to_code;
+            input_range_code_map_t f_input_range_to_code;
             U8 f_channel_count;
             U32 f_channel_mask;
             U8 f_bits_per_sample;
