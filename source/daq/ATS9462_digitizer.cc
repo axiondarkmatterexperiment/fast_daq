@@ -345,6 +345,7 @@ namespace fast_daq
         a_node->set_out_length( a_config.get_value( "out-length", a_node->get_out_length() ) );
         a_node->set_dma_buffer_count( a_config.get_value( "dma-buffer-count", a_node->get_dma_buffer_count() ) );
         a_node->set_samples_per_sec( a_config.get_value( "samples-per-sec", a_node->get_samples_per_sec() ) );
+        a_node->set_acquisition_length_sec( a_config.get_value( "acquisition-length-sec", a_node->get_acquisition_length_sec() ) );
     }
 
     void ats9462_digitizer_binding::do_dump_config( const ats9462_digitizer* a_node, scarab::param_node& a_config ) const
@@ -353,6 +354,7 @@ namespace fast_daq
         a_config.add( "out-length", scarab::param_value( a_node->get_out_length() ) );
         a_config.add( "dma-buffer-count", scarab::param_value( a_node->get_dma_buffer_count() ) );
         a_config.add( "samples-per-sec", scarab::param_value( a_node->get_samples_per_sec() ) );
+        a_config.add( "acquisition-length-sec", scarab::param_value( a_node->get_acquisition_length_sec() ) );
     }
 
 } /* namespace fast_daq */

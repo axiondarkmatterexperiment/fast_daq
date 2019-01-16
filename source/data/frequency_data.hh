@@ -24,6 +24,8 @@ namespace fast_daq
         // member varaible macros
         mv_accessible( complex_t*, data_array );
         mv_accessible( unsigned, array_size);
+        mv_accessible( double, bin_width ); // in [Hz]
+        mv_accessible( double, minimum_frequency ); // in [Hz]
 
         public:
             void allocate_array( unsigned n_samples );

@@ -7,14 +7,15 @@ amqp:
 
 daq:
     activate-at-startup: true
-    n-files: 0
+    # n-files must be >= 1 in order to set a description on a run
+    n-files: 1
     max-file-size-mb: 500
 
 on-startup:
-  - type: set
-    rks: use-monarch
-    payload:
-        values: [ false ]
+  #- type: set
+  #  rks: use-monarch
+  #  payload:
+  #      values: [ false ]
   - type: wait-for
     rks: daq-status
     payload: {}
@@ -24,11 +25,13 @@ on-startup:
     payload:
         values: [ false ]
     sleep-for: 10
-  - type: cmd
-    rks: "start-run"
-    payload:
-      duration: 0
-    sleep-for: 0
+  #- type: cmd
+  #  rks: "start-run"
+  #  payload:
+  #    duration: 0
+  #    description: "a test description"
+  #    #filename: ["foo.egg"]
+  #  sleep-for: 0
   #- type: wait-for
   #  rks: daq-status
   #  payload: {}
@@ -72,6 +75,7 @@ streams:
             out-length: 20 # number of buffers of node output to the next node
             dma-buffer-count: 100 #number of buffers between the ATS local memory and the node
             samples-per-sec: 50000000 # 50 MSPS
+            acquisition-length-sec: 100.0
         fft:
             input-type: real
             fft-size: 250000 # needs to match above in ats
@@ -81,7 +85,7 @@ streams:
         avg:
             spectrum-size: 1000 # needs to match the number of bins the fft node above produces
             num-output-buffers: 5
-            num-to-average: 8
+            num-to-average: 99999
         dend:
             #input-index: 0 # for simple_time input
             #input-index: 1 # for frequency_data

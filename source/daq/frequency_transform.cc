@@ -69,10 +69,15 @@ namespace fast_daq
     {
     }
 
-    //TODO should these two functions store to a member and be called when impacting members are changed instead?
+    // calculate derived params from members
+    double frequency_transform::bin_width_hz()
+    {
+        return ( f_samples_per_sec / 2. ) / f_fft_size;
+    }
+
     unsigned frequency_transform::first_output_index()
     {
-        double t_bin_width_hz = ( f_samples_per_sec / 2. ) / f_fft_size;
+        double t_bin_width_hz = bin_width_hz();
         unsigned center_bin = ((f_fft_size - 1) / 2) + 1;
         if ( f_centerish_freq > 0. )
         {
@@ -87,12 +92,17 @@ namespace fast_daq
         return to_return;
     }
 
+    double frequency_transform::min_output_frequency()
+    {
+        return first_output_index() * bin_width_hz();
+    }
+
     unsigned frequency_transform::num_output_bins()
     {
         unsigned to_return = f_fft_size;
         if ( f_min_output_bandwidth > 0. )
         {
-            double t_bin_width_hz = ( static_cast<double>(f_samples_per_sec) / 2. ) / static_cast<double>(f_fft_size);
+            double t_bin_width_hz = bin_width_hz();
             to_return = static_cast<int>( f_min_output_bandwidth / t_bin_width_hz - 1. ) + 1;
         }
         return std::min(to_return, f_fft_size);
@@ -214,6 +224,9 @@ namespace fast_daq
                     {
                         LDEBUG( flog, "got an s_start on slot <" << in_stream_index << ">" );
                         if ( ! out_stream< 0 >().set( stream::s_start ) ) throw midge::node_nonfatal_error() << "Stream 0 error while starting";
+                        // ensure scalars are set
+                        out_buffer< 0 >().call( &frequency_data::set_bin_width, bin_width_hz() );
+                        out_buffer< 0 >().call( &frequency_data::set_minimum_frequency, min_output_frequency() );
                         continue;
                     }
                     if ( in_cmd == stream::s_run )

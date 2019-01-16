@@ -9,10 +9,9 @@
 #define SPECTRUM_RELAY_HH_
 
 // psyllid includes
-//#include "memory_block.hh"
 #include "node_builder.hh"
 
-//#include "control_access.hh"
+#include "control_access.hh"
 #include "consumer.hh"
 #include "shared_cancel.hh"
 
@@ -43,7 +42,7 @@ namespace fast_daq
      - 1: power_data
 
     */
-    class spectrum_relay : public midge::_consumer< midge::type_list< power_data > >
+    class spectrum_relay : public midge::_consumer< midge::type_list< power_data > >, public psyllid::control_access
     {
         public:
             spectrum_relay();
@@ -61,6 +60,7 @@ namespace fast_daq
             std::thread f_dl_relay_thread;
 
         private:
+            void broadcast_spectrum( power_data* a_spectrum );
             void send_alert_message( std::string a_routing_key, scarab::param_node a_payload );
     };
 
