@@ -9,6 +9,7 @@
 
 //scarab includes
 #include "logger.hh"
+#include "param_json.hh"
 
 //psyllid
 #include "daq_control.hh"
@@ -108,16 +109,21 @@ namespace fast_daq
 
     void spectrum_relay::broadcast_spectrum( power_data* a_spectrum )
     {
+        // grab the run description and load it into the broadcast payload
         scarab::param_node t_payload = scarab::param_node();
+        std::shared_ptr< psyllid::daq_control > t_daq_control = use_daq_control();
+        scarab::param_input_json t_param_codec = scarab::param_input_json();
+        scarab::param_node codec_options = scarab::param_node();
+        codec_options.add( "encoding", "json" );
+        t_payload.merge(t_param_codec.read_string( t_daq_control->get_description() )->as_node());
+        // add the spectrum data to the broadcast payload
         t_payload.add( "value_raw", scarab::param_array() );
         //TODO if the data were in an std::vector, I could std::for_each instead of this
         for (unsigned i_bin=0; i_bin < a_spectrum->get_array_size(); i_bin++)
         {
             t_payload["value_raw"].as_array().push_back( a_spectrum->get_data_array()[i_bin] );
         }
-        std::shared_ptr< psyllid::daq_control > t_daq_control = use_daq_control();
-        //std::string description = t_daq_control->get_description();
-        t_payload.add( "run_details", t_daq_control->get_description() );
+        //t_payload.add( "run_details", t_daq_control->get_description() );
         send_alert_message( f_spectrum_alert_rk, t_payload );
     }
 
