@@ -91,4 +91,4 @@ streams:
             #input-index: 1 # for frequency_data
             input-index: 2 # for power_data
         relay:
-            spectrum-alert-rk: "data.medium-res-spec"
+            spectrum-alert-rk: "sensor_value.medium_spectrum"
