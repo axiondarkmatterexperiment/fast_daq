@@ -11,7 +11,8 @@ namespace fast_daq
 {
     real_time_data::real_time_data() :
         f_time_series(),
-        f_array_size()
+        f_array_size(),
+        f_dynamic_range()
     {
     }
 
@@ -37,6 +38,9 @@ namespace fast_daq
          std::vector<double> volts_data(f_array_size);
          for (unsigned i_bin=0; i_bin<f_array_size; i_bin++) 
          {
+            //TODO validate this:
+            // Note that volts = ((this_ADC_channel/number_of_channels) * dynamic_range) + min_voltage_in_range
+            // ... where min_voltage_in_range == -(dynamic_range/2.)
             volts_data[i_bin] = (static_cast<double>(f_time_series[i_bin]) * f_dynamic_range / 65536.) - (f_dynamic_range / 2.);
          }
          return volts_data;

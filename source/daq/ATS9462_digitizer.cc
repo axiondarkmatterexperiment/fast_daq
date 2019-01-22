@@ -105,8 +105,8 @@ namespace fast_daq
         // setup output buffer
         out_buffer< 0 >().initialize( f_out_length );
         out_buffer< 0 >().call( &real_time_data::allocate_array, f_samples_per_buffer );
-        //Convert +/- mV to dynamic range in V (*2 and /1000)
-        out_buffer< 0 >().call( &real_time_data::set_dynamic_range, 2. * 1.e-3 * static_cast<double>(f_input_mag_range) );
+        //Convert +/- mV to dynamic range: (*2 for +/- /1000 for mV->V)
+        out_buffer< 0 >().call( &real_time_data::set_dynamic_range, 2. * static_cast<double>(f_input_mag_range) / 1000. );
         // configure the digitizer board
         configure_board();
         allocate_buffers();
@@ -306,6 +306,11 @@ namespace fast_daq
                           "AlazarWaitAsyncBufferComplete", 1 );
         //copy the int array into the output stream
         real_time_data* time_data_out = out_stream< 0 >().data();
+        //TODO remove this debugging thing
+        std::vector<double> the_volts = time_data_out->as_volts();
+        double max_V = *std::max_element(the_volts.begin(), the_volts.end());
+        LWARN( flog, "ats max voltage in buffer is: " << max_V );
+        //end TODO debugging
         std::memcpy( time_data_out->get_time_series(), &this_buffer[0], bytes_per_buffer() );
         if( !out_stream< 0 >().set( stream::s_run ) )
         {

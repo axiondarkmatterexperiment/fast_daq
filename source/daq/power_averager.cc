@@ -139,12 +139,6 @@ namespace fast_daq
             //TODO throw something smart please
             throw 1;
         }
-        for (unsigned i_bin=0; i_bin < data_in->get_array_size(); i_bin++)
-        {
-            // square the complex V and divide by 50.0 Ohms to get to Watts
-            // go ahead and divide by the number of elements in the average
-            f_average_spectrum[i_bin] += std::pow(data_array_in[i_bin][0], 2) + std::pow(data_array_in[i_bin][1], 2) / 50.0 / static_cast<double>(f_num_to_average);
-        }
         f_input_counter++;
         if ( f_input_counter == f_num_to_average )
         {
