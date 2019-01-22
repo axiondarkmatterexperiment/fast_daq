@@ -31,4 +31,14 @@ namespace fast_daq
         }
         f_array_size = n_samples;
     }
+
+    std::vector<double> real_time_data::as_volts()
+    {
+         std::vector<double> volts_data(f_array_size);
+         for (unsigned i_bin=0; i_bin<f_array_size; i_bin++) 
+         {
+            volts_data[i_bin] = (static_cast<double>(f_time_series[i_bin]) * f_dynamic_range / 65536.) - (f_dynamic_range / 2.);
+         }
+         return volts_data;
+    }
 } /* namespace fast_daq */

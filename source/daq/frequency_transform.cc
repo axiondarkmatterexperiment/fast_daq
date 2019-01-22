@@ -248,11 +248,15 @@ namespace fast_daq
                         //frequency output
                         freq_data_out = out_stream< 0 >().data();
 
+                        std::vector<double> volts_data;
+
                         switch (f_input_type)
                         {
                             case input_type_t::real:
                                 LTRACE( flog, "copy real input data" );
-                                std::copy(&real_time_data_in->get_time_series()[0], &real_time_data_in->get_time_series()[0] + f_fft_size, &f_fftw_input_real[0]);
+                                //std::copy(&real_time_data_in->get_time_series()[0], &real_time_data_in->get_time_series()[0] + f_fft_size, &f_fftw_input_real[0]);
+                                volts_data = real_time_data_in->as_volts();
+                                std::copy(volts_data.begin(), volts_data.end(), &f_fftw_input_real[0] );
                                 break;
                             case input_type_t::complex:
                                 LTRACE( flog, "grab complex data" );

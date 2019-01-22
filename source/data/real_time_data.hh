@@ -11,6 +11,8 @@
 #include "AlazarApi.h"
 #include "member_variables.hh"
 
+#include <vector>
+
 namespace fast_daq
 {
     class real_time_data
@@ -21,10 +23,13 @@ namespace fast_daq
 
         // member varaible macros
         mv_accessible( U16*, time_series );
-        mv_accessible( unsigned, array_size);
+        mv_accessible( unsigned, array_size );
+        mv_accessible( double, dynamic_range ); //full scale range in V (not mV; not magnitude)
 
         public:
             void allocate_array( unsigned n_samples );
+            // is this the right signature?
+            std::vector<double> as_volts();
 
     };
 } /* namespace fast_daq */

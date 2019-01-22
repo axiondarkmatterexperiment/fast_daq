@@ -29,7 +29,7 @@ namespace fast_daq
         f_samples_per_sec( 50000000 ), //default is 50MS/s
         f_acquisition_length_sec( 0.1 ),
         f_samples_per_buffer( 204800 ),
-        f_input_mag_range( 400 ),
+        f_input_mag_range( 400 ), // in +/- mV, must be a valid value from the enum
         f_dma_buffer_count( 4883 ),
         f_system_id( 1 ),
         f_board_id( 1 ),
@@ -105,6 +105,8 @@ namespace fast_daq
         // setup output buffer
         out_buffer< 0 >().initialize( f_out_length );
         out_buffer< 0 >().call( &real_time_data::allocate_array, f_samples_per_buffer );
+        //Convert +/- mV to dynamic range in V (*2 and /1000)
+        out_buffer< 0 >().call( &real_time_data::set_dynamic_range, 2. * 1.e-3 * static_cast<double>(f_input_mag_range) );
         // configure the digitizer board
         configure_board();
         allocate_buffers();
