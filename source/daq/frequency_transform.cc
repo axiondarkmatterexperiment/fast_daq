@@ -231,7 +231,7 @@ namespace fast_daq
                     }
                     if ( in_cmd == stream::s_run )
                     {
-                        LDEBUG( flog, "got an s_run on slot <" << in_stream_index << ">" );
+                        LTRACE( flog, "got an s_run on slot <" << in_stream_index << ">" );
                         unsigned t_center_bin;
                         switch ( f_input_type )
                         {

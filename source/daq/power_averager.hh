@@ -9,10 +9,8 @@
 #define POWER_AVERAGER_HH_
 
 // psyllid includes
-//#include "memory_block.hh"
 #include "node_builder.hh"
 
-//#include "control_access.hh"
 #include "transformer.hh"
 #include "shared_cancel.hh"
 

@@ -141,7 +141,9 @@ namespace fast_daq
         }
         for (unsigned i_bin=0; i_bin < data_in->get_array_size(); i_bin++)
         {
-            f_average_spectrum[i_bin] += std::sqrt( std::pow(data_array_in[i_bin][0], 2) + std::pow(data_array_in[i_bin][1], 2) ) /static_cast<double>(f_num_to_average);
+            // square the complex V and divide by 50.0 Ohms to get to Watts
+            // go ahead and divide by the number of elements in the average
+            f_average_spectrum[i_bin] += std::pow(data_array_in[i_bin][0], 2) + std::pow(data_array_in[i_bin][1], 2) / 50.0 / static_cast<double>(f_num_to_average);
         }
         f_input_counter++;
         if ( f_input_counter == f_num_to_average )
@@ -171,6 +173,14 @@ namespace fast_daq
                 *bin_i = (static_cast<double>(f_num_to_average) / static_cast<double>(f_input_counter)) * *bin_i;
             }
         }
+        //TODO if we're keeping the above condition should go in the loop and there should only be one loop here. Also maybe it should be std::transform?
+        /*
+        for (std::vector< double >::iterator bin_i = f_average_spectrum.begin(); bin_i != f_average_spectrum.end(); bin_i++)
+        {
+            // convert W to dBm
+            *bin_i = 10. * log10( 1000. * (*bin_i) );
+        }
+        */
         // Copy data into output stream and re-zero the averager container
         //power_data out_data = out_stream< 0 >().data();
         power_data* out_data_ptr = out_stream< 0 >().data();
