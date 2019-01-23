@@ -73,9 +73,9 @@ streams:
         ats:
             samples-per-buffer: 250000
             # note to self, I'd been running with 20 output buffers without trouble for a while.
-            out-length: 100 # number of buffers of node output to the next node
+            out-length: 500 # number of buffers of node output to the next node
             # another note, 100 dma buffers had been fine for a while
-            dma-buffer-count: 200 #number of buffers between the ATS local memory and the node
+            dma-buffer-count: 500 #number of buffers between the ATS local memory and the node
             samples-per-sec: 50000000 # 50 MSPS
             acquisition-length-sec: 100.0
         fft:
@@ -84,6 +84,7 @@ streams:
             freq-in-center-bin: 10.575e6 # 10.7 MHz
             min-output-bandwidth: 100.e3 # 100 kHz total output (with 100 Hz bins, that means 1000 total bins in the output)
             samples-per-sec: 50000000 # 50 MSPS (must match ats above)
+            freq-length: 100 # number of output buffers
         avg:
             spectrum-size: 1000 # needs to match the number of bins the fft node above produces
             num-output-buffers: 5

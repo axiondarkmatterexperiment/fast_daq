@@ -139,6 +139,14 @@ namespace fast_daq
             //TODO throw something smart please
             throw 1;
         }
+        for (unsigned i_bin=0; i_bin < data_in->get_array_size(); i_bin++)
+        {
+            // compute the power in mW (note, not W)
+            // 1000.0 is to get to mW, 50.0 is impedance; 2.0 is to get RMS from peak voltage
+            double these_mW = ( std::pow(data_array_in[i_bin][0], 2) + std::pow(data_array_in[i_bin][1], 2) ) * 1000.0 / 50.0 / 2.0;
+            // divide by number of items in average and increment average spectrum buffer
+            f_average_spectrum[i_bin] += these_mW / static_cast<double>(f_num_to_average);
+        }
         f_input_counter++;
         if ( f_input_counter == f_num_to_average )
         {
@@ -161,20 +169,16 @@ namespace fast_daq
         // Rescale averaging N if needed
         if ( f_input_counter != f_num_to_average )
         {
+            LWARN( flog, "number of collected points <" <<f_input_counter<< "> is not as expected (" <<f_num_to_average<< "), fixing average normalization" );
             // If number of collected points is less than expected average, rescale
             for (std::vector< double >::iterator bin_i = f_average_spectrum.begin(); bin_i != f_average_spectrum.end(); bin_i++)
             {
                 *bin_i = (static_cast<double>(f_num_to_average) / static_cast<double>(f_input_counter)) * *bin_i;
             }
         }
-        //TODO if we're keeping the above condition should go in the loop and there should only be one loop here. Also maybe it should be std::transform?
-        /*
-        for (std::vector< double >::iterator bin_i = f_average_spectrum.begin(); bin_i != f_average_spectrum.end(); bin_i++)
-        {
-            // convert W to dBm
-            *bin_i = 10. * log10( 1000. * (*bin_i) );
-        }
-        */
+        double power_max_mW = *std::max_element(f_average_spectrum.begin(), f_average_spectrum.end());
+        LWARN( flog, "the maximum power bin has <" << power_max_mW << "> mW" );
+        LWARN( flog, " ... <" << 10. * std::log10(power_max_mW) << "> dBm" );
         // Copy data into output stream and re-zero the averager container
         //power_data out_data = out_stream< 0 >().data();
         power_data* out_data_ptr = out_stream< 0 >().data();

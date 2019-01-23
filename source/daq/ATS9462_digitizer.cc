@@ -183,10 +183,10 @@ namespace fast_daq
         ALAZAR_INPUT_RANGES this_input_range = f_input_range_to_code.left.at( f_input_mag_range );
         //check_return_code( AlazarInputControlEx( f_board_handle, CHANNEL_A, DC_COUPLING, INPUT_RANGE_PM_800_MV, IMPEDANCE_50_OHM ),
         //check_return_code( AlazarInputControlEx( f_board_handle, CHANNEL_A, DC_COUPLING, INPUT_RANGE_PM_400_MV, IMPEDANCE_50_OHM ),
-        check_return_code( AlazarInputControlEx( f_board_handle, CHANNEL_A, DC_COUPLING, this_input_range, IMPEDANCE_50_OHM ),
+        check_return_code( AlazarInputControlEx( f_board_handle, f_channel_mask, DC_COUPLING, this_input_range, IMPEDANCE_50_OHM ),
                           "AlazarInputControlEx", 1 );
 
-        check_return_code( AlazarSetBWLimit( f_board_handle, CHANNEL_A, 0 ),
+        check_return_code( AlazarSetBWLimit( f_board_handle, f_channel_mask, 0 ),
                           "AlazarSetBWLimit", 1 );
 
         check_return_code( AlazarSetTriggerOperation( f_board_handle,
@@ -309,7 +309,7 @@ namespace fast_daq
         //TODO remove this debugging thing
         std::vector<double> the_volts = time_data_out->as_volts();
         double max_V = *std::max_element(the_volts.begin(), the_volts.end());
-        LWARN( flog, "ats max voltage in buffer is: " << max_V );
+        LTRACE( flog, "ats max voltage in buffer is: " << max_V );
         //end TODO debugging
         std::memcpy( time_data_out->get_time_series(), &this_buffer[0], bytes_per_buffer() );
         if( !out_stream< 0 >().set( stream::s_run ) )

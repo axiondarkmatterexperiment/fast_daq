@@ -173,7 +173,6 @@ namespace fast_daq
             psyllid::time_data* complex_time_data_in = nullptr;
             real_time_data* real_time_data_in = nullptr;
             frequency_data* freq_data_out = nullptr;
-            double fft_norm = sqrt(1. / (double)f_fft_size);
 
             try
             {
@@ -250,6 +249,7 @@ namespace fast_daq
 
                         std::vector<double> volts_data;
 
+                        // copy input data into fft input array
                         switch (f_input_type)
                         {
                             case input_type_t::real:
@@ -265,10 +265,12 @@ namespace fast_daq
                                 break;
                             default: throw psyllid::error() << "input_type not fully implemented";
                         }
+                        // execute fft
                         fftw_execute( f_fftw_plan );
 
                         //take care of FFT normalization
                         //is this the normalization we want?
+                        double fft_norm = sqrt(1. / (double)f_fft_size);
                         for (size_t i_bin=0; i_bin<f_fft_size; ++i_bin)
                         {
                             f_fftw_output[i_bin][0] *= fft_norm;
