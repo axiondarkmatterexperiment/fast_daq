@@ -139,6 +139,9 @@ namespace fast_daq
                         LINFO( flog, "All requested buffers ("<<f_buffers_completed<<") completed, calling stop_run" );
                         std::shared_ptr< psyllid::daq_control > t_daq_control = use_daq_control();
                         t_daq_control->stop_run();
+                        LWARN( flog, "trying to print report" );
+                        out_stream< 0 >().timer_report();
+                        LWARN( flog, "end of report" );
                     }
                     else
                     {
@@ -307,9 +310,11 @@ namespace fast_daq
         //copy the int array into the output stream
         real_time_data* time_data_out = out_stream< 0 >().data();
         //TODO remove this debugging thing
+        /*
         std::vector<double> the_volts = time_data_out->as_volts();
         double max_V = *std::max_element(the_volts.begin(), the_volts.end());
         LTRACE( flog, "ats max voltage in buffer is: " << max_V );
+        */
         //end TODO debugging
         std::memcpy( time_data_out->get_time_series(), &this_buffer[0], bytes_per_buffer() );
         if( !out_stream< 0 >().set( stream::s_run ) )

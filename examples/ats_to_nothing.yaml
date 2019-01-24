@@ -77,8 +77,8 @@ streams:
             # another note, 100 dma buffers had been fine for a while
             dma-buffer-count: 500 #number of buffers between the ATS local memory and the node
             samples-per-sec: 50000000 # 50 MSPS
-            acquisition-length-sec: 15.0
-            #acquisition-length-sec: 100.0
+            #acquisition-length-sec: 20.0
+            acquisition-length-sec: 100.0
         fft:
             input-type: real
             fft-size: 250000 # needs to match above in ats
