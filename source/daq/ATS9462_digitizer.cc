@@ -136,12 +136,17 @@ namespace fast_daq
                     //TODO some condition that if the run is complete
                     if ( f_buffers_completed >= buffers_per_acquisition() )
                     {
-                        LINFO( flog, "All requested buffers ("<<f_buffers_completed<<") completed, calling stop_run" );
+                        LINFO( flog, "All requested buffers ("<<f_buffers_completed<<") completed, calling daq_control->stop_run and stopping board Reads" );
                         std::shared_ptr< psyllid::daq_control > t_daq_control = use_daq_control();
                         t_daq_control->stop_run();
+                        check_return_code( AlazarAbortAsyncRead( f_board_handle ),
+                                          "AlazarAbortAsyncRead", 1 );
+                        //TODO remove this
+                        /*
                         LWARN( flog, "trying to print report" );
                         out_stream< 0 >().timer_report();
                         LWARN( flog, "end of report" );
+                        */
                     }
                     else
                     {
@@ -289,7 +294,8 @@ namespace fast_daq
             LINFO( flog, "ATS9462 digitizer pausing");
             if( ! out_stream< 0 >().set( midge::stream::s_stop ) ) throw midge::node_nonfatal_error() << "Stream 0 error while stopping";
             f_paused = true;
-            //TODO something here to "end" a run
+            //Note: this step may have already have been done when the requested buffer count was reached
+            //      it is not a problem for the function to be called again here.
             check_return_code( AlazarAbortAsyncRead( f_board_handle ),
                               "AlazarAbortAsyncRead", 1 );
             LDEBUG( flog, "abort async read sent to board" );
