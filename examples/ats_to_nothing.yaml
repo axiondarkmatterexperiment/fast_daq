@@ -12,10 +12,6 @@ daq:
     max-file-size-mb: 500
 
 on-startup:
-  #- type: set
-  #  rks: use-monarch
-  #  payload:
-  #      values: [ false ]
   - type: wait-for
     rks: daq-status
     payload: {}
@@ -44,8 +40,8 @@ streams:
             nodes:
               - type: ats9462
                 name: ats
-              - type: dead-end
-                name: dend
+#              - type: dead-end
+#                name: dend
               - type: frequency-transform
                 name: fft
               - type: power-averager
@@ -57,7 +53,7 @@ streams:
               - "ats.out_0:fft.in_1"
               #- "fft.out_0:dend.in_1"
               - "fft.out_0:avg.in_0"
-              - "avg.out_0:dend.in_2"
+              #- "avg.out_0:dend.in_2"
               - "avg.out_0:relay.in_0"
 
         device:
@@ -72,12 +68,10 @@ streams:
 
         ats:
             samples-per-buffer: 250000
-            # note to self, I'd been running with 20 output buffers without trouble for a while.
-            out-length: 500 # number of buffers of node output to the next node
-            # another note, 100 dma buffers had been fine for a while
-            dma-buffer-count: 500 #number of buffers between the ATS local memory and the node
+            out-length: 20 # number of buffers of node output to the next node
+            dma-buffer-count: 100 #number of buffers between the ATS local memory and the node
             samples-per-sec: 50000000 # 50 MSPS
-            #acquisition-length-sec: 20.0
+            #acquisition-length-sec: 15.0
             acquisition-length-sec: 100.0
         fft:
             input-type: real
@@ -90,9 +84,9 @@ streams:
             spectrum-size: 1000 # needs to match the number of bins the fft node above produces
             num-output-buffers: 200
             num-to-average: 99999
-        dend:
-            #input-index: 0 # for simple_time input
+#        dend:
+#            input-index: 0 # for simple_time input
             #input-index: 1 # for frequency_data
-            input-index: 2 # for power_data
+            #input-index: 2 # for power_data
         relay:
             spectrum-alert-rk: "sensor_value.medium_spectrum"
