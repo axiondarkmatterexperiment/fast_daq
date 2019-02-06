@@ -25,37 +25,14 @@ namespace fast_daq
 
     LOGGER( flog, "inverse_frequency_transform" );
 
-    // supporting enum helpers
-    /*
-    std::string inverse_frequency_transform::input_type_to_string( inverse_frequency_transform::input_type_t an_input_type )
-    {
-        switch (an_input_type) {
-            case inverse_frequency_transform::input_type_t::real: return "real";
-            case inverse_frequency_transform::input_type_t::complex: return "complex";
-            default: throw psyllid::error() << "input_type value <" << input_type_to_uint(an_input_type) << "> not recognized";
-        }
-    }
-    inverse_frequency_transform::input_type_t inverse_frequency_transform::string_to_input_type( const std::string& an_input_type )
-    {
-        if( an_input_type == input_type_to_string( inverse_frequency_transform::input_type_t::real ) ) return input_type_t::real;
-        if( an_input_type == input_type_to_string( inverse_frequency_transform::input_type_t::complex ) ) return input_type_t::complex;
-        throw psyllid::error() << "string <" << an_input_type << "> not recognized as valid input_type type";
-    }
-    */
-
-
     // inverse_frequency_transform class implementation
     inverse_frequency_transform::inverse_frequency_transform() :
             f_time_length( 10 ),
             f_fft_size( 4096 ),
-            //f_samples_per_sec( 0 ),
             f_transform_flag( "ESTIMATE" ),
             f_use_wisdom( true ),
             f_wisdom_filename( "wisdom_complex_inversefft.fftw3" ),
-            //f_centerish_freq( 0. ),
-            //f_min_output_bandwidth( 0. ),
             f_transform_flag_map(),
-            //f_fftw_input_real(),
             f_fftw_input(),
             f_fftw_output(),
             f_fftw_plan(),
@@ -68,53 +45,9 @@ namespace fast_daq
     {
     }
 
-    // calculate derived params from members
-    /*
-    double inverse_frequency_transform::bin_width_hz()
-    {
-        return ( f_samples_per_sec / 2. ) / f_fft_size;
-    }
-
-    unsigned inverse_frequency_transform::first_output_index()
-    {
-        double t_bin_width_hz = bin_width_hz();
-        unsigned center_bin = ((f_fft_size - 1) / 2) + 1;
-        if ( f_centerish_freq > 0. )
-        {
-            center_bin = static_cast<unsigned>( f_centerish_freq / t_bin_width_hz );
-        }
-        unsigned to_return = center_bin - (num_output_bins() / 2);
-        // even number of bins && target is in upper half
-        if ( ! (num_output_bins() % 2) && ( ( f_centerish_freq - (num_output_bins() / 2)*t_bin_width_hz ) > (t_bin_width_hz/2.) ) )
-        {
-            to_return += 1;
-        }
-        return to_return;
-    }
-
-    double inverse_frequency_transform::min_output_frequency()
-    {
-        return first_output_index() * bin_width_hz();
-    }
-
-    unsigned inverse_frequency_transform::num_output_bins()
-    {
-        unsigned to_return = f_fft_size;
-        if ( f_min_output_bandwidth > 0. )
-        {
-            double t_bin_width_hz = bin_width_hz();
-            to_return = static_cast<int>( f_min_output_bandwidth / t_bin_width_hz - 1. ) + 1;
-        }
-        return std::min(to_return, f_fft_size);
-    }
-    */
-
     void inverse_frequency_transform::initialize()
     {
         out_buffer< 0 >().initialize( f_time_length );
-        /*
-        out_buffer< 0 >().call( &frequency_data::allocate_array, f_fft_size );
-        */
 
         if (f_use_wisdom)
         {
@@ -162,11 +95,6 @@ namespace fast_daq
         {
             LDEBUG( flog, "Executing the frequency transformer" );
 
-            /*
-            psyllid::time_data* complex_time_data_in = nullptr;
-            real_time_data* real_time_data_in = nullptr;
-            frequency_data* freq_data_out = nullptr;
-            */
             frequency_data* input_freq_data = nullptr;
             psyllid::time_data* output_time_data = nullptr;
 
@@ -176,7 +104,6 @@ namespace fast_daq
                 while (! is_canceled() )
                 {
                     // grab the next input data and check slot status
-                    //LDEBUG( flog, "check input stream signals for <" << get_input_type_str() << ">" );
                     midge::enum_t in_cmd = stream::s_none;
                     unsigned in_stream_index = 0;
                     in_cmd = in_stream< 0 >().get();
@@ -211,11 +138,6 @@ namespace fast_daq
                     {
                         LDEBUG( flog, "got an s_start on slot <" << in_stream_index << ">" );
                         if ( ! out_stream< 0 >().set( stream::s_start ) ) throw midge::node_nonfatal_error() << "Stream 0 error while starting";
-                        // ensure scalars are set
-                        /*
-                        out_buffer< 0 >().call( &frequency_data::set_bin_width, bin_width_hz() );
-                        out_buffer< 0 >().call( &frequency_data::set_minimum_frequency, min_output_frequency() );
-                        */
                         continue;
                     }
                     if ( in_cmd == stream::s_run )
@@ -224,43 +146,8 @@ namespace fast_daq
                         // Grab data buffers for input and output streams
                         input_freq_data = in_stream< 0 >().data();
                         output_time_data = out_stream< 0 >().data();
-                        /*
-                        switch ( f_input_type )
-                        {
-                            case input_type_t::real:
-                                real_time_data_in = in_stream< 1 >().data();
-                                t_center_bin = real_time_data_in->get_array_size() / 2;
-                                break;
-                            case input_type_t::complex:
-                                complex_time_data_in = in_stream< 0 >().data();
-                                t_center_bin = complex_time_data_in->get_array_size();
-                                break;
-                        }
-                        */
-
-                        /*
-                        std::vector<double> volts_data;
-                        */
-                        std::copy(&input_freq_data->get_data_array()[0][0], &input_freq_data->get_data_array()[0][0] + 2*f_fft_size, &f_fftw_input[0][0] );
-
                         // copy input data into fft input array
-                        /*
-                        switch (f_input_type)
-                        {
-                            case input_type_t::real:
-                                LTRACE( flog, "copy real input data" );
-                                //std::copy(&real_time_data_in->get_time_series()[0], &real_time_data_in->get_time_series()[0] + f_fft_size, &f_fftw_input_real[0]);
-                                volts_data = real_time_data_in->as_volts();
-                                std::copy(volts_data.begin(), volts_data.end(), &f_fftw_input_real[0] );
-                                break;
-                            case input_type_t::complex:
-                                LTRACE( flog, "grab complex data" );
-                                LWARN( flog, "complex input transforms are currently not tested" );
-                                std::copy(&complex_time_data_in->get_array()[0][0], &complex_time_data_in->get_array()[0][0] + f_fft_size*2, &f_fftw_input_complex[0][0]);
-                                break;
-                            default: throw psyllid::error() << "input_type not fully implemented";
-                        }
-                        */
+                        std::copy(&input_freq_data->get_data_array()[0][0], &input_freq_data->get_data_array()[0][0] + 2*f_fft_size, &f_fftw_input[0][0] );
                         // execute fft
                         fftw_execute( f_fftw_plan );
 
@@ -275,22 +162,6 @@ namespace fast_daq
 
                         // Is there anything weird in the output ordering of the inverse transform?
                         std::copy(&f_fftw_output[0][0], &f_fftw_output[f_fft_size][1], &output_time_data->get_array()[0][0]);
-                        //std::copy(&f_fftw_output[0][0] + t_center_bin, &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_data_array()[0][0]);
-                        /*
-                        switch (f_input_type)
-                        {
-                            case input_type_t::real:
-                                std::copy(&f_fftw_output[first_output_index()][0], &f_fftw_output[first_output_index()+num_output_bins()][1], &freq_data_out->get_data_array()[0][0] );
-                                break;
-                            case input_type_t::complex:
-                                // FFT unfolding based on katydid:Source/Data/Transform/KTFrequencyTransformFFTW
-                                std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + (t_center_bin - 1), &freq_data_out->get_data_array()[0][0] + t_center_bin);
-                                std::copy(&f_fftw_output[0][0] + t_center_bin, &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_data_array()[0][0]);
-                                break;
-                            default: throw psyllid::error() << "input_type not fully implemented";
-                        }
-                        */
-
                         if ( !out_stream< 0 >().set( stream::s_run ) )
                         {
                             LERROR( flog, "inverse_frequency_transform error setting frequency output stream to s_run" );

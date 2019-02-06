@@ -14,7 +14,6 @@
 
 //fast_daq
 #include "frequency_data.hh"
-#include "real_time_data.hh"
 
 //midge
 #include "transformer.hh"
@@ -59,17 +58,6 @@ namespace fast_daq
     {
         public:
             // internal enums
-            /*
-            enum class input_type_t
-            {
-                real,
-                complex
-            };
-            static uint32_t input_type_to_uint( input_type_t an_input_type );
-            static input_type_t uint_to_input_type( uint32_t an_input_type_uint );
-            static std::string input_type_to_string( input_type_t an_input_type );
-            static input_type_t string_to_input_type( const std::string& an_input_type );
-            */
 
         private:
             typedef std::map< std::string, unsigned > transform_flag_map_t;
@@ -104,25 +92,6 @@ namespace fast_daq
             void setup_internal_maps();
 
     };
-
-    /*
-    inline uint32_t inverse_frequency_transform::input_type_to_uint( input_type_t an_input_type )
-    {
-        return static_cast< uint32_t >( an_input_type );
-    }
-    inline inverse_frequency_transform::input_type_t inverse_frequency_transform::uint_to_input_type( uint32_t an_input_type_uint )
-    {
-        return static_cast< inverse_frequency_transform::input_type_t >( an_input_type_uint );
-    }
-    inline void inverse_frequency_transform::set_input_type( const std::string& an_input_type )
-    {
-        set_input_type( string_to_input_type( an_input_type ) );
-    }
-    inline std::string inverse_frequency_transform::get_input_type_str() const
-    {
-        return input_type_to_string( f_input_type );
-    }
-    */
 
 
     class inverse_frequency_transform_binding : public psyllid::_node_binding< inverse_frequency_transform, inverse_frequency_transform_binding >
