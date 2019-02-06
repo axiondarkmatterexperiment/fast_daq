@@ -4,6 +4,7 @@
 set( headers
     dead_end.hh
     frequency_transform.hh
+    inverse_frequency_transform.hh
     power_averager.hh
     spectrum_relay.hh
 )
@@ -11,6 +12,7 @@ set( headers
 set( sources
     dead_end.cc
     frequency_transform.cc
+    inverse_frequency_transform.cc
     power_averager.cc
     spectrum_relay.cc
 )
