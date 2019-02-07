@@ -15,6 +15,7 @@
 
 namespace fast_daq
 {
+    /// This class contains "real" time data which is in some sense fundamenta
     class real_time_data
     {
         public:
