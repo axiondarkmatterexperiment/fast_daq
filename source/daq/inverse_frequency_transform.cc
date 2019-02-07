@@ -96,7 +96,7 @@ namespace fast_daq
             LDEBUG( flog, "Executing the frequency transformer" );
 
             frequency_data* input_freq_data = nullptr;
-            psyllid::time_data* output_time_data = nullptr;
+            iq_time_data* output_time_data = nullptr;
 
             try
             {
@@ -161,7 +161,7 @@ namespace fast_daq
                         }
 
                         // Is there anything weird in the output ordering of the inverse transform?
-                        std::copy(&f_fftw_output[0][0], &f_fftw_output[f_fft_size][1], &output_time_data->get_array()[0][0]);
+                        std::copy(&f_fftw_output[0][0], &f_fftw_output[f_fft_size][1], &output_time_data->get_data_array()[0][0]);
                         if ( !out_stream< 0 >().set( stream::s_run ) )
                         {
                             LERROR( flog, "inverse_frequency_transform error setting frequency output stream to s_run" );

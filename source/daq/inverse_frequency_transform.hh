@@ -10,10 +10,11 @@
 
 //psyllid
 #include "node_builder.hh"
-#include "time_data.hh"
+//#include "time_data.hh"
 
 //fast_daq
 #include "frequency_data.hh"
+#include "iq_time_data.hh"
 
 //midge
 #include "transformer.hh"
@@ -54,7 +55,7 @@ namespace fast_daq
      Output Streams:
      - 0: psyllid::time_data (IQ)
     */
-    class inverse_frequency_transform : public midge::_transformer< midge::type_list< frequency_data >, midge::type_list< psyllid::time_data > >
+    class inverse_frequency_transform : public midge::_transformer< midge::type_list< frequency_data >, midge::type_list< iq_time_data > >
     {
         public:
             // internal enums

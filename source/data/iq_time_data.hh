@@ -23,10 +23,13 @@ namespace fast_daq
             iq_time_data();
             virtual ~iq_time_data();
 
+        public:
+            typedef double complex_t[2];
+
         // member varaible macros
         mv_accessible( unsigned, array_size );
         //mv_accessible( std::vector< std::complex< double > >, volts_data );
-        mv_accessible( std::complex< double >*, data_array );
+        mv_accessible( complex_t*, data_array );
         mv_accessible( unsigned, chunk_counter );
 
         public:
