@@ -48,6 +48,7 @@ namespace fast_daq
     void inverse_frequency_transform::initialize()
     {
         out_buffer< 0 >().initialize( f_time_length );
+        out_buffer< 0 >().call( &iq_time_data::allocate_container, f_fft_size );
 
         if (f_use_wisdom)
         {

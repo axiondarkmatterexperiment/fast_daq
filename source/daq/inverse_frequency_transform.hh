@@ -40,7 +40,7 @@ namespace fast_daq
 
      Parameter setting is not thread-safe.  Executing is thread-safe.
 
-     Node type: "inservse-frequency-transform"
+     Node type: "inverse-freq-transform"
 
      Available configuration values:
      - "time-length": uint -- The size of the output time-data buffer

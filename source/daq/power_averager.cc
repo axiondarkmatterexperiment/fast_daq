@@ -97,7 +97,6 @@ namespace fast_daq
                         LERROR( flog, "unable to set start on output!" );
                         throw midge::node_nonfatal_error() << "Stream 0 error while sending s_start";
                     }
-                    LWARN( flog, "start passed along" );
                     continue;
                 }
                 else if ( input_command == stream::s_run )
