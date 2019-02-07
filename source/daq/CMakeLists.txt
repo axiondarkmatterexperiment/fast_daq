@@ -2,6 +2,7 @@
 # daq #
 #######
 set( headers
+    ats_streaming_writer.hh
     dead_end.hh
     frequency_transform.hh
     inverse_frequency_transform.hh
@@ -10,6 +11,7 @@ set( headers
 )
 
 set( sources
+    ats_streaming_writer.cc
     dead_end.cc
     frequency_transform.cc
     inverse_frequency_transform.cc

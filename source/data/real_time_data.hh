@@ -27,6 +27,7 @@ namespace fast_daq
         mv_accessible( unsigned, array_size );
         mv_accessible( double, dynamic_range ); //full scale range in V (not mV; not magnitude)
         mv_accessible( std::vector<double>, volts_data );
+        mv_accessible( unsigned, chunk_counter );
 
         public:
             void allocate_array( unsigned n_samples );

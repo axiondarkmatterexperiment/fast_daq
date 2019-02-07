@@ -13,7 +13,8 @@ namespace fast_daq
         f_time_series(),
         f_array_size(),
         f_dynamic_range(),
-        f_volts_data()
+        f_volts_data(),
+        f_chunk_counter()
     {
     }
 

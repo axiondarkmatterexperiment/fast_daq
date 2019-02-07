@@ -288,6 +288,7 @@ namespace fast_daq
                         {
                             case input_type_t::real:
                                 std::copy(&f_fftw_output[first_output_index()][0], &f_fftw_output[first_output_index()+num_output_bins()][1], &freq_data_out->get_data_array()[0][0] );
+                                freq_data_out->set_chunk_counter( real_time_data_in->get_chunk_counter() );
                                 break;
                             case input_type_t::complex:
                                 // FFT unfolding based on katydid:Source/Data/Transform/KTFrequencyTransformFFTW

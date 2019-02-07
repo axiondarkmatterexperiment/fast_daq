@@ -26,6 +26,7 @@ namespace fast_daq
         mv_accessible( unsigned, array_size);
         mv_accessible( double, bin_width ); // in [Hz]
         mv_accessible( double, minimum_frequency ); // in [Hz]
+        mv_accessible( unsigned, chunk_counter );
 
         public:
             void allocate_array( unsigned n_samples );
