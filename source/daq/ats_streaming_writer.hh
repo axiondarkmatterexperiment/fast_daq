@@ -23,7 +23,7 @@ namespace fast_daq
 
     /*!
      @class ats_streaming_writer
-     @author N. S. Oblath
+     @author laroque
 
      @brief A consumer to that writes all time ROACH packets to an egg file.
 
