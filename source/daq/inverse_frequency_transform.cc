@@ -128,10 +128,10 @@ namespace fast_daq
                     if ( in_cmd == stream::s_stop )
                     {
                         LDEBUG( flog, "got an s_stop on slot <" << in_stream_index << ">" );
-                        //TODO
+                        //TODO extra timing report
                         LWARN( flog, "frequency output tim report" );
                         out_stream< 0 >().timer_report();
-                        // end of extra timing prints
+                        // end todo of extra timing prints
                         if ( ! out_stream< 0 >().set( stream::s_stop ) ) throw midge::node_nonfatal_error() << "Stream 0 error while stopping";
                         continue;
                     }
@@ -150,6 +150,7 @@ namespace fast_daq
                         output_time_data->set_chunk_counter( input_freq_data->get_chunk_counter() );
                         // copy input data into fft input array
                         std::copy(&input_freq_data->get_data_array()[0][0], &input_freq_data->get_data_array()[0][0] + 2*f_fft_size, &f_fftw_input[0][0] );
+
                         // execute fft
                         fftw_execute( f_fftw_plan );
 
@@ -161,7 +162,6 @@ namespace fast_daq
                             f_fftw_output[i_bin][0] *= fft_norm;
                             f_fftw_output[i_bin][1] *= fft_norm;
                         }
-
                         // Is there anything weird in the output ordering of the inverse transform?
                         std::copy(&f_fftw_output[0][0], &f_fftw_output[f_fft_size][1], &output_time_data->get_data_array()[0][0]);
                         if ( !out_stream< 0 >().set( stream::s_run ) )

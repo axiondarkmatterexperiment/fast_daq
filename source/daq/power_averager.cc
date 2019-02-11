@@ -69,7 +69,6 @@ namespace fast_daq
                 // check the slot status
                 midge::enum_t input_command = in_stream< 0 >().get();
                 unsigned stream_index = in_stream< 0 >().get_current_index();
-                //stream_id = 0;
                 if ( input_command == midge::stream::s_none )
                 {
                     LDEBUG( flog, "who sends an s_none... what does that even mean?" );

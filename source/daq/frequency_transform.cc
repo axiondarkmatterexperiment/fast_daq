@@ -216,7 +216,7 @@ namespace fast_daq
                     if ( in_cmd == stream::s_stop )
                     {
                         LDEBUG( flog, "got an s_stop on slot <" << in_stream_index << ">" );
-                        //TODO
+                        //TODO some extra timing report output
                         LWARN( flog, "frequency output tim report" );
                         out_stream<0>().timer_report();
                         LWARN( flog, "in 1 report:");
@@ -297,7 +297,6 @@ namespace fast_daq
                                 break;
                             default: throw psyllid::error() << "input_type not fully implemented";
                         }
-
                         if ( !out_stream< 0 >().set( stream::s_run ) )
                         {
                             LERROR( flog, "frequency_transform error setting frequency output stream to s_run" );
