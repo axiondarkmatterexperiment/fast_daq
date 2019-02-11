@@ -58,7 +58,7 @@ namespace fast_daq
         if (ret_code != ApiSuccess)
         {
             LERROR( flog, "Error: AlazarGetChannelInfo failed -- " << AlazarErrorToText(ret_code));
-            //TODO do something smarter here
+            //TODO do something smarter here also
             throw 1;
         }
     }
@@ -134,7 +134,6 @@ namespace fast_daq
                 // If not paused continue to process
                 if ( ! f_paused )
                 {
-                    //TODO some condition that if the run is complete
                     if ( f_buffers_completed >= buffers_per_acquisition() )
                     {
                         LINFO( flog, "All requested buffers ("<<f_buffers_completed<<") completed, calling daq_control->stop_run and stopping board Reads" );
@@ -142,12 +141,6 @@ namespace fast_daq
                         t_daq_control->stop_run();
                         check_return_code( AlazarAbortAsyncRead( f_board_handle ),
                                           "AlazarAbortAsyncRead", 1 );
-                        //TODO remove this
-                        /*
-                        LWARN( flog, "trying to print report" );
-                        out_stream< 0 >().timer_report();
-                        LWARN( flog, "end of report" );
-                        */
                     }
                     else
                     {
@@ -267,7 +260,6 @@ namespace fast_daq
             f_chunk_counter = 0;
             f_paused = false;
             LINFO( flog, "run status members set" );
-            //TODO something here to "start" a run
             //initial run setup for the board
             U32 adma_flags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_TRIGGERED_STREAMING;
             check_return_code( AlazarBeforeAsyncRead( f_board_handle, f_channel_mask,
@@ -318,13 +310,6 @@ namespace fast_daq
         //copy the int array into the output stream
         real_time_data* time_data_out = out_stream< 0 >().data();
         time_data_out->set_chunk_counter( f_chunk_counter );
-        //TODO remove this debugging thing
-        /*
-        std::vector<double> the_volts = time_data_out->as_volts();
-        double max_V = *std::max_element(the_volts.begin(), the_volts.end());
-        LTRACE( flog, "ats max voltage in buffer is: " << max_V );
-        */
-        //end TODO debugging
         std::memcpy( time_data_out->get_time_series(), &this_buffer[0], bytes_per_buffer() );
         if( !out_stream< 0 >().set( stream::s_run ) )
         {
