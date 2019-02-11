@@ -147,6 +147,7 @@ namespace fast_daq
                         // Grab data buffers for input and output streams
                         input_freq_data = in_stream< 0 >().data();
                         output_time_data = out_stream< 0 >().data();
+                        output_time_data->set_chunk_counter( input_freq_data->get_chunk_counter() );
                         // copy input data into fft input array
                         std::copy(&input_freq_data->get_data_array()[0][0], &input_freq_data->get_data_array()[0][0] + 2*f_fft_size, &f_fftw_input[0][0] );
                         // execute fft

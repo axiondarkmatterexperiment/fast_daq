@@ -87,6 +87,7 @@ namespace fast_daq
         mv_accessible( uint64_t, out_length );
         mv_accessible( double, trigger_delay_sec );
         mv_accessible( double, trigger_timeout_sec );
+        mv_accessible( unsigned, chunk_counter );
 
         private:
             sample_rate_code_map_t f_sample_rate_to_code;

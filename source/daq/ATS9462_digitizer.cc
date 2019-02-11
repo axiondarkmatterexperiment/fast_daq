@@ -36,6 +36,7 @@ namespace fast_daq
         f_out_length(),
         f_trigger_delay_sec(),
         f_trigger_timeout_sec( 0.01 ),
+        f_chunk_counter( 0 ),
         f_sample_rate_to_code(),
         f_channel_count( 1 ),
         f_channel_mask( CHANNEL_A ),
@@ -263,6 +264,7 @@ namespace fast_daq
             LINFO( flog, "ATS9462 digitizer resuming");
             if( ! out_stream< 0 >().set( midge::stream::s_start ) ) throw midge::node_nonfatal_error() << "Stream 0 error while starting";
             f_buffers_completed = 0;
+            f_chunk_counter = 0;
             f_paused = false;
             LINFO( flog, "run status members set" );
             //TODO something here to "start" a run
@@ -315,6 +317,7 @@ namespace fast_daq
                           "AlazarWaitAsyncBufferComplete", 1 );
         //copy the int array into the output stream
         real_time_data* time_data_out = out_stream< 0 >().data();
+        time_data_out->set_chunk_counter( f_chunk_counter );
         //TODO remove this debugging thing
         /*
         std::vector<double> the_volts = time_data_out->as_volts();
@@ -331,6 +334,7 @@ namespace fast_daq
         check_return_code( AlazarPostAsyncBuffer( f_board_handle, this_buffer, bytes_per_buffer() ),
                           "AlazarPostAsyncBuffer", 1 );
         f_buffers_completed++;
+        f_chunk_counter++;
     }
 
     // Derived properties

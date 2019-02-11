@@ -1,5 +1,4 @@
-/*
- * ats_streaming_writer.cc
+/* * ats_streaming_writer.cc
  *
  *  Created on: Feb. 7, 2019
  *      Author: laroque
@@ -67,7 +66,7 @@ namespace fast_daq
         vector< unsigned > t_chan_vec;
         f_stream_no = a_hw_ptr->header().AddStream( "Psyllid - ROACH2",
                 f_acq_rate, f_record_size, f_sample_size, f_data_type_size,
-                monarch3::sDigitizedS, f_bit_depth, monarch3::sBitsAlignedLeft, &t_chan_vec );
+                monarch3::sAnalog, f_bit_depth, monarch3::sBitsAlignedLeft, &t_chan_vec );
 
         //unsigned i_chan_psyllid = 0; // this is the channel number in psyllid, as opposed to the channel number in the monarch file
         for( std::vector< unsigned >::const_iterator it = t_chan_vec.begin(); it != t_chan_vec.end(); ++it )
