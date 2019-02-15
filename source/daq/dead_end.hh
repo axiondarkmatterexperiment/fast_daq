@@ -23,6 +23,7 @@ namespace fast_daq
     class real_time_data;
     class frequency_data;
     class power_data;
+    class iq_time_data;
 
     /*!
      @class dead_end
@@ -45,9 +46,10 @@ namespace fast_daq
      - 0: real_time_data
      - 1: frequency_data
      - 2: power_data
+     - 3: iq_time_data
 
     */
-    class dead_end : public midge::_consumer< midge::type_list< real_time_data, frequency_data, power_data > >
+    class dead_end : public midge::_consumer< midge::type_list< real_time_data, frequency_data, power_data, iq_time_data > >
     {
         public:
             dead_end();
