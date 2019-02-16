@@ -72,7 +72,7 @@ namespace fast_daq
     // calculate derived params from members
     double frequency_transform::bin_width_hz()
     {
-        return ( f_samples_per_sec / 2. ) / f_fft_size;
+        return ( f_samples_per_sec ) / f_fft_size;
     }
 
     unsigned frequency_transform::first_output_index()
@@ -112,6 +112,7 @@ namespace fast_daq
     {
         out_buffer< 0 >().initialize( f_freq_length );
         out_buffer< 0 >().call( &frequency_data::allocate_array, num_output_bins() );
+        LWARN( flog, "configuring to use: " << num_output_bins() << " bins, each " << bin_width_hz() << " Hz wide" );
 
         if (f_use_wisdom)
         {

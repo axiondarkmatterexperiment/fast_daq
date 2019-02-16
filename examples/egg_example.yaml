@@ -76,7 +76,7 @@ streams:
             samples-per-sec: 50000000 # 50 MSPS (must match ats above)
             freq-length: 100 # number of output buffers
         avg:
-            spectrum-size: 1000 # needs to match the number of bins the fft node above produces
+            spectrum-size: 500 # needs to match the number of bins the fft node above produces
             num-output-buffers: 20
             num-to-average: 99999
         #dend:
@@ -88,13 +88,13 @@ streams:
             spectrum-alert-rk: "sensor_value.medium_spectrum"
         z:
             time-length: 20
-            fft-size: 100
+            fft-size: 500
         writer:
             device:
                 bit-depth: 16
                 data-type-size: 8
                 sample-size: 2
-                record-size: 1000
+                record-size: 500
                 acq-rate: 200.e3 # We have 100 kHz of complex output, 100 kHz of real and 100 kHz of quadrature samples...
                 v-offset: 0.
                 v-range: 1. # my data are already real values, what is this going to do?
