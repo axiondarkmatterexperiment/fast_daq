@@ -29,12 +29,14 @@ namespace fast_daq
         f_samples_per_sec( 50000000 ), //default is 50MS/s
         f_acquisition_length_sec( 0.1 ),
         f_samples_per_buffer( 204800 ),
+        f_input_mag_range( 400 ), // in +/- mV, must be a valid value from the enum
         f_dma_buffer_count( 4883 ),
         f_system_id( 1 ),
         f_board_id( 1 ),
         f_out_length(),
         f_trigger_delay_sec(),
         f_trigger_timeout_sec( 0.01 ),
+        f_chunk_counter( 0 ),
         f_sample_rate_to_code(),
         f_channel_count( 1 ),
         f_channel_mask( CHANNEL_A ),
@@ -56,13 +58,16 @@ namespace fast_daq
         if (ret_code != ApiSuccess)
         {
             LERROR( flog, "Error: AlazarGetChannelInfo failed -- " << AlazarErrorToText(ret_code));
-            //TODO do something smarter here
+            //TODO do something smarter here also
             throw 1;
         }
     }
 
     void ats9462_digitizer::set_internal_maps()
     {
+        // see /usr/include/AlazarCmd.h enums for a full list of valid values
+
+        // Sampling rates
         f_sample_rate_to_code.insert( rate_mapping_t( 1000, SAMPLE_RATE_1KSPS ) );
         f_sample_rate_to_code.insert( rate_mapping_t( 2000, SAMPLE_RATE_2KSPS ) );
         f_sample_rate_to_code.insert( rate_mapping_t( 5000, SAMPLE_RATE_5KSPS ) );
@@ -84,6 +89,10 @@ namespace fast_daq
         f_sample_rate_to_code.insert( rate_mapping_t( 125000000, SAMPLE_RATE_125MSPS ) );
         f_sample_rate_to_code.insert( rate_mapping_t( 160000000, SAMPLE_RATE_160MSPS ) );
         f_sample_rate_to_code.insert( rate_mapping_t( 180000000, SAMPLE_RATE_180MSPS ) );
+
+        // input ranges (note that left values are mV)
+        f_input_range_to_code.insert( input_range_mapping_t( 400, INPUT_RANGE_PM_400_MV ) );
+        f_input_range_to_code.insert( input_range_mapping_t( 800, INPUT_RANGE_PM_800_MV ) );
     }
 
     ats9462_digitizer::~ats9462_digitizer()
@@ -97,6 +106,8 @@ namespace fast_daq
         // setup output buffer
         out_buffer< 0 >().initialize( f_out_length );
         out_buffer< 0 >().call( &real_time_data::allocate_array, f_samples_per_buffer );
+        //Convert +/- mV to dynamic range: (*2 for +/- /1000 for mV->V)
+        out_buffer< 0 >().call( &real_time_data::set_dynamic_range, 2. * static_cast<double>(f_input_mag_range) / 1000. );
         // configure the digitizer board
         configure_board();
         allocate_buffers();
@@ -123,12 +134,13 @@ namespace fast_daq
                 // If not paused continue to process
                 if ( ! f_paused )
                 {
-                    //TODO some condition that if the run is complete
                     if ( f_buffers_completed >= buffers_per_acquisition() )
                     {
-                        LINFO( flog, "All requested buffers ("<<f_buffers_completed<<") completed, calling stop_run" );
+                        LINFO( flog, "All requested buffers ("<<f_buffers_completed<<") completed, calling daq_control->stop_run and stopping board Reads" );
                         std::shared_ptr< psyllid::daq_control > t_daq_control = use_daq_control();
                         t_daq_control->stop_run();
+                        check_return_code( AlazarAbortAsyncRead( f_board_handle ),
+                                          "AlazarAbortAsyncRead", 1 );
                     }
                     else
                     {
@@ -166,17 +178,17 @@ namespace fast_daq
 
     void ats9462_digitizer::configure_board()
     {
-        ALAZAR_SAMPLE_RATES this_rate;
-        LWARN( flog, "sample rate is " << f_samples_per_sec );
-        this_rate = f_sample_rate_to_code.left.at(f_samples_per_sec);
+        ALAZAR_SAMPLE_RATES this_rate = f_sample_rate_to_code.left.at( f_samples_per_sec );
         check_return_code( AlazarSetCaptureClock( f_board_handle, INTERNAL_CLOCK, this_rate, CLOCK_EDGE_RISING, 0),
                           "AlazarSetCaptureClock", 1 );
 
+        ALAZAR_INPUT_RANGES this_input_range = f_input_range_to_code.left.at( f_input_mag_range );
         //check_return_code( AlazarInputControlEx( f_board_handle, CHANNEL_A, DC_COUPLING, INPUT_RANGE_PM_800_MV, IMPEDANCE_50_OHM ),
-        check_return_code( AlazarInputControlEx( f_board_handle, CHANNEL_A, DC_COUPLING, INPUT_RANGE_PM_400_MV, IMPEDANCE_50_OHM ),
+        //check_return_code( AlazarInputControlEx( f_board_handle, CHANNEL_A, DC_COUPLING, INPUT_RANGE_PM_400_MV, IMPEDANCE_50_OHM ),
+        check_return_code( AlazarInputControlEx( f_board_handle, f_channel_mask, DC_COUPLING, this_input_range, IMPEDANCE_50_OHM ),
                           "AlazarInputControlEx", 1 );
 
-        check_return_code( AlazarSetBWLimit( f_board_handle, CHANNEL_A, 0 ),
+        check_return_code( AlazarSetBWLimit( f_board_handle, f_channel_mask, 0 ),
                           "AlazarSetBWLimit", 1 );
 
         check_return_code( AlazarSetTriggerOperation( f_board_handle,
@@ -245,9 +257,9 @@ namespace fast_daq
             LINFO( flog, "ATS9462 digitizer resuming");
             if( ! out_stream< 0 >().set( midge::stream::s_start ) ) throw midge::node_nonfatal_error() << "Stream 0 error while starting";
             f_buffers_completed = 0;
+            f_chunk_counter = 0;
             f_paused = false;
             LINFO( flog, "run status members set" );
-            //TODO something here to "start" a run
             //initial run setup for the board
             U32 adma_flags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_TRIGGERED_STREAMING;
             check_return_code( AlazarBeforeAsyncRead( f_board_handle, f_channel_mask,
@@ -276,7 +288,8 @@ namespace fast_daq
             LINFO( flog, "ATS9462 digitizer pausing");
             if( ! out_stream< 0 >().set( midge::stream::s_stop ) ) throw midge::node_nonfatal_error() << "Stream 0 error while stopping";
             f_paused = true;
-            //TODO something here to "end" a run
+            //Note: this step may have already have been done when the requested buffer count was reached
+            //      it is not a problem for the function to be called again here.
             check_return_code( AlazarAbortAsyncRead( f_board_handle ),
                               "AlazarAbortAsyncRead", 1 );
             LDEBUG( flog, "abort async read sent to board" );
@@ -296,6 +309,7 @@ namespace fast_daq
                           "AlazarWaitAsyncBufferComplete", 1 );
         //copy the int array into the output stream
         real_time_data* time_data_out = out_stream< 0 >().data();
+        time_data_out->set_chunk_counter( f_chunk_counter );
         std::memcpy( time_data_out->get_time_series(), &this_buffer[0], bytes_per_buffer() );
         if( !out_stream< 0 >().set( stream::s_run ) )
         {
@@ -305,6 +319,7 @@ namespace fast_daq
         check_return_code( AlazarPostAsyncBuffer( f_board_handle, this_buffer, bytes_per_buffer() ),
                           "AlazarPostAsyncBuffer", 1 );
         f_buffers_completed++;
+        f_chunk_counter++;
     }
 
     // Derived properties

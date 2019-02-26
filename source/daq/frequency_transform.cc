@@ -72,7 +72,7 @@ namespace fast_daq
     // calculate derived params from members
     double frequency_transform::bin_width_hz()
     {
-        return ( f_samples_per_sec / 2. ) / f_fft_size;
+        return ( f_samples_per_sec ) / f_fft_size;
     }
 
     unsigned frequency_transform::first_output_index()
@@ -112,6 +112,7 @@ namespace fast_daq
     {
         out_buffer< 0 >().initialize( f_freq_length );
         out_buffer< 0 >().call( &frequency_data::allocate_array, num_output_bins() );
+        LWARN( flog, "configuring to use: " << num_output_bins() << " bins, each " << bin_width_hz() << " Hz wide" );
 
         if (f_use_wisdom)
         {
@@ -173,7 +174,6 @@ namespace fast_daq
             psyllid::time_data* complex_time_data_in = nullptr;
             real_time_data* real_time_data_in = nullptr;
             frequency_data* freq_data_out = nullptr;
-            double fft_norm = sqrt(1. / (double)f_fft_size);
 
             try
             {
@@ -217,6 +217,13 @@ namespace fast_daq
                     if ( in_cmd == stream::s_stop )
                     {
                         LDEBUG( flog, "got an s_stop on slot <" << in_stream_index << ">" );
+                        //TODO some extra timing report output
+                        LWARN( flog, "frequency output tim report" );
+                        out_stream<0>().timer_report();
+                        LWARN( flog, "in 1 report:");
+                        in_stream< 1 >().timer_report();
+                        LWARN( flog, "all reports done");
+                        // end of extra timing prints
                         if ( ! out_stream< 0 >().set( stream::s_stop ) ) throw midge::node_nonfatal_error() << "Stream 0 error while stopping";
                         continue;
                     }
@@ -231,7 +238,7 @@ namespace fast_daq
                     }
                     if ( in_cmd == stream::s_run )
                     {
-                        LDEBUG( flog, "got an s_run on slot <" << in_stream_index << ">" );
+                        LTRACE( flog, "got an s_run on slot <" << in_stream_index << ">" );
                         unsigned t_center_bin;
                         switch ( f_input_type )
                         {
@@ -248,11 +255,16 @@ namespace fast_daq
                         //frequency output
                         freq_data_out = out_stream< 0 >().data();
 
+                        std::vector<double> volts_data;
+
+                        // copy input data into fft input array
                         switch (f_input_type)
                         {
                             case input_type_t::real:
                                 LTRACE( flog, "copy real input data" );
-                                std::copy(&real_time_data_in->get_time_series()[0], &real_time_data_in->get_time_series()[0] + f_fft_size, &f_fftw_input_real[0]);
+                                //std::copy(&real_time_data_in->get_time_series()[0], &real_time_data_in->get_time_series()[0] + f_fft_size, &f_fftw_input_real[0]);
+                                volts_data = real_time_data_in->as_volts();
+                                std::copy(volts_data.begin(), volts_data.end(), &f_fftw_input_real[0] );
                                 break;
                             case input_type_t::complex:
                                 LTRACE( flog, "grab complex data" );
@@ -261,10 +273,12 @@ namespace fast_daq
                                 break;
                             default: throw psyllid::error() << "input_type not fully implemented";
                         }
+                        // execute fft
                         fftw_execute( f_fftw_plan );
 
                         //take care of FFT normalization
                         //is this the normalization we want?
+                        double fft_norm = sqrt(1. / (double)f_fft_size);
                         for (size_t i_bin=0; i_bin<f_fft_size; ++i_bin)
                         {
                             f_fftw_output[i_bin][0] *= fft_norm;
@@ -275,6 +289,7 @@ namespace fast_daq
                         {
                             case input_type_t::real:
                                 std::copy(&f_fftw_output[first_output_index()][0], &f_fftw_output[first_output_index()+num_output_bins()][1], &freq_data_out->get_data_array()[0][0] );
+                                freq_data_out->set_chunk_counter( real_time_data_in->get_chunk_counter() );
                                 break;
                             case input_type_t::complex:
                                 // FFT unfolding based on katydid:Source/Data/Transform/KTFrequencyTransformFFTW
@@ -283,7 +298,6 @@ namespace fast_daq
                                 break;
                             default: throw psyllid::error() << "input_type not fully implemented";
                         }
-
                         if ( !out_stream< 0 >().set( stream::s_run ) )
                         {
                             LERROR( flog, "frequency_transform error setting frequency output stream to s_run" );

@@ -13,6 +13,7 @@
 //fast_daq includes
 #include "dead_end.hh"
 #include "frequency_data.hh"
+#include "iq_time_data.hh"
 #include "real_time_data.hh"
 #include "power_data.hh"
 
@@ -76,6 +77,11 @@ namespace fast_daq
                         input_command = in_stream< 2 >().get();
                         stream_index = in_stream< 2 >().get_current_index();
                         stream_id = 2;
+                        break;
+                    case 3:
+                        input_command = in_stream< 3 >().get();
+                        stream_index = in_stream< 3 >().get_current_index();
+                        stream_id = 3;
                         break;
                     default:
                         LERROR( flog, "input type not recognized!" );
