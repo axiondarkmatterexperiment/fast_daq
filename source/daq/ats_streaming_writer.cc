@@ -45,12 +45,6 @@ namespace fast_daq
             f_stream_no( 0 )
     {
     }
-    /*
-        For complex time data we want:
-        f_data_type_size = 8 // 8 bytes per double
-        f_sample_size = 2 // number of components, each of size f_data_type_size
-        f_record_size = <runtime_configuration> // number of samples per "chunk" of data
-    */
 
     ats_streaming_writer::~ats_streaming_writer()
     {
