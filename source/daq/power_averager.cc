@@ -140,8 +140,8 @@ namespace fast_daq
         for (unsigned i_bin=0; i_bin < data_in->get_array_size(); i_bin++)
         {
             // compute the power in mW (note, not W)
-            // 1000.0 is to get to mW, 50.0 is impedance; 2.0 is to get RMS from peak voltage
-            float these_mW = ( std::pow(data_array_in[i_bin][0], 2) + std::pow(data_array_in[i_bin][1], 2) ) * 1000.0 / 50.0 / 2.0;
+            // 1000.0 is to get to mW, 50.0 is impedance
+            float these_mW = ( std::pow(data_array_in[i_bin][0], 2) + std::pow(data_array_in[i_bin][1], 2) ) * 1000.0 / 50.0;
             // divide by number of items in average and increment average spectrum buffer
             f_average_spectrum[i_bin] += these_mW / static_cast<float>(f_num_to_average);
         }

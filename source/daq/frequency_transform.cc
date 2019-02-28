@@ -277,7 +277,7 @@ namespace fast_daq
 
                         //take care of FFT normalization
                         //is this the normalization we want?
-                        float fft_norm = sqrt(1. / (float)f_fft_size);
+                        float fft_norm = sqrt(2. / (double)f_fft_size);
                         for (size_t i_bin=0; i_bin<f_fft_size; ++i_bin)
                         {
                             f_fftwf_output[i_bin][0] *= fft_norm;
