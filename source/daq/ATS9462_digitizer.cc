@@ -291,29 +291,6 @@ namespace fast_daq
             LINFO( flog, "run status members set" );
             //initial run setup for the board
             commence_buffer_collection();
-            /* TODO remove this block
-            U32 adma_flags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_TRIGGERED_STREAMING;
-            check_return_code( AlazarBeforeAsyncRead( f_board_handle, f_channel_mask,
-                                                          0, //per example, "Must be 0"
-                                                          f_samples_per_buffer,
-                                                          1, //per example, "Must be 1"
-                                                          0x7FFFFFFF, //per example "Ignored. Behave as if infinite"
-                                                          adma_flags
-                                                        ),
-                              "AlazarBeforeAsyncRead", 1 );
-            LINFO( flog, "board pre-read complete" );
-            //give the board all buffers
-            for (U16* a_buffer : f_board_buffers)
-            {
-                check_return_code( AlazarPostAsyncBuffer( f_board_handle, a_buffer, bytes_per_buffer() ),
-                                  "AlazarPostAsyncBuffer", 1 );
-            }
-            LINFO( flog, "buffers posted to board" );
-            //arm the trigger, should start immediately
-            check_return_code( AlazarStartCapture( f_board_handle ),
-                              "AlazarStartCapture", 1 );
-            LDEBUG( flog, "digitizer trigger armed, buffer collection should begin" );
-            */
         }
         else if( ! f_paused && use_instruction() == midge::instruction::pause )
         {
@@ -364,21 +341,9 @@ namespace fast_daq
         }
         if ( f_overrun_collected == f_dma_buffer_count )
         {
-            //TODO something here to restart the acquisition
             LWARN( flog, "something goes here to restart the acquisition" );
             ++f_chunk_counter;
             commence_buffer_collection();
-            /* TODO remove this block
-            check_return_code( AlazarAbortAsyncRead( f_board_handle ), "AlazarAbortAsyncRead", 1 );
-            for (U16* a_buffer : f_board_buffers)
-            {
-                check_return_code( AlazarPostAsyncBuffer( f_board_handle, a_buffer, bytes_per_buffer() ),
-                                  "AlazarPostAsyncBuffer", 1 );
-            }
-            check_return_code( AlazarStartCapture( f_board_handle ),
-                              "AlazarStartCapture", 1 );
-            LWARN( flog, "should be resuming" );
-            */
         }
         ++f_buffers_completed;
         ++f_chunk_counter;
