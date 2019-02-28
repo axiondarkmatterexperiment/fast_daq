@@ -33,9 +33,9 @@ namespace fast_daq
             f_use_wisdom( true ),
             f_wisdom_filename( "wisdom_complex_inversefft.fftw3" ),
             f_transform_flag_map(),
-            f_fftw_input(),
-            f_fftw_output(),
-            f_fftw_plan(),
+            f_fftwf_input(),
+            f_fftwf_output(),
+            f_fftwf_plan(),
             f_multithreaded_is_initialized( false )
     {
         setup_internal_maps();
@@ -53,7 +53,7 @@ namespace fast_daq
         if (f_use_wisdom)
         {
             LDEBUG( flog, "Reading wisdom from file <" << f_wisdom_filename << ">");
-            if (fftw_import_wisdom_from_filename(f_wisdom_filename.c_str()) == 0)
+            if (fftwf_import_wisdom_from_filename(f_wisdom_filename.c_str()) == 0)
             {
                 LWARN( flog, "Unable to read FFTW wisdom from file <" << f_wisdom_filename << ">" );
             }
@@ -62,8 +62,8 @@ namespace fast_daq
         #ifdef FFTW_NTHREADS
             if (! f_multithreaded_is_initialized)
             {
-                fftw_init_threads();
-                fftw_plan_with_nthreads(FFTW_NTHREADS);
+                fftwf_init_threads();
+                fftwf_plan_with_nthreads(FFTW_NTHREADS);
                 LDEBUG( flog, "Configuring FFTW to use up to " << FFTW_NTHREADS << " threads.");
                 f_multithreaded_is_initialized = true;
             }
@@ -72,15 +72,15 @@ namespace fast_daq
         transform_flag_map_t::const_iterator iter = f_transform_flag_map.find(f_transform_flag);
         unsigned transform_flag = iter->second;
         // initialize FFTW IO arrays and plan
-        f_fftw_input= (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * f_fft_size);
-        f_fftw_output = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * f_fft_size);
-        f_fftw_plan = fftw_plan_dft_1d(f_fft_size, f_fftw_input, f_fftw_output, FFTW_BACKWARD, transform_flag | FFTW_PRESERVE_INPUT);
+        f_fftwf_input= (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * f_fft_size);
+        f_fftwf_output = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * f_fft_size);
+        f_fftwf_plan = fftwf_plan_dft_1d(f_fft_size, f_fftwf_input, f_fftwf_output, FFTW_BACKWARD, transform_flag | FFTW_PRESERVE_INPUT);
         //save plan
-        if (f_fftw_plan != NULL)
+        if (f_fftwf_plan != NULL)
         {
             if (f_use_wisdom)
             {
-                if (fftw_export_wisdom_to_filename(f_wisdom_filename.c_str()) == 0)
+                if (fftwf_export_wisdom_to_filename(f_wisdom_filename.c_str()) == 0)
                 {
                     LWARN( flog, "Unable to write FFTW wisdom to file<" << f_wisdom_filename << ">");
                 }
@@ -149,21 +149,21 @@ namespace fast_daq
                         output_time_data = out_stream< 0 >().data();
                         output_time_data->set_chunk_counter( input_freq_data->get_chunk_counter() );
                         // copy input data into fft input array
-                        std::copy(&input_freq_data->get_data_array()[0][0], &input_freq_data->get_data_array()[0][0] + 2*f_fft_size, &f_fftw_input[0][0] );
+                        std::copy(&input_freq_data->get_data_array()[0][0], &input_freq_data->get_data_array()[0][0] + 2*f_fft_size, &f_fftwf_input[0][0] );
 
                         // execute fft
-                        fftw_execute( f_fftw_plan );
+                        fftwf_execute( f_fftwf_plan );
 
                         //take care of FFT normalization
                         //is this the normalization we want?
-                        double fft_norm = sqrt(1. / (double)f_fft_size);
+                        float fft_norm = sqrt(1. / (float)f_fft_size);
                         for (size_t i_bin=0; i_bin<f_fft_size; ++i_bin)
                         {
-                            f_fftw_output[i_bin][0] *= fft_norm;
-                            f_fftw_output[i_bin][1] *= fft_norm;
+                            f_fftwf_output[i_bin][0] *= fft_norm;
+                            f_fftwf_output[i_bin][1] *= fft_norm;
                         }
                         // Is there anything weird in the output ordering of the inverse transform?
-                        std::copy(&f_fftw_output[0][0], &f_fftw_output[f_fft_size][1], &output_time_data->get_data_array()[0][0]);
+                        std::copy(&f_fftwf_output[0][0], &f_fftwf_output[f_fft_size][1], &output_time_data->get_data_array()[0][0]);
                         if ( !out_stream< 0 >().set( stream::s_run ) )
                         {
                             LERROR( flog, "inverse_frequency_transform error setting frequency output stream to s_run" );
@@ -202,15 +202,15 @@ namespace fast_daq
     {
         LINFO( flog, "in finalize(), freeing fftw data objects" );
         out_buffer< 0 >().finalize();
-        if (f_fftw_input!= NULL )
+        if (f_fftwf_input!= NULL )
         {
-            fftw_free(f_fftw_input);
-            f_fftw_input= NULL;
+            fftwf_free(f_fftwf_input);
+            f_fftwf_input= NULL;
         }
-        if (f_fftw_output != NULL)
+        if (f_fftwf_output != NULL)
         {
-            fftw_free(f_fftw_output);
-            f_fftw_output = NULL;
+            fftwf_free(f_fftwf_output);
+            f_fftwf_output = NULL;
         }
         return;
     }
