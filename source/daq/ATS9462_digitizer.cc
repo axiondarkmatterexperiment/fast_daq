@@ -31,12 +31,14 @@ namespace fast_daq
         f_samples_per_buffer( 204800 ),
         f_input_mag_range( 400 ), // in +/- mV, must be a valid value from the enum
         f_dma_buffer_count( 4883 ),
+        f_next_read_buffer( 0 ),
         f_system_id( 1 ),
         f_board_id( 1 ),
         f_out_length(),
         f_trigger_delay_sec(),
         f_trigger_timeout_sec( 0.01 ),
         f_chunk_counter( 0 ),
+        f_overrun_collected( 0 ),
         f_sample_rate_to_code(),
         f_channel_count( 1 ),
         f_channel_mask( CHANNEL_A ),
@@ -250,6 +252,33 @@ namespace fast_daq
         }
     }
 
+    void ats9462_digitizer::commence_buffer_collection()
+    {
+        U32 adma_flags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_TRIGGERED_STREAMING;
+        check_return_code( AlazarBeforeAsyncRead( f_board_handle, f_channel_mask,
+                                                  0, //per example, "Must be 0"
+                                                  f_samples_per_buffer,
+                                                  1, //per example, "Must be 1"
+                                                  0x7FFFFFFF, //per example "Ignored. Behave as if infinite"
+                                                  adma_flags
+                                                ),
+                          "AlazarBeforeAsyncRead", 1 );
+        LINFO( flog, "board pre-read complete" );
+        //give the board all buffers
+        f_overrun_collected = 0;
+        for (U16* a_buffer : f_board_buffers)
+        {
+            check_return_code( AlazarPostAsyncBuffer( f_board_handle, a_buffer, bytes_per_buffer() ),
+                              "AlazarPostAsyncBuffer", 1 );
+        }
+        f_next_read_buffer = 0;
+        LINFO( flog, "buffers posted to board" );
+        // arm the trigger to start immediately
+        check_return_code( AlazarStartCapture( f_board_handle ),
+                          "AlazarStartCapture", 1 );
+        LDEBUG( flog, "digitizer trigger armed, buffer collection should begin" );
+    }
+
     void ats9462_digitizer::process_instructions()
     {
         if( f_paused && use_instruction() == midge::instruction::resume )
@@ -261,27 +290,7 @@ namespace fast_daq
             f_paused = false;
             LINFO( flog, "run status members set" );
             //initial run setup for the board
-            U32 adma_flags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_TRIGGERED_STREAMING;
-            check_return_code( AlazarBeforeAsyncRead( f_board_handle, f_channel_mask,
-                                                          0, //per example, "Must be 0"
-                                                          f_samples_per_buffer,
-                                                          1, //per example, "Must be 1"
-                                                          0x7FFFFFFF, //per example "Ignored. Behave as if infinite"
-                                                          adma_flags
-                                                        ),
-                              "AlazarBeforeAsyncRead", 1 );
-            LINFO( flog, "board pre-read complete" );
-            //give the board all buffers
-            for (U16* a_buffer : f_board_buffers)
-            {
-                check_return_code( AlazarPostAsyncBuffer( f_board_handle, a_buffer, bytes_per_buffer() ),
-                                  "AlazarPostAsyncBuffer", 1 );
-            }
-            LINFO( flog, "buffers posted to board" );
-            //arm the trigger, should start immediately
-            check_return_code( AlazarStartCapture( f_board_handle ),
-                              "AlazarStartCapture", 1 );
-            LDEBUG( flog, "digitizer trigger armed, buffer collection should begin" );
+            commence_buffer_collection();
         }
         else if( ! f_paused && use_instruction() == midge::instruction::pause )
         {
@@ -304,9 +313,10 @@ namespace fast_daq
     {
         LTRACE( flog, "in process_a_buffer" );
         //grab the next buffer, once it is filled by the digitizer
-        U16* this_buffer = f_board_buffers.at( f_buffers_completed % f_board_buffers.size() );
+        U16* this_buffer = f_board_buffers.at( f_next_read_buffer % f_board_buffers.size() );
         check_return_code( AlazarWaitAsyncBufferComplete( f_board_handle, this_buffer, 5000 ),
                           "AlazarWaitAsyncBufferComplete", 1 );
+        ++f_next_read_buffer;
         //copy the int array into the output stream
         real_time_data* time_data_out = out_stream< 0 >().data();
         time_data_out->set_chunk_counter( f_chunk_counter );
@@ -315,11 +325,28 @@ namespace fast_daq
         {
             LERROR( flog, "error pushing time series to output stream" );
         }
-        //return buffer to board and increment buffer count
-        check_return_code( AlazarPostAsyncBuffer( f_board_handle, this_buffer, bytes_per_buffer() ),
-                          "AlazarPostAsyncBuffer", 1 );
-        f_buffers_completed++;
-        f_chunk_counter++;
+        // if we're not in a buffer overrun, try to return the buffer to the board
+        if ( ! f_overrun_collected )
+        {
+            if ( ! check_return_code( AlazarPostAsyncBuffer( f_board_handle, this_buffer, bytes_per_buffer() ), "AlazarPostAsyncBuffer", 0 ) )
+            { // if posting the buffer fails, we're in an overrun; collect all buffers then restart
+                LWARN( flog, "in overrun situation, starting to count" );
+                f_overrun_collected = 1;
+            }
+        }
+        else
+        {
+            ++f_overrun_collected;
+            LWARN( flog, "overrun collection now at " << f_overrun_collected << "/" << f_dma_buffer_count );
+        }
+        if ( f_overrun_collected == f_dma_buffer_count )
+        {
+            LWARN( flog, "something goes here to restart the acquisition" );
+            ++f_chunk_counter;
+            commence_buffer_collection();
+        }
+        ++f_buffers_completed;
+        ++f_chunk_counter;
     }
 
     // Derived properties
