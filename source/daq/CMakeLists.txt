@@ -19,11 +19,11 @@ set( sources
     spectrum_relay.cc
 )
 
-if ( FastDAQ_ENABLE_ATS)
+if( ATS9462_FOUND )
     # digitizer node
     set( headers ${headers} ATS9462_digitizer.hh )
     set( sources ${sources} ATS9462_digitizer.cc )
-endif ( FastDAQ_ENABLE_ATS)
+endif( ATS9462_FOUND )
 
 set( dependencies
     FastDaqData
