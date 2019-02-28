@@ -82,12 +82,14 @@ namespace fast_daq
         mv_accessible( U32, samples_per_buffer );
         mv_accessible( U32, input_mag_range );
         mv_accessible( U32, dma_buffer_count );
+        mv_accessible( unsigned, next_read_buffer );
         mv_accessible( U32, system_id );
         mv_accessible( U32, board_id );
         mv_accessible( uint64_t, out_length );
         mv_accessible( double, trigger_delay_sec );
         mv_accessible( double, trigger_timeout_sec );
         mv_accessible( unsigned, chunk_counter );
+        mv_accessible( unsigned, overrun_collected );
 
         private:
             sample_rate_code_map_t f_sample_rate_to_code;
@@ -106,6 +108,7 @@ namespace fast_daq
             void configure_board();
             void allocate_buffers();
             void clear_buffers();
+            void commence_buffer_collection();
             void process_instructions();
             void process_a_buffer();
 
