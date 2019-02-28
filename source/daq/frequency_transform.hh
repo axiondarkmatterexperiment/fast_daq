@@ -101,9 +101,9 @@ namespace fast_daq
 
         // derrive scalers
         private:
-            double bin_width_hz();
+            float bin_width_hz();
             unsigned first_output_index();
-            double min_output_frequency();
+            float min_output_frequency();
             unsigned num_output_bins();
 
         private:

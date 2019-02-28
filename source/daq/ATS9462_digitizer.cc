@@ -109,7 +109,9 @@ namespace fast_daq
         out_buffer< 0 >().initialize( f_out_length );
         out_buffer< 0 >().call( &real_time_data::allocate_array, f_samples_per_buffer );
         //Convert +/- mV to dynamic range: (*2 for +/- /1000 for mV->V)
-        out_buffer< 0 >().call( &real_time_data::set_dynamic_range, 2. * static_cast<double>(f_input_mag_range) / 1000. );
+        float t_dynm_range = 2. * static_cast<float>(f_input_mag_range) / 1000.;
+        //out_buffer< 0 >().call( &real_time_data::set_dynamic_range, 2. * static_cast<float>(f_input_mag_range) / 1000. );
+        out_buffer< 0 >().call( &real_time_data::set_dynamic_range, t_dynm_range );
         // configure the digitizer board
         configure_board();
         allocate_buffers();

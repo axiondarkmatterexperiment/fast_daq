@@ -19,11 +19,11 @@ namespace fast_daq
             virtual ~power_data();
 
         // member varaible macros
-        //TODO this should probably be an std::vector, not an double*
-        mv_accessible( double*, data_array );
+        //TODO this should probably be an std::vector, not an float*
+        mv_accessible( float*, data_array );
         mv_accessible( unsigned, array_size );
-        mv_accessible( double, bin_width ); // in [Hz]
-        mv_accessible( double, minimum_frequency ); // in [Hz]
+        mv_accessible( float, bin_width ); // in [Hz]
+        mv_accessible( float, minimum_frequency ); // in [Hz]
 
         public:
             void allocate_array( unsigned n_samples );

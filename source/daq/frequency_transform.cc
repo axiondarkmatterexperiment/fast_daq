@@ -70,14 +70,14 @@ namespace fast_daq
     }
 
     // calculate derived params from members
-    double frequency_transform::bin_width_hz()
+    float frequency_transform::bin_width_hz()
     {
         return ( f_samples_per_sec ) / f_fft_size;
     }
 
     unsigned frequency_transform::first_output_index()
     {
-        double t_bin_width_hz = bin_width_hz();
+        float t_bin_width_hz = bin_width_hz();
         unsigned center_bin = ((f_fft_size - 1) / 2) + 1;
         if ( f_centerish_freq > 0. )
         {
@@ -92,7 +92,7 @@ namespace fast_daq
         return to_return;
     }
 
-    double frequency_transform::min_output_frequency()
+    float frequency_transform::min_output_frequency()
     {
         return first_output_index() * bin_width_hz();
     }
@@ -102,8 +102,7 @@ namespace fast_daq
         unsigned to_return = f_fft_size;
         if ( f_min_output_bandwidth > 0. )
         {
-            double t_bin_width_hz = bin_width_hz();
-            to_return = static_cast<int>( f_min_output_bandwidth / t_bin_width_hz - 1. ) + 1;
+            to_return = static_cast<int>( f_min_output_bandwidth / bin_width_hz() - 1. ) + 1;
         }
         return std::min(to_return, f_fft_size);
     }
