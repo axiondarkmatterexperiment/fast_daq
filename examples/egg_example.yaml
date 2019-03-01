@@ -78,7 +78,7 @@ streams:
         avg:
             spectrum-size: 500 # needs to match the number of bins the fft node above produces
             num-output-buffers: 20
-            num-to-average: 99999
+            num-to-average: 0 #10000
         #dend:
             #input-index: 0 # for simple_time input
             #input-index: 1 # for frequency_data
@@ -92,7 +92,7 @@ streams:
         writer:
             device:
                 bit-depth: 16
-                data-type-size: 8
+                data-type-size: 4
                 sample-size: 2
                 record-size: 500
                 acq-rate: 200.e3 # We have 100 kHz of complex output, 100 kHz of real and 100 kHz of quadrature samples...

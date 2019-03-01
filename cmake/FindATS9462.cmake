@@ -1,7 +1,7 @@
 # Check for the presence of the ATS9462 digitizer
 #
 # The following variables are set when ATS9462 is found:
-#  HAVE_ATS9462          = Set to true, if all components of ATS9462
+#  ATS9462_FOUND         = Set to true, if all components of ATS9462
 #                          have been found.
 #  ATS9462_INCLUDE_DIR   = Include path for the header files of ATS9462
 #  ATS9462_LIBRARIES     = Link these to use ATS9462
@@ -24,7 +24,7 @@ find_library (ATS9462_LIBRARIES ATSApi
 ## Actions taken when all components have been found
 
 if (ATS9462_INCLUDE_DIR AND ATS9462_LIBRARIES)
-  set (HAVE_ATS9462 TRUE)
+  set (ATS9462_FOUND TRUE)
 else (ATS9462_INCLUDE_DIR AND ATS9462_LIBRARIES)
   if (NOT ATS9462_FIND_QUIETLY)
     if (NOT ATS9462_INCLUDE_DIR)
@@ -36,20 +36,20 @@ else (ATS9462_INCLUDE_DIR AND ATS9462_LIBRARIES)
   endif (NOT ATS9462_FIND_QUIETLY)
 endif (ATS9462_INCLUDE_DIR AND ATS9462_LIBRARIES)
 
-if (HAVE_ATS9462)
+if (ATS9462_FOUND)
   if (NOT ATS9462_FIND_QUIETLY)
     message (STATUS "Found components for ATS9462")
     message (STATUS "ATS9462_INCLUDE_DIR = ${ATS9462_INCLUDE_DIR}")
     message (STATUS "ATS9462_LIBRARIES = ${ATS9462_LIBRARIES}")
   endif (NOT ATS9462_FIND_QUIETLY)
-else (HAVE_ATS9462)
+else (ATS9462_FOUND)
   if (ATS9462_FIND_REQUIRED)
     message (FATAL_ERROR "Could not find ATS9462!")
   endif (ATS9462_FIND_REQUIRED)
-endif (HAVE_ATS9462)
+endif (ATS9462_FOUND)
 
 mark_as_advanced (
-  HAVE_ATS9462
+  ATS9462_FOUND
   ATS9462_LIBRARIES
   ATS9462_INCLUDE_DIR
 )
