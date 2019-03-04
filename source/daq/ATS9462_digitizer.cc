@@ -57,13 +57,8 @@ namespace fast_daq
             //TODO do something smarter here
             throw 1;
         }
-        RETURN_CODE ret_code = AlazarGetChannelInfo(f_board_handle, &f_max_samples_per_channel, &f_bits_per_sample);
-        if (ret_code != ApiSuccess)
-        {
-            LERROR( flog, "Error: AlazarGetChannelInfo failed -- " << AlazarErrorToText(ret_code));
-            //TODO do something smarter here also
-            throw 1;
-        }
+        check_return_code( AlazarGetChannelInfo(f_board_handle, &f_max_samples_per_channel, &f_bits_per_sample),
+                          "AlazarGetChannelInfo", 1);
     }
 
     void ats9462_digitizer::set_internal_maps()
