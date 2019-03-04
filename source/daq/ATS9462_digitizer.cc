@@ -15,6 +15,7 @@
 
 using midge::stream;
 
+
 namespace fast_daq
 {
     REGISTER_NODE_AND_BUILDER( ats9462_digitizer, "ats9462", ats9462_digitizer_binding );
@@ -330,7 +331,8 @@ namespace fast_daq
         // if we're not in a buffer overrun, try to return the buffer to the board
         if ( ! f_overrun_collected )
         {
-            if ( ! check_return_code( AlazarPostAsyncBuffer( f_board_handle, this_buffer, bytes_per_buffer() ), "AlazarPostAsyncBuffer", 0 ) )
+            if ( ! check_return_code( AlazarPostAsyncBuffer( f_board_handle, this_buffer, bytes_per_buffer() ),
+                                     "AlazarPostAsyncBuffer", 0 ) )
             { // if posting the buffer fails, we're in an overrun; collect all buffers then restart
                 LWARN( flog, "in overrun situation, starting to count" );
                 f_overrun_collected = 1;
