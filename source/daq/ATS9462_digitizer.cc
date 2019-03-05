@@ -329,18 +329,18 @@ namespace fast_daq
             if ( ! check_return_code( AlazarPostAsyncBuffer( f_board_handle, this_buffer, bytes_per_buffer() ),
                                      "AlazarPostAsyncBuffer", 0 ) )
             { // if posting the buffer fails, we're in an overrun; collect all buffers then restart
-                LWARN( flog, "in overrun situation, starting to count" );
+                LINFO( flog, "DMA buffer overrun detected; flushing buffers then will increment acquisition" );
                 f_overrun_collected = 1;
             }
         }
         else
         {
             ++f_overrun_collected;
-            LWARN( flog, "overrun collection now at " << f_overrun_collected << "/" << f_dma_buffer_count );
+            LDEBUG( flog, "overrun collection now at " << f_overrun_collected << "/" << f_dma_buffer_count );
         }
         if ( f_overrun_collected == f_dma_buffer_count )
         {
-            LWARN( flog, "something goes here to restart the acquisition" );
+            LINFO( flog, "all buffers cleared, incrementing acquistition number and restarting digitization" );
             ++f_chunk_counter;
             commence_buffer_collection();
         }
