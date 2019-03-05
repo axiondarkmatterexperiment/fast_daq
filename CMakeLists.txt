@@ -5,13 +5,17 @@ cmake_minimum_required (VERSION 3.1)
 cmake_policy( SET CMP0048 NEW ) # version in project()
 project( FastDaq VERSION 0.1.0 )
 
-list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/psyllid/midge/scarab/cmake )
+# Setup the module path in the proper order for overriding dependencies
+list( APPEND CMAKE_MODULE_PATH 
+    ${PROJECT_SOURCE_DIR}/cmake 
+    ${PROJECT_SOURCE_DIR}/psyllid/cmake
+    ${PROJECT_SOURCE_DIR}/psyllid/midge/cmake
+    ${PROJECT_SOURCE_DIR}/psyllid/midge/scarab/cmake
+)
+
+# Inclusions of dependencies' cmake files
 include( PackageBuilder )
-
-list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/psyllid/midge/cmake )
 include( MidgeUtility )
-
-list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/psyllid/cmake )
 include( Psyllid )
 
 pbuilder_prepare_project()
@@ -21,22 +25,29 @@ pbuilder_prepare_project()
 # flags #
 #########
 
+option( FastDAQ_ENABLE_ATS "Flag to enable building of node to read from AlazarTech digitizer" )
+option( FastDAQ_ENABLE_FFTW "Flag to enable FFTW features" TRUE )
 set_option( USE_CPP11 TRUE )
+
 
 ################
 # dependencies #
 ################
 
 # AlazarTech
-list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
-include( ATS9462 )
-add_ats9462( ATS_FOUND )
-option( FastDAQ_ENABLE_ATS "Flag to enable building of node to read from AlazarTech digitizer" ${ATS_FOUND} )
+if (FastDAQ_ENABLE_ATS)
+    find_package(ATS9462 REQUIRED)
+else (FastDAQ_ENABLE_ATS)
+    set (ATS9462_FOUND FALSE)
+endif (FastDAQ_ENABLE_ATS)
+if (ATS9462_FOUND)
+    pbuilder_add_ext_libraries( ${ATS9462_LIBRARIES} )
+    include_directories (${ATS9462_INCLUDE_DIR})
+endif (ATS9462_FOUND)
 
 # FFTW
-option( FastDAQ_ENABLE_FFTW "Flag to enable FFTW features" TRUE )
 if (FastDAQ_ENABLE_FFTW)
-    find_package(FFTW REQUIRED)
+    find_package(FFTW COMPONENTS SINGLE REQUIRED)
 else (FastDAQ_ENABLE_FFTW)
     set (FFTW_FOUND FALSE)
 endif (FastDAQ_ENABLE_FFTW)
@@ -44,6 +55,7 @@ if (FFTW_FOUND)
     add_definitions(-DFFTW_FOUND)
     pbuilder_add_ext_libraries (${FFTW_LIBRARIES})
     if (FFTW_THREADS_FOUND)
+        pbuilder_add_ext_libraries (${FFTW_THREADS_LIBRARIES})
         set (FFTW_NTHREADS 1 CACHE STRING "Number of threads to use for FFTW processes")
         add_definitions (-DFFTW_NTHREADS=${FFTW_NTHREADS})
         message (STATUS "FFTW configured to use up to ${FFTW_NTHREADS} threads.")

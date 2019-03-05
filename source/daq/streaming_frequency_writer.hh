@@ -22,7 +22,7 @@ namespace psyllid
      @class streaming_frequency_writer
      @author B. H. LaRoque
 
-     @brief A consumer to that writes all frequency ROACH packets to an egg file.
+     @brief A consumer to that writes all frequency data to an egg file.
 
      @details
 

@@ -137,13 +137,18 @@ namespace fast_daq
             //TODO throw something smart please
             throw 1;
         }
+        float t_avg_norm = 1.0;
+        if (f_num_to_average)
+        {
+            t_avg_norm = 1. / f_num_to_average;
+        }
         for (unsigned i_bin=0; i_bin < data_in->get_array_size(); i_bin++)
         {
             // compute the power in mW (note, not W)
-            // 1000.0 is to get to mW, 50.0 is impedance; 2.0 is to get RMS from peak voltage
-            double these_mW = ( std::pow(data_array_in[i_bin][0], 2) + std::pow(data_array_in[i_bin][1], 2) ) * 1000.0 / 50.0 / 2.0;
+            // 1000.0 is to get to mW, 50.0 is impedance
+            float these_mW = ( std::pow(data_array_in[i_bin][0], 2) + std::pow(data_array_in[i_bin][1], 2) ) * 1000.0 / 50.0;
             // divide by number of items in average and increment average spectrum buffer
-            f_average_spectrum[i_bin] += these_mW / static_cast<double>(f_num_to_average);
+            f_average_spectrum[i_bin] += these_mW * t_avg_norm;
         }
         f_input_counter++;
         if ( f_input_counter == f_num_to_average )
@@ -168,19 +173,20 @@ namespace fast_daq
         if ( f_input_counter != f_num_to_average )
         {
             LWARN( flog, "number of collected points <" <<f_input_counter<< "> is not as expected (" <<f_num_to_average<< "), fixing average normalization" );
+            float t_rescale_factor = std::max( static_cast<float>(1.0), static_cast<float>(f_num_to_average) ) / static_cast<float>(f_input_counter);
             // If number of collected points is less than expected average, rescale
-            for (std::vector< double >::iterator bin_i = f_average_spectrum.begin(); bin_i != f_average_spectrum.end(); bin_i++)
+            for (std::vector< float >::iterator bin_i = f_average_spectrum.begin(); bin_i != f_average_spectrum.end(); bin_i++)
             {
-                *bin_i = (static_cast<double>(f_num_to_average) / static_cast<double>(f_input_counter)) * *bin_i;
+                *bin_i = t_rescale_factor * *bin_i;
             }
         }
-        double power_max_mW = *std::max_element(f_average_spectrum.begin(), f_average_spectrum.end());
+        float power_max_mW = *std::max_element(f_average_spectrum.begin(), f_average_spectrum.end());
         LWARN( flog, "the maximum power bin has <" << power_max_mW << "> mW" );
         LWARN( flog, " ... <" << 10. * std::log10(power_max_mW) << "> dBm" );
         // Copy data into output stream and re-zero the averager container
         //power_data out_data = out_stream< 0 >().data();
         power_data* out_data_ptr = out_stream< 0 >().data();
-        double* out_data_array = out_data_ptr->get_data_array();
+        float* out_data_array = out_data_ptr->get_data_array();
         out_data_ptr->set_bin_width( f_bin_width );
         out_data_ptr->set_minimum_frequency( f_minimum_frequency );
         for (unsigned bin_i=0; bin_i < f_average_spectrum.size(); bin_i++)

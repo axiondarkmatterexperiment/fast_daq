@@ -25,7 +25,7 @@ namespace fast_daq
      @class ats_streaming_writer
      @author laroque
 
-     @brief A consumer to that writes all time ROACH packets to an egg file.
+     @brief A consumer to that writes all time slices to an egg file.
 
      @details
 

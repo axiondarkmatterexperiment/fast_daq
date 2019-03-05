@@ -56,10 +56,10 @@ namespace fast_daq
             f_centerish_freq( 0. ),
             f_min_output_bandwidth( 0. ),
             f_transform_flag_map(),
-            f_fftw_input_real(),
-            f_fftw_input_complex(),
-            f_fftw_output(),
-            f_fftw_plan(),
+            f_fftwf_input_real(),
+            f_fftwf_input_complex(),
+            f_fftwf_output(),
+            f_fftwf_plan(),
             f_multithreaded_is_initialized( false )
     {
         setup_internal_maps();
@@ -70,14 +70,14 @@ namespace fast_daq
     }
 
     // calculate derived params from members
-    double frequency_transform::bin_width_hz()
+    float frequency_transform::bin_width_hz()
     {
         return ( f_samples_per_sec ) / f_fft_size;
     }
 
     unsigned frequency_transform::first_output_index()
     {
-        double t_bin_width_hz = bin_width_hz();
+        float t_bin_width_hz = bin_width_hz();
         unsigned center_bin = ((f_fft_size - 1) / 2) + 1;
         if ( f_centerish_freq > 0. )
         {
@@ -92,7 +92,7 @@ namespace fast_daq
         return to_return;
     }
 
-    double frequency_transform::min_output_frequency()
+    float frequency_transform::min_output_frequency()
     {
         return first_output_index() * bin_width_hz();
     }
@@ -102,8 +102,7 @@ namespace fast_daq
         unsigned to_return = f_fft_size;
         if ( f_min_output_bandwidth > 0. )
         {
-            double t_bin_width_hz = bin_width_hz();
-            to_return = static_cast<int>( f_min_output_bandwidth / t_bin_width_hz - 1. ) + 1;
+            to_return = static_cast<int>( f_min_output_bandwidth / bin_width_hz() - 1. ) + 1;
         }
         return std::min(to_return, f_fft_size);
     }
@@ -117,7 +116,7 @@ namespace fast_daq
         if (f_use_wisdom)
         {
             LDEBUG( flog, "Reading wisdom from file <" << f_wisdom_filename << ">");
-            if (fftw_import_wisdom_from_filename(f_wisdom_filename.c_str()) == 0)
+            if (fftwf_import_wisdom_from_filename(f_wisdom_filename.c_str()) == 0)
             {
                 LWARN( flog, "Unable to read FFTW wisdom from file <" << f_wisdom_filename << ">" );
             }
@@ -126,8 +125,8 @@ namespace fast_daq
         #ifdef FFTW_NTHREADS
             if (! f_multithreaded_is_initialized)
             {
-                fftw_init_threads();
-                fftw_plan_with_nthreads(FFTW_NTHREADS);
+                fftwf_init_threads();
+                fftwf_plan_with_nthreads(FFTW_NTHREADS);
                 LDEBUG( flog, "Configuring FFTW to use up to " << FFTW_NTHREADS << " threads.");
                 f_multithreaded_is_initialized = true;
             }
@@ -136,25 +135,25 @@ namespace fast_daq
         TransformFlagMap::const_iterator iter = f_transform_flag_map.find(f_transform_flag);
         unsigned transform_flag = iter->second;
         // initialize FFTW IO arrays and plan
-        f_fftw_output = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * f_fft_size);
+        f_fftwf_output = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * f_fft_size);
         switch (f_input_type)
         {
             case input_type_t::real:
-                f_fftw_input_real = (double*) fftw_malloc(sizeof(double) * f_fft_size);
-                f_fftw_plan = fftw_plan_dft_r2c_1d(f_fft_size, f_fftw_input_real, f_fftw_output, transform_flag | FFTW_PRESERVE_INPUT);
+                f_fftwf_input_real = (float*) fftwf_malloc(sizeof(float) * f_fft_size);
+                f_fftwf_plan = fftwf_plan_dft_r2c_1d(f_fft_size, f_fftwf_input_real, f_fftwf_output, transform_flag | FFTW_PRESERVE_INPUT);
                 break;
             case input_type_t::complex:
-                f_fftw_input_complex = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * f_fft_size);
-                f_fftw_plan = fftw_plan_dft_1d(f_fft_size, f_fftw_input_complex, f_fftw_output, FFTW_FORWARD, transform_flag | FFTW_PRESERVE_INPUT);
+                f_fftwf_input_complex = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * f_fft_size);
+                f_fftwf_plan = fftwf_plan_dft_1d(f_fft_size, f_fftwf_input_complex, f_fftwf_output, FFTW_FORWARD, transform_flag | FFTW_PRESERVE_INPUT);
                 break;
             default: throw psyllid::error() << "input_type not fully implemented";
         }
         //save plan
-        if (f_fftw_plan != NULL)
+        if (f_fftwf_plan != NULL)
         {
             if (f_use_wisdom)
             {
-                if (fftw_export_wisdom_to_filename(f_wisdom_filename.c_str()) == 0)
+                if (fftwf_export_wisdom_to_filename(f_wisdom_filename.c_str()) == 0)
                 {
                     LWARN( flog, "Unable to write FFTW wisdom to file<" << f_wisdom_filename << ">");
                 }
@@ -255,46 +254,47 @@ namespace fast_daq
                         //frequency output
                         freq_data_out = out_stream< 0 >().data();
 
-                        std::vector<double> volts_data;
+                        std::vector<float> volts_data;
 
                         // copy input data into fft input array
                         switch (f_input_type)
                         {
                             case input_type_t::real:
                                 LTRACE( flog, "copy real input data" );
-                                //std::copy(&real_time_data_in->get_time_series()[0], &real_time_data_in->get_time_series()[0] + f_fft_size, &f_fftw_input_real[0]);
+                                //std::copy(&real_time_data_in->get_time_series()[0], &real_time_data_in->get_time_series()[0] + f_fft_size, &f_fftwf_input_real[0]);
                                 volts_data = real_time_data_in->as_volts();
-                                std::copy(volts_data.begin(), volts_data.end(), &f_fftw_input_real[0] );
+                                std::copy(volts_data.begin(), volts_data.end(), &f_fftwf_input_real[0] );
                                 break;
                             case input_type_t::complex:
                                 LTRACE( flog, "grab complex data" );
                                 LWARN( flog, "complex input transforms are currently not tested" );
-                                std::copy(&complex_time_data_in->get_array()[0][0], &complex_time_data_in->get_array()[0][0] + f_fft_size*2, &f_fftw_input_complex[0][0]);
+                                std::copy(&complex_time_data_in->get_array()[0][0], &complex_time_data_in->get_array()[0][0] + f_fft_size*2, &f_fftwf_input_complex[0][0]);
                                 break;
                             default: throw psyllid::error() << "input_type not fully implemented";
                         }
                         // execute fft
-                        fftw_execute( f_fftw_plan );
+                        fftwf_execute( f_fftwf_plan );
 
                         //take care of FFT normalization
-                        //is this the normalization we want?
-                        double fft_norm = sqrt(1. / (double)f_fft_size);
+                        //is this the normalization we want? ... it is not symmetric, but seems to give the correct result
+                        float fft_norm = 1.0 / (double)f_fft_size;
+                        //float fft_norm = sqrt(2.) / (double)f_fft_size;
                         for (size_t i_bin=0; i_bin<f_fft_size; ++i_bin)
                         {
-                            f_fftw_output[i_bin][0] *= fft_norm;
-                            f_fftw_output[i_bin][1] *= fft_norm;
+                            f_fftwf_output[i_bin][0] *= fft_norm;
+                            f_fftwf_output[i_bin][1] *= fft_norm;
                         }
 
                         switch (f_input_type)
                         {
                             case input_type_t::real:
-                                std::copy(&f_fftw_output[first_output_index()][0], &f_fftw_output[first_output_index()+num_output_bins()][1], &freq_data_out->get_data_array()[0][0] );
+                                std::copy(&f_fftwf_output[first_output_index()][0], &f_fftwf_output[first_output_index()+num_output_bins()][1], &freq_data_out->get_data_array()[0][0] );
                                 freq_data_out->set_chunk_counter( real_time_data_in->get_chunk_counter() );
                                 break;
                             case input_type_t::complex:
                                 // FFT unfolding based on katydid:Source/Data/Transform/KTFrequencyTransformFFTW
-                                std::copy(&f_fftw_output[0][0], &f_fftw_output[0][0] + (t_center_bin - 1), &freq_data_out->get_data_array()[0][0] + t_center_bin);
-                                std::copy(&f_fftw_output[0][0] + t_center_bin, &f_fftw_output[0][0] + f_fft_size*2, &freq_data_out->get_data_array()[0][0]);
+                                std::copy(&f_fftwf_output[0][0], &f_fftwf_output[0][0] + (t_center_bin - 1), &freq_data_out->get_data_array()[0][0] + t_center_bin);
+                                std::copy(&f_fftwf_output[0][0] + t_center_bin, &f_fftwf_output[0][0] + f_fft_size*2, &freq_data_out->get_data_array()[0][0]);
                                 break;
                             default: throw psyllid::error() << "input_type not fully implemented";
                         }
@@ -336,20 +336,20 @@ namespace fast_daq
     {
         LINFO( flog, "in finalize(), freeing fftw data objects" );
         out_buffer< 0 >().finalize();
-        if (f_fftw_input_real != NULL )
+        if (f_fftwf_input_real != NULL )
         {
-            fftw_free(f_fftw_input_real);
-            f_fftw_input_real = NULL;
+            fftwf_free(f_fftwf_input_real);
+            f_fftwf_input_real = NULL;
         }
-        if (f_fftw_input_complex != NULL )
+        if (f_fftwf_input_complex != NULL )
         {
-            fftw_free(f_fftw_input_complex);
-            f_fftw_input_complex = NULL;
+            fftwf_free(f_fftwf_input_complex);
+            f_fftwf_input_complex = NULL;
         }
-        if (f_fftw_output != NULL)
+        if (f_fftwf_output != NULL)
         {
-            fftw_free(f_fftw_output);
-            f_fftw_output = NULL;
+            fftwf_free(f_fftwf_output);
+            f_fftwf_output = NULL;
         }
         return;
     }

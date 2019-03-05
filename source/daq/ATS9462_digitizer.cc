@@ -15,6 +15,7 @@
 
 using midge::stream;
 
+
 namespace fast_daq
 {
     REGISTER_NODE_AND_BUILDER( ats9462_digitizer, "ats9462", ats9462_digitizer_binding );
@@ -56,13 +57,8 @@ namespace fast_daq
             //TODO do something smarter here
             throw 1;
         }
-        RETURN_CODE ret_code = AlazarGetChannelInfo(f_board_handle, &f_max_samples_per_channel, &f_bits_per_sample);
-        if (ret_code != ApiSuccess)
-        {
-            LERROR( flog, "Error: AlazarGetChannelInfo failed -- " << AlazarErrorToText(ret_code));
-            //TODO do something smarter here also
-            throw 1;
-        }
+        check_return_code( AlazarGetChannelInfo(f_board_handle, &f_max_samples_per_channel, &f_bits_per_sample),
+                          "AlazarGetChannelInfo", 1);
     }
 
     void ats9462_digitizer::set_internal_maps()
@@ -109,7 +105,9 @@ namespace fast_daq
         out_buffer< 0 >().initialize( f_out_length );
         out_buffer< 0 >().call( &real_time_data::allocate_array, f_samples_per_buffer );
         //Convert +/- mV to dynamic range: (*2 for +/- /1000 for mV->V)
-        out_buffer< 0 >().call( &real_time_data::set_dynamic_range, 2. * static_cast<double>(f_input_mag_range) / 1000. );
+        float t_dynm_range = 2. * static_cast<float>(f_input_mag_range) / 1000.;
+        //out_buffer< 0 >().call( &real_time_data::set_dynamic_range, 2. * static_cast<float>(f_input_mag_range) / 1000. );
+        out_buffer< 0 >().call( &real_time_data::set_dynamic_range, t_dynm_range );
         // configure the digitizer board
         configure_board();
         allocate_buffers();
@@ -328,7 +326,8 @@ namespace fast_daq
         // if we're not in a buffer overrun, try to return the buffer to the board
         if ( ! f_overrun_collected )
         {
-            if ( ! check_return_code( AlazarPostAsyncBuffer( f_board_handle, this_buffer, bytes_per_buffer() ), "AlazarPostAsyncBuffer", 0 ) )
+            if ( ! check_return_code( AlazarPostAsyncBuffer( f_board_handle, this_buffer, bytes_per_buffer() ),
+                                     "AlazarPostAsyncBuffer", 0 ) )
             { // if posting the buffer fails, we're in an overrun; collect all buffers then restart
                 LWARN( flog, "in overrun situation, starting to count" );
                 f_overrun_collected = 1;

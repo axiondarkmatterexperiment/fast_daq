@@ -19,13 +19,13 @@ namespace fast_daq
             virtual ~frequency_data();
 
         public:
-            typedef double complex_t[2];
+            typedef float complex_t[2];
 
         // member varaible macros
         mv_accessible( complex_t*, data_array );
         mv_accessible( unsigned, array_size);
-        mv_accessible( double, bin_width ); // in [Hz]
-        mv_accessible( double, minimum_frequency ); // in [Hz]
+        mv_accessible( float, bin_width ); // in [Hz]
+        mv_accessible( float, minimum_frequency ); // in [Hz]
         mv_accessible( unsigned, chunk_counter );
 
         public:

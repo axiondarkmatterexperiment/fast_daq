@@ -45,7 +45,7 @@ namespace fast_daq
      Available configuration values:
      - "time-length": uint -- The size of the output time-data buffer
      - "fft-size": unsigned -- The length of the fft input/output array (each element is 2-component)
-     - "transform-flag": string -- FFTW flag to indicate how much optimization of the fftw_plan is desired
+     - "transform-flag": string -- FFTW flag to indicate how much optimization of the fftwf_plan is desired
      - "use-wisdom": bool -- whether to use a plan from a wisdom file and save the plan to that file
      - "wisdom-filename": string -- if "use-wisdom" is true, resolvable path to the wisdom file
 
@@ -83,9 +83,9 @@ namespace fast_daq
 
         private:
             transform_flag_map_t f_transform_flag_map;
-            fftw_complex* f_fftw_input;
-            fftw_complex* f_fftw_output;
-            fftw_plan f_fftw_plan;
+            fftwf_complex* f_fftwf_input;
+            fftwf_complex* f_fftwf_output;
+            fftwf_plan f_fftwf_plan;
 
             bool f_multithreaded_is_initialized;
 

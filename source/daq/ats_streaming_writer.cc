@@ -45,12 +45,6 @@ namespace fast_daq
             f_stream_no( 0 )
     {
     }
-    /*
-        For complex time data we want:
-        f_data_type_size = 8 // 8 bytes per double
-        f_sample_size = 2 // number of components, each of size f_data_type_size
-        f_record_size = <runtime_configuration> // number of samples per "chunk" of data
-    */
 
     ats_streaming_writer::~ats_streaming_writer()
     {
@@ -64,7 +58,8 @@ namespace fast_daq
         scarab::get_calib_params( f_bit_depth, f_data_type_size, f_v_offset, f_v_range, true, &t_dig_params );
 
         vector< unsigned > t_chan_vec;
-        f_stream_no = a_hw_ptr->header().AddStream( "Psyllid - ROACH2",
+        //TODO this name should be generated, not hard-coded
+        f_stream_no = a_hw_ptr->header().AddStream( "fast_daq - ATS9462",
                 f_acq_rate, f_record_size, f_sample_size, f_data_type_size,
                 monarch3::sAnalog, f_bit_depth, monarch3::sBitsAlignedLeft, &t_chan_vec );
 

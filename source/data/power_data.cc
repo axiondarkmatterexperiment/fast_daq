@@ -30,7 +30,7 @@ namespace fast_daq
     {
         if (f_data_array == nullptr )
         {
-            f_data_array = new double[n_samples];
+            f_data_array = new float[n_samples];
         }
         f_array_size = n_samples;
     }

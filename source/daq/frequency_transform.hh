@@ -34,7 +34,7 @@ namespace fast_daq
      @class frequency_transform
      @author B. H. LaRoque
 
-     @brief A transformer to receive time data, compute an FFT, and distribute as time and frequency ROACH packets.
+     @brief A transformer to receive time data, compute an FFT, and distribute as time and frequency slices.
 
      @details
 
@@ -48,7 +48,7 @@ namespace fast_daq
      - "input-type": string -- must either by "real" or "complex" (corresponds to using input stream 1 or 0 respectively)
      - "fft-size": unsigned -- The length of the fft input/output array (each element is 2-component)
      - "samples-per-sec": int -- the sampling rate for the upstream node
-     - "transform-flag": string -- FFTW flag to indicate how much optimization of the fftw_plan is desired
+     - "transform-flag": string -- FFTW flag to indicate how much optimization of the fftwf_plan is desired
      - "use-wisdom": bool -- whether to use a plan from a wisdom file and save the plan to that file
      - "wisdom-filename": string -- if "use-wisdom" is true, resolvable path to the wisdom file
      - "freq-in-center-bin": double -- determine the center output bin to be the bin containing this frequency in Hz (default = 0; special case meaning center of the full band)
@@ -101,9 +101,9 @@ namespace fast_daq
 
         // derrive scalers
         private:
-            double bin_width_hz();
+            float bin_width_hz();
             unsigned first_output_index();
-            double min_output_frequency();
+            float min_output_frequency();
             unsigned num_output_bins();
 
         private:
@@ -116,10 +116,10 @@ namespace fast_daq
 
         private:
             TransformFlagMap f_transform_flag_map;
-            double* f_fftw_input_real;
-            fftw_complex* f_fftw_input_complex;
-            fftw_complex* f_fftw_output;
-            fftw_plan f_fftw_plan;
+            float* f_fftwf_input_real;
+            fftwf_complex* f_fftwf_input_complex;
+            fftwf_complex* f_fftwf_output;
+            fftwf_plan f_fftwf_plan;
 
             bool f_multithreaded_is_initialized;
 

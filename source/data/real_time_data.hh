@@ -25,14 +25,14 @@ namespace fast_daq
         // member varaible macros
         mv_accessible( U16*, time_series );
         mv_accessible( unsigned, array_size );
-        mv_accessible( double, dynamic_range ); //full scale range in V (not mV; not magnitude)
-        mv_accessible( std::vector<double>, volts_data );
+        mv_accessible( float, dynamic_range ); //full scale range in V (not mV; not magnitude)
+        mv_accessible( std::vector<float>, volts_data );
         mv_accessible( unsigned, chunk_counter );
 
         public:
             void allocate_array( unsigned n_samples );
             // is this the right signature?
-            std::vector<double> as_volts();
+            std::vector<float> as_volts();
 
     };
 } /* namespace fast_daq */
