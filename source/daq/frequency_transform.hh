@@ -34,7 +34,7 @@ namespace fast_daq
      @class frequency_transform
      @author B. H. LaRoque
 
-     @brief A transformer to receive time data, compute an FFT, and distribute as time and frequency ROACH packets.
+     @brief A transformer to receive time data, compute an FFT, and distribute as time and frequency slices.
 
      @details
 
