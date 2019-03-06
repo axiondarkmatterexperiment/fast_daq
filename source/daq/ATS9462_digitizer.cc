@@ -56,8 +56,6 @@ namespace fast_daq
             //TODO do something smarter here
             throw 1;
         }
-        //check_return_code( AlazarGetChannelInfo(f_board_handle, &f_max_samples_per_channel, &f_bits_per_sample),
-        //                  "AlazarGetChannelInfo", 1);
         check_return_code_macro( AlazarGetChannelInfo, f_board_handle, &f_max_samples_per_channel, &f_bits_per_sample);
     }
 
@@ -140,8 +138,6 @@ namespace fast_daq
                         std::shared_ptr< psyllid::daq_control > t_daq_control = use_daq_control();
                         t_daq_control->stop_run();
                         check_return_code_macro( AlazarAbortAsyncRead, f_board_handle );
-                        //check_return_code( AlazarAbortAsyncRead( f_board_handle ),
-                        //                  "AlazarAbortAsyncRead", 1 );
                     }
                     else
                     {
@@ -165,9 +161,15 @@ namespace fast_daq
 
     void ats9462_digitizer::check_return_code( RETURN_CODE a_return_code, const std::string& an_action, const std::string& a_file_line )
     {
-        if (a_return_code != ApiSuccess)
+        switch ( a_return_code )
         {
-            throw psyllid::error() << an_action << " at <" << a_file_line << "> failed, it returned with:\n" << "\t" << AlazarErrorToText(a_return_code);
+            case ApiSuccess:
+                break;
+            case ApiBufferOverflow:
+                throw buffer_overflow();
+                break;
+            default:
+                throw psyllid::error() << an_action << " at <" << a_file_line << "> failed, it returned with:\n" << "\t" << AlazarErrorToText(a_return_code);
         }
     }
 
@@ -175,51 +177,24 @@ namespace fast_daq
     {
         ALAZAR_SAMPLE_RATES this_rate = f_sample_rate_to_code.left.at( f_samples_per_sec );
         check_return_code_macro( AlazarSetCaptureClock, f_board_handle, INTERNAL_CLOCK, this_rate, CLOCK_EDGE_RISING, 0);
-        //check_return_code( AlazarSetCaptureClock( f_board_handle, INTERNAL_CLOCK, this_rate, CLOCK_EDGE_RISING, 0),
-        //                  "AlazarSetCaptureClock", 1 );
 
         ALAZAR_INPUT_RANGES this_input_range = f_input_range_to_code.left.at( f_input_mag_range );
         check_return_code_macro( AlazarInputControlEx, f_board_handle, f_channel_mask, DC_COUPLING, this_input_range, IMPEDANCE_50_OHM );
-        //check_return_code( AlazarInputControlEx( f_board_handle, f_channel_mask, DC_COUPLING, this_input_range, IMPEDANCE_50_OHM ),
-        //                  "AlazarInputControlEx", 1 );
 
         check_return_code_macro( AlazarSetBWLimit, f_board_handle, f_channel_mask, 0 );
-        //check_return_code( AlazarSetBWLimit( f_board_handle, f_channel_mask, 0 ),
-        //                  "AlazarSetBWLimit", 1 );
 
 
         check_return_code_macro( AlazarSetTriggerOperation, f_board_handle, TRIG_ENGINE_OP_J, TRIG_ENGINE_J, TRIG_CHAN_A, TRIGGER_SLOPE_POSITIVE, 150, TRIG_ENGINE_K, TRIG_DISABLE, TRIGGER_SLOPE_POSITIVE, 128);
-        /*
-        check_return_code( AlazarSetTriggerOperation( f_board_handle,
-                                              TRIG_ENGINE_OP_J,
-                                              TRIG_ENGINE_J,
-                                              TRIG_CHAN_A,
-                                              TRIGGER_SLOPE_POSITIVE,
-                                              150,
-                                              TRIG_ENGINE_K,
-                                              TRIG_DISABLE,
-                                              TRIGGER_SLOPE_POSITIVE,
-                                              128),
-                           "AlazarSetTriggerOperation", 1 );
-        */
 
         check_return_code_macro( AlazarSetExternalTrigger, f_board_handle, DC_COUPLING, ETR_5V );
-        //check_return_code( AlazarSetExternalTrigger( f_board_handle, DC_COUPLING, ETR_5V ),
-        //                  "AlazarSetExternalTrigger", 1 );
 
         U32 trigger_delay_samples = (U32)(f_trigger_delay_sec * double(f_samples_per_sec) + 0.5);
         check_return_code_macro( AlazarSetTriggerDelay, f_board_handle, trigger_delay_samples );
-        //check_return_code( AlazarSetTriggerDelay( f_board_handle, trigger_delay_samples ),
-        //                  "AlazarSetTriggerDelay", 1 );
 
         U32 trigger_timeout_clocks = (U32)(f_trigger_timeout_sec / 10.e-6 + 0.5);
         check_return_code_macro( AlazarSetTriggerTimeOut, f_board_handle, trigger_timeout_clocks );
-        //check_return_code( AlazarSetTriggerTimeOut( f_board_handle, trigger_timeout_clocks ),
-        //                  "AlazarSetTriggerTimeOut", 1 );
 
         check_return_code_macro( AlazarConfigureAuxIO, f_board_handle, AUX_OUT_TRIGGER, 0 );
-        //check_return_code( AlazarConfigureAuxIO( f_board_handle, AUX_OUT_TRIGGER, 0 ),
-        //                  "AlazarConfigureAuxIO", 1 );
     }
 
     void ats9462_digitizer::allocate_buffers()
@@ -242,8 +217,6 @@ namespace fast_daq
     {
         LDEBUG( flog, "clearing up DMA buffers" );
         check_return_code_macro( AlazarAbortAsyncRead, f_board_handle );
-        //check_return_code( AlazarAbortAsyncRead( f_board_handle ),
-        //                  "AlazarAbortAsyncRead", 1 );
         LDEBUG( flog, "async read abort sent to board" );
         for (std::vector<U16*>::iterator a_buffer=f_board_buffers.begin(); a_buffer != f_board_buffers.end(); )
         {
@@ -266,31 +239,17 @@ namespace fast_daq
                                                         0x7FFFFFFF, //per example "Ignored. Behave as if infinite"
                                                         adma_flags
                                );
-        /*
-        check_return_code( AlazarBeforeAsyncRead( f_board_handle, f_channel_mask,
-                                                  0, //per example, "Must be 0"
-                                                  f_samples_per_buffer,
-                                                  1, //per example, "Must be 1"
-                                                  0x7FFFFFFF, //per example "Ignored. Behave as if infinite"
-                                                  adma_flags
-                                                ),
-                          "AlazarBeforeAsyncRead", 1 );
-        */
         LINFO( flog, "board pre-read complete" );
         //give the board all buffers
         f_overrun_collected = 0;
         for (U16* a_buffer : f_board_buffers)
         {
             check_return_code_macro( AlazarPostAsyncBuffer, f_board_handle, a_buffer, bytes_per_buffer() );
-            //check_return_code( AlazarPostAsyncBuffer( f_board_handle, a_buffer, bytes_per_buffer() ),
-            //                  "AlazarPostAsyncBuffer", 1 );
         }
         f_next_read_buffer = 0;
         LINFO( flog, "buffers posted to board" );
         // arm the trigger to start immediately
         check_return_code_macro( AlazarStartCapture, f_board_handle );
-        //check_return_code( AlazarStartCapture( f_board_handle ),
-        //                  "AlazarStartCapture", 1 );
         LDEBUG( flog, "digitizer trigger armed, buffer collection should begin" );
     }
 
@@ -315,8 +274,6 @@ namespace fast_daq
             //Note: this step may have already have been done when the requested buffer count was reached
             //      it is not a problem for the function to be called again here.
             check_return_code_macro( AlazarAbortAsyncRead, f_board_handle );
-            //check_return_code( AlazarAbortAsyncRead( f_board_handle ),
-            //                  "AlazarAbortAsyncRead", 1 );
             LDEBUG( flog, "abort async read sent to board" );
         }
         else
@@ -331,8 +288,6 @@ namespace fast_daq
         //grab the next buffer, once it is filled by the digitizer
         U16* this_buffer = f_board_buffers.at( f_next_read_buffer % f_board_buffers.size() );
         check_return_code_macro( AlazarWaitAsyncBufferComplete, f_board_handle, this_buffer, 5000 );
-        //check_return_code( AlazarWaitAsyncBufferComplete( f_board_handle, this_buffer, 5000 ),
-        //                  "AlazarWaitAsyncBufferComplete", 1 );
         ++f_next_read_buffer;
         //copy the int array into the output stream
         real_time_data* time_data_out = out_stream< 0 >().data();
@@ -345,13 +300,11 @@ namespace fast_daq
         // if we're not in a buffer overrun, try to return the buffer to the board
         if ( ! f_overrun_collected )
         {
-            //if ( ! check_return_code( AlazarPostAsyncBuffer( f_board_handle, this_buffer, bytes_per_buffer() ),
-            //                         "AlazarPostAsyncBuffer", 0 ) )
             try
             {
                 check_return_code_macro( AlazarPostAsyncBuffer, f_board_handle, this_buffer, bytes_per_buffer() );
             }
-            catch( std::exception ) //TODO should define a specific exception for buffer overrun and catch only that here
+            catch( buffer_overflow )
             { // if posting the buffer fails, we're in an overrun; collect all buffers then restart
                 LINFO( flog, "DMA buffer overrun detected; flushing buffers then will increment acquisition" );
                 f_overrun_collected = 1;

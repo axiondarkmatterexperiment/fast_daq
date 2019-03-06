@@ -12,13 +12,11 @@
 #include <boost/bimap.hpp>
 
 // AlazarTech includes
-//TODO (maybe some/all of these could go in the source file?)
 #include "AlazarError.h"
 #include "AlazarApi.h"
 #include "AlazarCmd.h"
 
 // psyllid includes
-//#include "memory_block.hh"
 #include "node_builder.hh"
 
 #include "producer.hh"
@@ -60,6 +58,7 @@ namespace fast_daq
     */
     class ats9462_digitizer : public midge::_producer< midge::type_list< real_time_data > >, public psyllid::control_access
     {
+
         private:
             typedef boost::bimap< uint32_t, ALAZAR_SAMPLE_RATES > sample_rate_code_map_t;
             typedef sample_rate_code_map_t::value_type rate_mapping_t;
@@ -135,5 +134,14 @@ namespace fast_daq
             virtual void do_apply_config(ats9462_digitizer* a_node, const scarab::param_node& a_config ) const;
             virtual void do_dump_config( const ats9462_digitizer* a_node, scarab::param_node& a_config ) const;
     };
+
+    // ATS-specific exceptions for handling in try/catch blocks
+    class buffer_overflow : public psyllid::error
+    {
+        public:
+            buffer_overflow() { f_message = "ATS9462 has overflown the output buffer FIFO"; }
+            virtual ~buffer_overflow() {}
+    };
+
 } /* namespace fast_daq */
 #endif /* ATS9462_WRAP_HH_ */
