@@ -52,9 +52,7 @@ namespace fast_daq
         f_board_handle = AlazarGetBoardBySystemID( f_system_id, f_board_id );
         if (f_board_handle == NULL)
         {
-            LERROR( flog, "Error: Unable to open board system Id " << f_system_id << " board Id " << f_board_id );
-            //TODO do something smarter here
-            throw 1;
+            throw psyllid::error() << "Error: Unable to open board system Id " << f_system_id << " board Id " << f_board_id;
         }
         check_return_code_macro( AlazarGetChannelInfo, f_board_handle, &f_max_samples_per_channel, &f_bits_per_sample);
     }
@@ -146,7 +144,7 @@ namespace fast_daq
                 }
             }
         }
-        catch( std::exception )
+        catch( std::exception& )
         {
             a_midge->throw_ex( std::current_exception() );
         }
@@ -206,9 +204,8 @@ namespace fast_daq
             f_board_buffers.push_back( (U16*)valloc(bytes_per_buffer()) );
             if (f_board_buffers.back() == NULL)
             {
-                LERROR( flog, "Error: unable to allocate buffer" );
                 clear_buffers();
-                throw 1;
+                throw psyllid::error() << "Error: unable to allocate buffer";
             }
         }
     }
@@ -304,7 +301,7 @@ namespace fast_daq
             {
                 check_return_code_macro( AlazarPostAsyncBuffer, f_board_handle, this_buffer, bytes_per_buffer() );
             }
-            catch( buffer_overflow )
+            catch( buffer_overflow& )
             { // if posting the buffer fails, we're in an overrun; collect all buffers then restart
                 LINFO( flog, "DMA buffer overrun detected; flushing buffers then will increment acquisition" );
                 f_overrun_collected = 1;
