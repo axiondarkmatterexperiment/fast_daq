@@ -25,6 +25,9 @@
 #include "control_access.hh"
 
 
+#define check_return_code_macro( function, ... ) \
+    ats9462_digitizer::check_return_code( function(__VA_ARGS__), STRINGIFY(function), __FILE_LINE__ );
+
 namespace fast_daq
 {
     // forward declarations
@@ -104,7 +107,8 @@ namespace fast_daq
             U32 f_buffers_completed;
 
         private:
-            bool check_return_code(RETURN_CODE a_return_code, std::string an_action, unsigned to_throw);
+            //bool check_return_code(RETURN_CODE a_return_code, std::string an_action, unsigned to_throw);
+            static void check_return_code( RETURN_CODE a_return_code, const std::string& an_action, const std::string& a_file_line );//, const std::string& a_line );
             void configure_board();
             void allocate_buffers();
             void clear_buffers();
