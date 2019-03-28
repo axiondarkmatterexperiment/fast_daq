@@ -46,7 +46,7 @@ namespace fast_daq
      - "time-length": uint -- The size of the output time-data buffer
      - "freq-length": uint -- The size of the output frequency-data buffer
      - "input-type": string -- must either by "real" or "complex" (corresponds to using input stream 1 or 0 respectively)
-     - "fft-size": unsigned -- The length of the fft input/output array (each element is 2-component)
+     - "fft-size": unsigned -- The length of the fftw input/output array (each element is 2-component)
      - "samples-per-sec": int -- the sampling rate for the upstream node
      - "transform-flag": string -- FFTW flag to indicate how much optimization of the fftwf_plan is desired
      - "use-wisdom": bool -- whether to use a plan from a wisdom file and save the plan to that file

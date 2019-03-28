@@ -111,6 +111,8 @@ namespace fast_daq
     {
         out_buffer< 0 >().initialize( f_freq_length );
         out_buffer< 0 >().call( &frequency_data::allocate_array, num_output_bins() );
+        out_buffer< 0 >().call( &frequency_data::set_fft_size, f_fft_size );
+
         LWARN( flog, "configuring to use: " << num_output_bins() << " bins, each " << bin_width_hz() << " Hz wide" );
 
         if (f_use_wisdom)
