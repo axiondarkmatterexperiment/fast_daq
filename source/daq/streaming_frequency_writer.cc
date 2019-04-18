@@ -59,7 +59,8 @@ namespace psyllid
         scarab::get_calib_params( f_bit_depth, f_data_type_size, f_v_offset, f_v_range, true, &t_dig_params );
 
         vector< unsigned > t_chan_vec;
-        f_stream_no = a_hw_ptr->header().AddStream( "Psyllid - ROACH2",
+        //TODO this stream name should probably come from something more meaningful
+        f_stream_no = a_hw_ptr->header().AddStream( "fast_daq - ATS9462",
                 f_acq_rate, f_record_size, f_sample_size, f_data_type_size,
                 monarch3::sDigitizedS, f_bit_depth, monarch3::sBitsAlignedLeft, &t_chan_vec );
 

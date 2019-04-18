@@ -1,0 +1,103 @@
+post-to-slack: false
+
+amqp:
+    broker: rabbit_broker
+    queue: psyllid
+    #make-connection: false
+
+daq:
+    activate-at-startup: true
+    # n-files must be >= 1 in order to set a description on a run
+    n-files: 1
+    max-file-size-mb: 500
+
+on-startup:
+  - type: wait-for
+    rks: daq-status
+    payload: {}
+    sleep-for: 100
+
+streams:
+    ch0:
+        preset:
+            type: ats-stream-custom
+            nodes:
+              - type: ats9462
+                name: ats
+              #- type: dead-end
+              #  name: dend
+              - type: frequency-transform
+                name: fft
+              # path 1: medium-res
+              - type: power-averager
+                name: avg
+              - type: spectrum-relay
+                name: relay
+              # path 2: high-res
+              - type: inverse-frequency-transform
+                name: z # I can't name this ifft? not sure why
+              - type: ats-streaming-writer
+                name: writer
+            connections:
+              #- "ats.out_0:dend.in_0"
+              - "ats.out_0:fft.in_1"
+              #- "fft.out_0:dend.in_1"
+              ## Path 1
+              - "fft.out_0:avg.in_0"
+              #- "avg.out_0:dend.in_2"
+              - "avg.out_0:relay.in_0"
+              ## Path 2
+              - "fft.out_0:z.in_0"
+              #- "z.out_0:dend.in_3"
+              - "z.out_0:writer.in_0"
+
+        device:
+            n-channels: 1
+            bit-depth: 16
+            data-type-size: 8
+            sample-size: 2
+            record-size: 500
+            acq-rate: 50
+            v-offset: 0.0
+            v-range: 1.0
+
+        ats:
+            samples-per-buffer: 500000
+            out-length: 200 #20 # number of buffers of node output to the next node
+            dma-buffer-count: 100 #number of buffers between the ATS local memory and the node
+            samples-per-sec: 50000000 # 50 MSPS
+            #acquisition-length-sec: 15.0
+            acquisition-length-sec: 100.0
+        fft:
+            input-type: real
+            fft-size: 500000 # needs to match above in ats
+            freq-in-center-bin: 10.59e6 # [Hz]
+            min-output-bandwidth: 50.e3 # 50 kHz total output (with 100 Hz bins, that means 500 total bins in the output)
+            samples-per-sec: 50000000 # 50 MSPS (must match ats above)
+            freq-length: 100 # number of output buffers
+        avg:
+            spectrum-size: 500 # needs to match the number of bins the fft node above produces
+            num-output-buffers: 20
+            num-to-average: 0 #10000
+        #dend:
+            #input-index: 0 # for simple_time input
+            #input-index: 1 # for frequency_data
+            #input-index: 2 # for power_data
+            #input-index: 3 # for iq_time_input
+        relay:
+            spectrum-alert-rk: "sensor_value.medium_spectrum"
+        z:
+            time-length: 20
+            fft-size: 500
+        writer:
+            device:
+                bit-depth: 16
+                data-type-size: 4
+                sample-size: 2
+                record-size: 500
+                acq-rate: 200.e3 # We have 100 kHz of complex output, 100 kHz of real and 100 kHz of quadrature samples...
+                v-offset: 0.
+                v-range: 1. # my data are already real values, what is this going to do?
+            center-freq: 50.e3 # is this asking about the center frequency of the output band selected from the fft above?
+            freq-range: 100.e3
+

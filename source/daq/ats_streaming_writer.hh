@@ -1,33 +1,37 @@
 /*
- * streaming_writer.hh
+ * ats_ats_streaming_writer.hh
  *
- *  Created on: May 31, 2016
+ *  Created on: Feb. 7, 2019
+ *  Author: laroque
+ *    Based strongly on psyllid/ats_streaming_writer.hh
+ *      Created on: May 31, 2016
  *      Author: nsoblath
  */
 
-#ifndef PSYLLID_STREAMING_WRITER_HH_
-#define PSYLLID_STREAMING_WRITER_HH_
+#ifndef FAST_DAQ_ATS_STREAMING_WRITER_HH_
+#define FAST_DAQ_ATS_STREAMING_WRITER_HH_
 
 #include "egg_writer.hh"
 #include "node_builder.hh"
-#include "time_data.hh"
+//#include "time_data.hh"
+#include "iq_time_data.hh"
 
 #include "consumer.hh"
 
-namespace psyllid
+namespace fast_daq
 {
 
     /*!
-     @class streaming_writer
-     @author N. S. Oblath
+     @class ats_streaming_writer
+     @author laroque
 
-     @brief A consumer to that writes all time ROACH packets to an egg file.
+     @brief A consumer to that writes all time slices to an egg file.
 
      @details
 
      Parameter setting is not thread-safe.  Executing is thread-safe.
 
-     Node type: "streaming-writer"
+     Node type: "ats-streaming-writer"
 
      Available configuration values:
      - "device": node -- digitizer parameters
@@ -41,21 +45,18 @@ namespace psyllid
      - "center-freq": double -- the center frequency of the data being digitized in Hz
      - "freq-range": double -- the frequency window (bandwidth) of the data being digitized in Hz
 
-     ADC calibration: analog (V) = digital * gain + v-offset
-                      gain = v-range / # of digital levels
-
      Input Stream:
-     - 0: time_data
+     - 0: iq_time_data
 
      Output Streams: (none)
     */
-    class streaming_writer :
-            public midge::_consumer< streaming_writer, typelist_1( time_data ) >,
-            public egg_writer
+    class ats_streaming_writer :
+            public midge::_consumer< midge::type_list< iq_time_data > >,
+            public psyllid::egg_writer
     {
         public:
-            streaming_writer();
-            virtual ~streaming_writer();
+            ats_streaming_writer();
+            virtual ~ats_streaming_writer();
 
         public:
             mv_accessible( unsigned, file_num );
@@ -71,7 +72,7 @@ namespace psyllid
             mv_accessible( double, freq_range ); // Hz
 
         public:
-            virtual void prepare_to_write( monarch_wrap_ptr a_mw_ptr, header_wrap_ptr a_hw_ptr );
+            virtual void prepare_to_write( psyllid::monarch_wrap_ptr a_mw_ptr, psyllid::header_wrap_ptr a_hw_ptr );
 
             virtual void initialize();
             virtual void execute( midge::diptera* a_midge = nullptr );
@@ -80,23 +81,23 @@ namespace psyllid
         private:
             unsigned f_last_pkt_in_batch;
 
-            monarch_wrap_ptr f_monarch_ptr;
+            psyllid::monarch_wrap_ptr f_monarch_ptr;
             unsigned f_stream_no;
 
     };
 
 
-    class streaming_writer_binding : public _node_binding< streaming_writer, streaming_writer_binding >
+    class ats_streaming_writer_binding : public psyllid::_node_binding< ats_streaming_writer, ats_streaming_writer_binding >
     {
         public:
-            streaming_writer_binding();
-            virtual ~streaming_writer_binding();
+            ats_streaming_writer_binding();
+            virtual ~ats_streaming_writer_binding();
 
         private:
-            virtual void do_apply_config( streaming_writer* a_node, const scarab::param_node& a_config ) const;
-            virtual void do_dump_config( const streaming_writer* a_node, scarab::param_node& a_config ) const;
+            virtual void do_apply_config( ats_streaming_writer* a_node, const scarab::param_node& a_config ) const;
+            virtual void do_dump_config( const ats_streaming_writer* a_node, scarab::param_node& a_config ) const;
     };
 
-} /* namespace psyllid */
+} /* namespace fast_daq */
 
-#endif /* PSYLLID_STREAMING_WRITER_HH_ */
+#endif /* FAST_DAQ_ATS_STREAMING_WRITER_HH_ */

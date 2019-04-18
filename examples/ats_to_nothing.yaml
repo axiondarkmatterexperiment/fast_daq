@@ -1,0 +1,92 @@
+post-to-slack: false
+
+amqp:
+    broker: rabbit_broker
+    queue: psyllid
+    #make-connection: false
+
+daq:
+    activate-at-startup: true
+    # n-files must be >= 1 in order to set a description on a run
+    n-files: 1
+    max-file-size-mb: 500
+
+on-startup:
+  - type: wait-for
+    rks: daq-status
+    payload: {}
+    sleep-for: 100
+  - type: set
+    rks: use-monarch
+    payload:
+        values: [ false ]
+    sleep-for: 10
+  #- type: cmd
+  #  rks: "start-run"
+  #  payload:
+  #    duration: 0
+  #    description: "a test description"
+  #    #filename: ["foo.egg"]
+  #  sleep-for: 0
+  #- type: wait-for
+  #  rks: daq-status
+  #  payload: {}
+  #  sleep-for: 100
+
+streams:
+    ch0:
+        preset:
+            type: ats-stream-custom
+            nodes:
+              - type: ats9462
+                name: ats
+#              - type: dead-end
+#                name: dend
+              - type: frequency-transform
+                name: fft
+              - type: power-averager
+                name: avg
+              - type: spectrum-relay
+                name: relay
+            connections:
+              #- "ats.out_0:dend.in_0"
+              - "ats.out_0:fft.in_1"
+              #- "fft.out_0:dend.in_1"
+              - "fft.out_0:avg.in_0"
+              #- "avg.out_0:dend.in_2"
+              - "avg.out_0:relay.in_0"
+
+        device:
+            n-channels: 1
+            bit-depth: 8
+            data-type-size: 1
+            sample-size: 2
+            record-size: 4096
+            acq-rate: 100
+            v-offset: 0.0
+            v-range: 0.5
+
+        ats:
+            samples-per-buffer: 250000
+            out-length: 20 # number of buffers of node output to the next node
+            dma-buffer-count: 100 #number of buffers between the ATS local memory and the node
+            samples-per-sec: 50000000 # 50 MSPS
+            #acquisition-length-sec: 15.0
+            acquisition-length-sec: 100.0
+        fft:
+            input-type: real
+            fft-size: 250000 # needs to match above in ats
+            freq-in-center-bin: 10.575e6 # 10.7 MHz
+            min-output-bandwidth: 100.e3 # 100 kHz total output (with 100 Hz bins, that means 1000 total bins in the output)
+            samples-per-sec: 50000000 # 50 MSPS (must match ats above)
+            freq-length: 200 # number of output buffers
+        avg:
+            spectrum-size: 1000 # needs to match the number of bins the fft node above produces
+            num-output-buffers: 200
+            num-to-average: 99999
+#        dend:
+#            input-index: 0 # for simple_time input
+            #input-index: 1 # for frequency_data
+            #input-index: 2 # for power_data
+        relay:
+            spectrum-alert-rk: "sensor_value.medium_spectrum"

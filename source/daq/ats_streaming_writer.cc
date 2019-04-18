@@ -1,11 +1,10 @@
-/*
- * streaming_writer.cc
+/* * ats_streaming_writer.cc
  *
- *  Created on: May 31, 2016
- *      Author: nsoblath
+ *  Created on: Feb. 7, 2019
+ *      Author: laroque
  */
 
-#include "streaming_writer.hh"
+#include "ats_streaming_writer.hh"
 
 #include "butterfly_house.hh"
 #include "psyllid_error.hh"
@@ -23,13 +22,13 @@ using midge::stream;
 using std::string;
 using std::vector;
 
-namespace psyllid
+namespace fast_daq
 {
-    REGISTER_NODE_AND_BUILDER( streaming_writer, "streaming-writer", streaming_writer_binding );
+    REGISTER_NODE_AND_BUILDER( ats_streaming_writer, "ats-streaming-writer", ats_streaming_writer_binding );
 
-    LOGGER( plog, "streaming_writer" );
+    LOGGER( plog, "ats_streaming_writer" );
 
-    streaming_writer::streaming_writer() :
+    ats_streaming_writer::ats_streaming_writer() :
             egg_writer(),
             f_file_num( 0 ),
             f_bit_depth( 8 ),
@@ -47,11 +46,11 @@ namespace psyllid
     {
     }
 
-    streaming_writer::~streaming_writer()
+    ats_streaming_writer::~ats_streaming_writer()
     {
     }
 
-    void streaming_writer::prepare_to_write( monarch_wrap_ptr a_mw_ptr, header_wrap_ptr a_hw_ptr )
+    void ats_streaming_writer::prepare_to_write( psyllid::monarch_wrap_ptr a_mw_ptr, psyllid::header_wrap_ptr a_hw_ptr )
     {
         f_monarch_ptr = a_mw_ptr;
 
@@ -59,9 +58,10 @@ namespace psyllid
         scarab::get_calib_params( f_bit_depth, f_data_type_size, f_v_offset, f_v_range, true, &t_dig_params );
 
         vector< unsigned > t_chan_vec;
-        f_stream_no = a_hw_ptr->header().AddStream( "Psyllid - ROACH2",
+        //TODO this name should be generated, not hard-coded
+        f_stream_no = a_hw_ptr->header().AddStream( "fast_daq - ATS9462",
                 f_acq_rate, f_record_size, f_sample_size, f_data_type_size,
-                monarch3::sDigitizedS, f_bit_depth, monarch3::sBitsAlignedLeft, &t_chan_vec );
+                monarch3::sAnalog, f_bit_depth, monarch3::sBitsAlignedLeft, &t_chan_vec );
 
         //unsigned i_chan_psyllid = 0; // this is the channel number in psyllid, as opposed to the channel number in the monarch file
         for( std::vector< unsigned >::const_iterator it = t_chan_vec.begin(); it != t_chan_vec.end(); ++it )
@@ -78,27 +78,29 @@ namespace psyllid
         return;
     }
 
-    void streaming_writer::initialize()
+    void ats_streaming_writer::initialize()
     {
-        butterfly_house::get_instance()->register_writer( this, f_file_num );
+        psyllid::butterfly_house::get_instance()->register_writer( this, f_file_num );
         return;
     }
 
-    void streaming_writer::execute( midge::diptera* a_midge )
+    void ats_streaming_writer::execute( midge::diptera* a_midge )
     {
         LDEBUG( plog, "execute streaming writer" );
         try
         {
             midge::enum_t t_time_command = stream::s_none;
 
-            time_data* t_time_data = nullptr;
+            iq_time_data* t_time_data = nullptr;
 
-            stream_wrap_ptr t_swrap_ptr;
+            psyllid::stream_wrap_ptr t_swrap_ptr;
 
             uint64_t t_bytes_per_record = f_record_size * f_sample_size * f_data_type_size;
-            uint64_t t_record_length_nsec = llrint( (double)(PAYLOAD_SIZE / 2) / (double)f_acq_rate * 1.e3 );
+            uint64_t t_record_length_nsec = llrint( (double)(f_record_size) / (double)f_acq_rate * 1.e3 );
 
-            uint64_t t_first_pkt_in_run = 0;
+            //TODO maybe we should up this to a uint64? I think the ATS won't need values nearly so large as a roach
+            //uint64_t t_first_pkt_in_run = 0;
+            unsigned t_first_pkt_in_run = 0;
 
             bool t_is_new_acquisition = true;
             bool t_start_file_with_next_data = false;
@@ -158,22 +160,22 @@ namespace psyllid
                     {
                         LDEBUG( plog, "Handling first packet in run" );
 
-                        t_first_pkt_in_run = t_time_data->get_pkt_in_session();
+                        t_first_pkt_in_run = t_time_data->get_chunk_counter();
 
                         t_is_new_acquisition = true;
 
                         t_start_file_with_next_data = false;
                     }
 
-                    uint64_t t_time_id = t_time_data->get_pkt_in_session();
+                    unsigned t_time_id = t_time_data->get_chunk_counter();
                     LTRACE( plog, "Writing packet (in session) " << t_time_id );
 
-                    uint32_t t_expected_pkt_in_batch = f_last_pkt_in_batch + 1;
-                    if( t_expected_pkt_in_batch >= BATCH_COUNTER_SIZE ) t_expected_pkt_in_batch = 0;
-                    if( ! t_is_new_acquisition && t_time_data->get_pkt_in_batch() != t_expected_pkt_in_batch ) t_is_new_acquisition = true;
-                    f_last_pkt_in_batch = t_time_data->get_pkt_in_batch();
+                    unsigned t_expected_pkt_in_batch = f_last_pkt_in_batch + 1;
+                    if( t_expected_pkt_in_batch >= UINT_MAX ) t_expected_pkt_in_batch = 0;
+                    if( ! t_is_new_acquisition && t_time_data->get_chunk_counter() != t_expected_pkt_in_batch ) t_is_new_acquisition = true;
+                    f_last_pkt_in_batch = t_time_data->get_chunk_counter();
 
-                    if( ! t_swrap_ptr->write_record( t_time_id, t_record_length_nsec * ( t_time_id - t_first_pkt_in_run ), t_time_data->get_raw_array(), t_bytes_per_record, t_is_new_acquisition ) )
+                    if( ! t_swrap_ptr->write_record( t_time_id, t_record_length_nsec * ( t_time_id - t_first_pkt_in_run ), t_time_data->get_data_array(), t_bytes_per_record, t_is_new_acquisition ) )
                     {
                         throw midge::node_nonfatal_error() << "Unable to write record to file; record ID: " << t_time_id;
                     }
@@ -205,26 +207,26 @@ namespace psyllid
         }
     }
 
-    void streaming_writer::finalize()
+    void ats_streaming_writer::finalize()
     {
         LDEBUG( plog, "finalize streaming writer" );
-        butterfly_house::get_instance()->unregister_writer( this );
+        psyllid::butterfly_house::get_instance()->unregister_writer( this );
         return;
     }
 
 
-    streaming_writer_binding::streaming_writer_binding() :
-            _node_binding< streaming_writer, streaming_writer_binding >()
+    ats_streaming_writer_binding::ats_streaming_writer_binding() :
+            _node_binding< ats_streaming_writer, ats_streaming_writer_binding >()
     {
     }
 
-    streaming_writer_binding::~streaming_writer_binding()
+    ats_streaming_writer_binding::~ats_streaming_writer_binding()
     {
     }
 
-    void streaming_writer_binding::do_apply_config( streaming_writer* a_node, const scarab::param_node& a_config ) const
+    void ats_streaming_writer_binding::do_apply_config( ats_streaming_writer* a_node, const scarab::param_node& a_config ) const
     {
-        LDEBUG( plog, "Configuring streaming_writer with:\n" << a_config );
+        LDEBUG( plog, "Configuring ats_streaming_writer with:\n" << a_config );
         a_node->set_file_num( a_config.get_value( "file-num", a_node->get_file_num() ) );
         if( a_config.has( "device" ) )
         {
@@ -242,9 +244,9 @@ namespace psyllid
         return;
     }
 
-    void streaming_writer_binding::do_dump_config( const streaming_writer* a_node, scarab::param_node& a_config ) const
+    void ats_streaming_writer_binding::do_dump_config( const ats_streaming_writer* a_node, scarab::param_node& a_config ) const
     {
-        LDEBUG( plog, "Dumping configuration for streaming_writer" );
+        LDEBUG( plog, "Dumping configuration for ats_streaming_writer" );
         a_config.add( "file-num", a_node->get_file_num() );
         scarab::param_node t_dev_node = scarab::param_node();
         t_dev_node.add( "bit-depth", a_node->get_bit_depth() );

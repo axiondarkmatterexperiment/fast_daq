@@ -22,7 +22,7 @@ namespace psyllid
      @class streaming_frequency_writer
      @author B. H. LaRoque
 
-     @brief A consumer to that writes all frequency ROACH packets to an egg file.
+     @brief A consumer to that writes all frequency data to an egg file.
 
      @details
 
@@ -53,7 +53,7 @@ namespace psyllid
      Output Streams: (none)
     */
     class streaming_frequency_writer :
-            public midge::_consumer< streaming_frequency_writer, typelist_1( freq_data ) >,
+            public midge::_consumer< midge::type_list< psyllid::freq_data > >,
             public egg_writer
     {
         public:
