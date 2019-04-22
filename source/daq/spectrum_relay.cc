@@ -74,7 +74,7 @@ namespace fast_daq
                 }
                 else if ( input_command == stream::s_stop )
                 {
-                    LWARN( flog, " got an s_stop on slot <" << stream_index << ">");
+                    LDEBUG( flog, " got an s_stop on slot <" << stream_index << ">");
                     continue;
                 }
                 else if ( input_command == stream::s_start )
