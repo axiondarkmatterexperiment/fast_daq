@@ -113,7 +113,7 @@ namespace fast_daq
         out_buffer< 0 >().call( &frequency_data::allocate_array, num_output_bins() );
         out_buffer< 0 >().call( &frequency_data::set_fft_size, f_fft_size );
 
-        LWARN( flog, "configuring to use: " << num_output_bins() << " bins, each " << bin_width_hz() << " Hz wide" );
+        LINFO( flog, "configuring to use: " << num_output_bins() << " bins, each " << bin_width_hz() << " Hz wide" );
 
         if (f_use_wisdom)
         {
@@ -218,13 +218,6 @@ namespace fast_daq
                     if ( in_cmd == stream::s_stop )
                     {
                         LDEBUG( flog, "got an s_stop on slot <" << in_stream_index << ">" );
-                        //TODO some extra timing report output
-                        LWARN( flog, "frequency output tim report" );
-                        out_stream<0>().timer_report();
-                        LWARN( flog, "in 1 report:");
-                        in_stream< 1 >().timer_report();
-                        LWARN( flog, "all reports done");
-                        // end of extra timing prints
                         if ( ! out_stream< 0 >().set( stream::s_stop ) ) throw midge::node_nonfatal_error() << "Stream 0 error while stopping";
                         continue;
                     }
