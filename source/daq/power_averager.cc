@@ -181,10 +181,7 @@ namespace fast_daq
             }
         }
         float power_max_mW = *std::max_element(f_average_spectrum.begin(), f_average_spectrum.end());
-        LWARN( flog, "the maximum power bin has <" << power_max_mW << "> mW" );
-        LWARN( flog, " ... <" << 10. * std::log10(power_max_mW) << "> dBm" );
         // Copy data into output stream and re-zero the averager container
-        //power_data out_data = out_stream< 0 >().data();
         power_data* out_data_ptr = out_stream< 0 >().data();
         float* out_data_array = out_data_ptr->get_data_array();
         out_data_ptr->set_bin_width( f_bin_width );
