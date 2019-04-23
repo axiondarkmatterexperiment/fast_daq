@@ -128,10 +128,6 @@ namespace fast_daq
                     if ( in_cmd == stream::s_stop )
                     {
                         LDEBUG( flog, "got an s_stop on slot <" << in_stream_index << ">" );
-                        //TODO extra timing report
-                        LWARN( flog, "frequency output tim report" );
-                        out_stream< 0 >().timer_report();
-                        // end todo of extra timing prints
                         if ( ! out_stream< 0 >().set( stream::s_stop ) ) throw midge::node_nonfatal_error() << "Stream 0 error while stopping";
                         continue;
                     }

@@ -172,7 +172,10 @@ namespace fast_daq
         // Rescale averaging N if needed
         if ( f_input_counter != f_num_to_average )
         {
-            LINFO( flog, "number of collected points <" <<f_input_counter<< "> is not as expected (" <<f_num_to_average<< "), fixing average normalization" );
+            if ( f_num_to_average != 0 )
+            {
+                LWARN( flog, "number of collected points <" <<f_input_counter<< "> is not as expected (" <<f_num_to_average<< "), fixing average normalization" );
+            }
             float t_rescale_factor = std::max( static_cast<float>(1.0), static_cast<float>(f_num_to_average) ) / static_cast<float>(f_input_counter);
             // If number of collected points is less than expected average, rescale
             for (std::vector< float >::iterator bin_i = f_average_spectrum.begin(); bin_i != f_average_spectrum.end(); bin_i++)
@@ -180,11 +183,7 @@ namespace fast_daq
                 *bin_i = t_rescale_factor * *bin_i;
             }
         }
-        float power_max_mW = *std::max_element(f_average_spectrum.begin(), f_average_spectrum.end());
-        LDEBUG( flog, "the maximum power bin has <" << power_max_mW << "> mW" );
-        LDEBUG( flog, " ... <" << 10. * std::log10(power_max_mW) << "> dBm" );
         // Copy data into output stream and re-zero the averager container
-        //power_data out_data = out_stream< 0 >().data();
         power_data* out_data_ptr = out_stream< 0 >().data();
         float* out_data_array = out_data_ptr->get_data_array();
         out_data_ptr->set_bin_width( f_bin_width );
