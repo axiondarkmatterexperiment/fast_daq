@@ -172,7 +172,10 @@ namespace fast_daq
         // Rescale averaging N if needed
         if ( f_input_counter != f_num_to_average )
         {
-            LWARN( flog, "number of collected points <" <<f_input_counter<< "> is not as expected (" <<f_num_to_average<< "), fixing average normalization" );
+            if ( f_num_to_average != 0 )
+            {
+                LWARN( flog, "number of collected points <" <<f_input_counter<< "> is not as expected (" <<f_num_to_average<< "), fixing average normalization" );
+            }
             float t_rescale_factor = std::max( static_cast<float>(1.0), static_cast<float>(f_num_to_average) ) / static_cast<float>(f_input_counter);
             // If number of collected points is less than expected average, rescale
             for (std::vector< float >::iterator bin_i = f_average_spectrum.begin(); bin_i != f_average_spectrum.end(); bin_i++)
