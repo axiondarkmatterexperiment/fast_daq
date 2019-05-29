@@ -113,23 +113,26 @@ namespace fast_daq
         scarab::param_ptr_t t_payload_ptr( new scarab::param_node() );
         scarab::param_node& t_payload = t_payload_ptr->as_node();
         std::shared_ptr< psyllid::daq_control > t_daq_control = use_daq_control();
-        scarab::param_input_json t_param_codec = scarab::param_input_json();
+        scarab::param_input_json t_param_codec;// = scarab::param_input_json();
+        /*
         scarab::param_node codec_options = scarab::param_node();
         codec_options.add( "encoding", "json" );
-        t_payload.merge(t_param_codec.read_string( t_daq_control->get_description() )->as_node());
+        */
+        t_payload.merge( t_param_codec.read_string( t_daq_control->get_description() )->as_node() );
         // add the spectrum data to the broadcast payload
-        t_payload.add( "value_raw", scarab::param_array() );
-        //TODO if the data were in an std::vector, I could std::for_each instead of this
-        for (unsigned i_bin=0; i_bin < a_spectrum->get_array_size(); i_bin++)
+        scarab::param_array t_spectrum_array;
+        for (unsigned i_bin=0; i_bin < a_spectrum->get_array_size(); ++i_bin)
         {
-            t_payload["value_raw"].as_array().push_back( a_spectrum->get_data_array()[i_bin] );
+            //t_payload["value_raw"].as_array().push_back( a_spectrum->get_data_array()[i_bin] );
+            t_spectrum_array.push_back( a_spectrum->get_data_array()[i_bin] );
         }
+        t_payload.add( "value_raw", std::move( t_spectrum_array) );
         t_payload.add( "minimum_frequency", a_spectrum->get_minimum_frequency() );
         t_payload.add( "maximum_frequency", a_spectrum->get_minimum_frequency() + a_spectrum->get_array_size() * a_spectrum->get_bin_width() );
         t_payload.add( "frequency_resolution", a_spectrum->get_bin_width() );
         // send it
         //send_alert_message( f_spectrum_alert_rk, t_payload );
-        f_dl_relay.send_async( dripline::msg_alert::create( t_payload_ptr, f_spectrum_alert_rk );
+        f_dl_relay.send_async( dripline::msg_alert::create( t_payload_ptr, f_spectrum_alert_rk ) );
     }
 
     void spectrum_relay::send_alert_message( std::string a_routing_key, scarab::param_node a_payload )
