@@ -110,7 +110,8 @@ namespace fast_daq
     void spectrum_relay::broadcast_spectrum( power_data* a_spectrum )
     {
         // grab the run description and load it into the broadcast payload
-        scarab::param_node t_payload = scarab::param_node();
+        scarab::param_ptr_t t_payload_ptr( new scarab::param_node() );
+        scarab::param_node& t_payload = t_payload_ptr->as_node();
         std::shared_ptr< psyllid::daq_control > t_daq_control = use_daq_control();
         scarab::param_input_json t_param_codec = scarab::param_input_json();
         scarab::param_node codec_options = scarab::param_node();
@@ -126,14 +127,20 @@ namespace fast_daq
         t_payload.add( "minimum_frequency", a_spectrum->get_minimum_frequency() );
         t_payload.add( "maximum_frequency", a_spectrum->get_minimum_frequency() + a_spectrum->get_array_size() * a_spectrum->get_bin_width() );
         t_payload.add( "frequency_resolution", a_spectrum->get_bin_width() );
-        send_alert_message( f_spectrum_alert_rk, t_payload );
+        // send it
+        //send_alert_message( f_spectrum_alert_rk, t_payload );
+        f_dl_relay.send_async( dripline::msg_alert::create( t_payload_ptr, f_spectrum_alert_rk );
     }
 
     void spectrum_relay::send_alert_message( std::string a_routing_key, scarab::param_node a_payload )
     {
-        //scarab::param_node t_msg = scarab::param_node();
-        f_dl_relay.send_async( dripline::msg_alert::create( a_payload, a_routing_key ) );
+        /*
+        scarab::param_ptr_t t_payload_ptr( new scarab::param_node(a_payload) );
+        scarab::param_node& t_payload = t_payload_ptr->as_node();
+        t_payload.merge( a_payload );
+        f_dl_relay.send_async( dripline::msg_alert::create( t_payload_ptr, a_routing_key ) );
         LINFO( flog, "sent an alert with rk <" << a_routing_key << ">" );
+        */
     }
 
     /* spectrum_relay_binding class */
