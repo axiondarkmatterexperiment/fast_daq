@@ -56,7 +56,6 @@ namespace fast_daq
             virtual void finalize();
 
         private:
-            dripline::relayer f_dl_relay;
             std::thread f_dl_relay_thread;
 
         private:

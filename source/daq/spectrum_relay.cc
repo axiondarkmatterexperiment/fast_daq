@@ -34,8 +34,7 @@ namespace fast_daq
 
     // spectrum_relay methods
     spectrum_relay::spectrum_relay() :
-        f_spectrum_alert_rk( "spectrum-data" ),
-        f_dl_relay( psyllid::global_config::get_instance()->retrieve()["amqp"].as_node() )
+        f_spectrum_alert_rk( "spectrum-data" )
     {
     }
 
@@ -46,7 +45,6 @@ namespace fast_daq
     // node interface methods
     void spectrum_relay::initialize()
     {
-        f_dl_relay_thread = std::thread( &dripline::relayer::execute_relayer, &f_dl_relay );
     }
 
     void spectrum_relay::execute( midge::diptera* a_midge )
@@ -84,7 +82,6 @@ namespace fast_daq
                 }
                 else if ( input_command == stream::s_run )
                 {
-                    //TODO clean this
                     LTRACE( flog, " got an s_run on slot <" << stream_index << ">");
                     power_data* data_in = in_stream< 0 >().data();
                     broadcast_spectrum( data_in );
@@ -100,11 +97,6 @@ namespace fast_daq
 
     void spectrum_relay::finalize()
     {
-        f_dl_relay.cancel();
-        if ( f_dl_relay_thread.joinable() )
-        {
-            f_dl_relay_thread.join();
-        }
     }
 
     void spectrum_relay::broadcast_spectrum( power_data* a_spectrum )
@@ -125,7 +117,8 @@ namespace fast_daq
         t_payload.add( "maximum_frequency", a_spectrum->get_minimum_frequency() + a_spectrum->get_array_size() * a_spectrum->get_bin_width() );
         t_payload.add( "frequency_resolution", a_spectrum->get_bin_width() );
         // send it
-        f_dl_relay.send_async( dripline::msg_alert::create( std::move(t_payload_ptr), f_spectrum_alert_rk ) );
+        psyllid::message_relayer* t_message_relay = psyllid::message_relayer::get_instance();
+        t_message_relay->send( dripline::msg_alert::create( std::move(t_payload_ptr), f_spectrum_alert_rk ) );
     }
 
     /* spectrum_relay_binding class */
