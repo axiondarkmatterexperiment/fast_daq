@@ -61,7 +61,6 @@ namespace fast_daq
 
         private:
             void broadcast_spectrum( power_data* a_spectrum );
-            void send_alert_message( std::string a_routing_key, scarab::param_node a_payload );
     };
 
     class spectrum_relay_binding : public psyllid::_node_binding< spectrum_relay, spectrum_relay_binding >
