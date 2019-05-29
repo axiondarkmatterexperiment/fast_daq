@@ -34,8 +34,7 @@ namespace fast_daq
 
     // spectrum_relay methods
     spectrum_relay::spectrum_relay() :
-        f_spectrum_alert_rk( "spectrum-data" ),
-        f_dl_relay( psyllid::global_config::get_instance()->retrieve()["amqp"].as_node() )
+        f_spectrum_alert_rk( "spectrum-data" )
     {
     }
 
@@ -46,7 +45,6 @@ namespace fast_daq
     // node interface methods
     void spectrum_relay::initialize()
     {
-        f_dl_relay_thread = std::thread( &dripline::relayer::execute_relayer, &f_dl_relay );
     }
 
     void spectrum_relay::execute( midge::diptera* a_midge )
@@ -74,7 +72,7 @@ namespace fast_daq
                 }
                 else if ( input_command == stream::s_stop )
                 {
-                    LPROG( flog, " got an s_stop on slot <" << stream_index << ">");
+                    LINFO( flog, " got an s_stop on slot <" << stream_index << ">");
                     continue;
                 }
                 else if ( input_command == stream::s_start )
@@ -84,7 +82,6 @@ namespace fast_daq
                 }
                 else if ( input_command == stream::s_run )
                 {
-                    //TODO clean this
                     LTRACE( flog, " got an s_run on slot <" << stream_index << ">");
                     power_data* data_in = in_stream< 0 >().data();
                     broadcast_spectrum( data_in );
@@ -100,40 +97,28 @@ namespace fast_daq
 
     void spectrum_relay::finalize()
     {
-        f_dl_relay.cancel();
-        if ( f_dl_relay_thread.joinable() )
-        {
-            f_dl_relay_thread.join();
-        }
     }
 
     void spectrum_relay::broadcast_spectrum( power_data* a_spectrum )
     {
         // grab the run description and load it into the broadcast payload
-        scarab::param_node t_payload = scarab::param_node();
+        scarab::param_ptr_t t_payload_ptr( new scarab::param_node() );
+        scarab::param_node& t_payload = t_payload_ptr->as_node();
         std::shared_ptr< psyllid::daq_control > t_daq_control = use_daq_control();
-        scarab::param_input_json t_param_codec = scarab::param_input_json();
-        scarab::param_node codec_options = scarab::param_node();
-        codec_options.add( "encoding", "json" );
-        t_payload.merge(t_param_codec.read_string( t_daq_control->get_description() )->as_node());
-        // add the spectrum data to the broadcast payload
-        t_payload.add( "value_raw", scarab::param_array() );
-        //TODO if the data were in an std::vector, I could std::for_each instead of this
-        for (unsigned i_bin=0; i_bin < a_spectrum->get_array_size(); i_bin++)
+        scarab::param_input_json t_param_codec;
+        t_payload.merge( t_param_codec.read_string( t_daq_control->get_description() )->as_node() );
+        scarab::param_array t_spectrum_array;
+        for (unsigned i_bin=0; i_bin < a_spectrum->get_array_size(); ++i_bin)
         {
-            t_payload["value_raw"].as_array().push_back( a_spectrum->get_data_array()[i_bin] );
+            t_spectrum_array.push_back( a_spectrum->get_data_array()[i_bin] );
         }
+        t_payload.add( "value_raw", std::move( t_spectrum_array) );
         t_payload.add( "minimum_frequency", a_spectrum->get_minimum_frequency() );
         t_payload.add( "maximum_frequency", a_spectrum->get_minimum_frequency() + a_spectrum->get_array_size() * a_spectrum->get_bin_width() );
         t_payload.add( "frequency_resolution", a_spectrum->get_bin_width() );
-        send_alert_message( f_spectrum_alert_rk, t_payload );
-    }
-
-    void spectrum_relay::send_alert_message( std::string a_routing_key, scarab::param_node a_payload )
-    {
-        //scarab::param_node t_msg = scarab::param_node();
-        f_dl_relay.send_async( dripline::msg_alert::create( a_payload, a_routing_key ) );
-        LINFO( flog, "sent an alert with rk <" << a_routing_key << ">" );
+        // send it
+        psyllid::message_relayer* t_message_relay = psyllid::message_relayer::get_instance();
+        t_message_relay->send( dripline::msg_alert::create( std::move(t_payload_ptr), f_spectrum_alert_rk ) );
     }
 
     /* spectrum_relay_binding class */
