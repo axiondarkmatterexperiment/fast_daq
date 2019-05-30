@@ -43,6 +43,7 @@ endif (FastDAQ_ENABLE_ATS)
 if (ATS9462_FOUND)
     pbuilder_add_ext_libraries( ${ATS9462_LIBRARIES} )
     include_directories (${ATS9462_INCLUDE_DIR})
+    add_definitions( -DATS_ENABLED )
 endif (ATS9462_FOUND)
 
 # FFTW

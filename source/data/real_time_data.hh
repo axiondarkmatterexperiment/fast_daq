@@ -8,7 +8,12 @@
 #ifndef REAL_TIME_DATA_HH_
 #define REAL_TIME_DATA_HH_
 
+#ifdef ATS_ENABLED
 #include "AlazarApi.h"
+#else
+typedef unsigned short U16;
+#endif
+
 #include "member_variables.hh"
 
 #include <vector>
