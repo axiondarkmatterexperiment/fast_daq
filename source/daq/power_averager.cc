@@ -57,7 +57,7 @@ namespace fast_daq
         LWARN( flog, "f_rescale: " << f_rescale );
         f_rescale *= 1000. / 50.; // scale to mW: 1000.0 is to get to mW from W, 50.0 is impedance to get W from
 
-        f_avg_spectrum_bytes = f_avg_spectrum.size() * sizeof(float);
+        f_avg_spectrum_bytes = f_average_spectrum.size() * sizeof(float);
     }
 
     void power_averager::execute( midge::diptera* a_midge )
@@ -149,7 +149,7 @@ namespace fast_daq
         for (unsigned i_bin=0; i_bin < data_in->get_array_size(); ++i_bin)
         {
             // compute the power in mW (note, not W)
-            f_average_spectrum[i_bin] += ( data_array_in[i_bin][0]*data_array_in[i_bin][0] + ata_array_in[i_bin][1]*data_array_in[i_bin][1] ) * f_rescale;
+            f_average_spectrum[i_bin] += ( data_array_in[i_bin][0]*data_array_in[i_bin][0] + data_array_in[i_bin][1]*data_array_in[i_bin][1] ) * f_rescale;
         }
 
         ++f_input_counter;
