@@ -195,6 +195,7 @@ namespace fast_daq
         out_data_ptr->set_minimum_frequency( f_minimum_frequency );
 
         std::memcpy( out_data_array, f_average_spectrum.data(), f_avg_spectrum_bytes );
+        std::fill( f_average_spectrum.begin(), f_average_spectrum.end(), 0. );
 
         f_input_counter = 0;
 
