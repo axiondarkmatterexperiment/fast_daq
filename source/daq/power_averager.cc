@@ -146,11 +146,13 @@ namespace fast_daq
             throw 1;
         }
 
+        double t_prev = f_average_spectrum[100];
         for (unsigned i_bin=0; i_bin < data_in->get_array_size(); ++i_bin)
         {
             // compute the power in mW (note, not W)
             f_average_spectrum[i_bin] += ( data_array_in[i_bin][0]*data_array_in[i_bin][0] + data_array_in[i_bin][1]*data_array_in[i_bin][1] ) * f_rescale;
         }
+        LWARN( flog, std::string("Bin 100: avg spect: ") << f_average_spectrum[100] << " = " << t_prev << " + (" << data_array_in[100][0] << "^2 + " << data_array_in[100][1] << "^2) * " << f_rescale);
 
         ++f_input_counter;
 
@@ -182,10 +184,12 @@ namespace fast_daq
             float t_rescale_factor = std::max( static_cast<float>(1.0), static_cast<float>(f_num_to_average) ) / static_cast<float>(f_input_counter);
             LWARN( flog, "t_rescale_factor: " << t_rescale_factor );
             // If number of collected points is less than expected average, rescale
+            double t_prev = f_average_spectrum[100];
             for (std::vector< float >::iterator bin_i = f_average_spectrum.begin(); bin_i != f_average_spectrum.end(); ++bin_i)
             {
                 *bin_i = t_rescale_factor * *bin_i;
             }
+            LWARN( flog, "Final bin 100: " << f_average_spectrum[100] << " = " << t_prev << " * " << t_rescale_factor );
         }
 
         // Copy data into output stream and re-zero the averager container
