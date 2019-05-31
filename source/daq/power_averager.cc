@@ -142,6 +142,7 @@ namespace fast_daq
         {
             t_avg_norm = 1. / f_num_to_average;
         }
+        LWARN( flog, "t_avg_norm: " << t_avg_norm );
         for (unsigned i_bin=0; i_bin < data_in->get_array_size(); i_bin++)
         {
             // compute the power in mW (note, not W)
@@ -177,6 +178,7 @@ namespace fast_daq
                 LWARN( flog, "number of collected points <" <<f_input_counter<< "> is not as expected (" <<f_num_to_average<< "), fixing average normalization" );
             }
             float t_rescale_factor = std::max( static_cast<float>(1.0), static_cast<float>(f_num_to_average) ) / static_cast<float>(f_input_counter);
+            LWARN( flog, "t_rescale_factor: " << t_rescale_factor );
             // If number of collected points is less than expected average, rescale
             for (std::vector< float >::iterator bin_i = f_average_spectrum.begin(); bin_i != f_average_spectrum.end(); bin_i++)
             {
