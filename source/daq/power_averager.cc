@@ -54,7 +54,6 @@ namespace fast_daq
         f_average_spectrum.resize( f_spectrum_size, 0. );
 
         f_rescale = f_num_to_average == 0 ? 1. : 1. / (float)f_num_to_average;
-        LWARN( flog, "f_rescale: " << f_rescale );
         f_rescale *= 1000. / 50.; // scale to mW: 1000.0 is to get to mW from W, 50.0 is impedance to get W from
 
         f_avg_spectrum_bytes = f_average_spectrum.size() * sizeof(float);
