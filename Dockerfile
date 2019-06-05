@@ -51,6 +51,7 @@ RUN mkdir -p /tmp/dl_build && \
     make install && \
     /bin/true
 
+ARG enable_ats=FALSE
 RUN cd /usr/local/src && \
     mkdir -p build && \
     cd build && \
@@ -61,6 +62,7 @@ RUN cd /usr/local/src/build && \
           #-DMonarch_ENABLE_EXECUTABLES=FALSE \
           -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
           -DPsyllid_ENABLE_STREAMED_FREQUENCY_OUTPUT=TRUE \
+          -DFastDAQ_ENABLE_ATS:BOOL=${enable_ats} \
           .. && \
      /bin/true
 RUN cd /usr/local/src/build && \
