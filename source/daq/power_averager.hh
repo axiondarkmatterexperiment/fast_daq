@@ -71,6 +71,10 @@ namespace fast_daq
         mv_accessible( unsigned, num_to_average );
         mv_accessible( float, bin_width );
         mv_accessible( float, minimum_frequency );
+
+        mv_accessible_noset( float, rescale );
+        mv_accessible_noset( unsigned, avg_spectrum_bytes );
+
         private:
             std::vector< float > f_average_spectrum;
             unsigned f_input_counter;

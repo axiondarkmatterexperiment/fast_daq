@@ -50,7 +50,13 @@ namespace fast_daq
     {
         out_buffer< 0 >().initialize( f_num_output_buffers );
         out_buffer< 0 >().call( &power_data::allocate_array, f_spectrum_size );
+
         f_average_spectrum.resize( f_spectrum_size, 0. );
+
+        f_rescale = f_num_to_average == 0 ? 1. : 1. / (float)f_num_to_average;
+        f_rescale *= 1000. / 50.; // scale to mW: 1000.0 is to get to mW from W, 50.0 is impedance to get W from
+
+        f_avg_spectrum_bytes = f_average_spectrum.size() * sizeof(float);
     }
 
     void power_averager::execute( midge::diptera* a_midge )
@@ -131,26 +137,22 @@ namespace fast_daq
         //     ... even better, do it with a call upon getting s_start, or in init, or something
         f_bin_width = data_in->get_bin_width();
         f_minimum_frequency = data_in->get_minimum_frequency();
+
         if (data_in->get_array_size() != f_average_spectrum.size())
         {
             LERROR( flog, "input array size [" << data_in->get_array_size() <<"] != output array size ["<<f_average_spectrum.size()<<"]");
             //TODO throw something smart please
             throw 1;
         }
-        float t_avg_norm = 1.0;
-        if (f_num_to_average)
-        {
-            t_avg_norm = 1. / f_num_to_average;
-        }
-        for (unsigned i_bin=0; i_bin < data_in->get_array_size(); i_bin++)
+
+        for (unsigned i_bin=0; i_bin < data_in->get_array_size(); ++i_bin)
         {
             // compute the power in mW (note, not W)
-            // 1000.0 is to get to mW, 50.0 is impedance
-            float these_mW = ( std::pow(data_array_in[i_bin][0], 2) + std::pow(data_array_in[i_bin][1], 2) ) * 1000.0 / 50.0;
-            // divide by number of items in average and increment average spectrum buffer
-            f_average_spectrum[i_bin] += these_mW * t_avg_norm;
+            f_average_spectrum[i_bin] += ( data_array_in[i_bin][0]*data_array_in[i_bin][0] + data_array_in[i_bin][1]*data_array_in[i_bin][1] ) * f_rescale;
         }
-        f_input_counter++;
+
+        ++f_input_counter;
+
         if ( f_input_counter == f_num_to_average )
         {
             send_output();
@@ -178,24 +180,26 @@ namespace fast_daq
             }
             float t_rescale_factor = std::max( static_cast<float>(1.0), static_cast<float>(f_num_to_average) ) / static_cast<float>(f_input_counter);
             // If number of collected points is less than expected average, rescale
-            for (std::vector< float >::iterator bin_i = f_average_spectrum.begin(); bin_i != f_average_spectrum.end(); bin_i++)
+            for (std::vector< float >::iterator bin_i = f_average_spectrum.begin(); bin_i != f_average_spectrum.end(); ++bin_i)
             {
                 *bin_i = t_rescale_factor * *bin_i;
             }
         }
+
         // Copy data into output stream and re-zero the averager container
         power_data* out_data_ptr = out_stream< 0 >().data();
         float* out_data_array = out_data_ptr->get_data_array();
+
         out_data_ptr->set_bin_width( f_bin_width );
         out_data_ptr->set_minimum_frequency( f_minimum_frequency );
-        for (unsigned bin_i=0; bin_i < f_average_spectrum.size(); bin_i++)
-        {
-            out_data_array[bin_i] = f_average_spectrum[bin_i];
-            f_average_spectrum[bin_i] = 0;
-        }
+
+        std::memcpy( out_data_array, f_average_spectrum.data(), f_avg_spectrum_bytes );
+        std::fill( f_average_spectrum.begin(), f_average_spectrum.end(), 0. );
+
         f_input_counter = 0;
+
         LINFO( flog, "sending out a spectrum" );
-        if (!out_stream< 0 >().set( stream::s_run))
+        if (! out_stream< 0 >().set( stream::s_run))
         {
             LERROR( flog, "unable to set s_run on output stream" );
             //TODO this should be something smarter

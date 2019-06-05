@@ -1,4 +1,7 @@
-FROM debian:9
+ARG base_image_repo=debian
+ARG base_image_tag=9
+
+FROM ${base_image_repo}:${base_image_tag}
 
 # Most dependencies
 
@@ -26,13 +29,27 @@ RUN cd /tmp &&\
     tar -xvzf ${hdf5_version}.tar.gz &&\
     cd ${hdf5_version} &&\
     ./configure --prefix=$COMMON_BUILD_PREFIX --enable-cxx --enable-shared &&\
-    make install -j3 &&\
+    make install &&\
     /bin/true
+
+# actually build the local project(s)
 
 COPY psyllid /usr/local/src/psyllid
 COPY source /usr/local/src/source
 COPY cmake /usr/local/src/cmake
 COPY CMakeLists.txt /usr/local/src/CMakeLists.txt
+
+# need to build dripline separately
+RUN mkdir -p /tmp/dl_build && \
+    cd /tmp/dl_build && \
+    cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
+          -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+          /usr/local/src/psyllid/dripline-cpp && \
+    cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
+          -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+          /usr/local/src/psyllid/dripline-cpp && \
+    make install && \
+    /bin/true
 
 RUN cd /usr/local/src && \
     mkdir -p build && \
