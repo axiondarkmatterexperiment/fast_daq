@@ -39,14 +39,15 @@ COPY source /usr/local/src/source
 COPY cmake /usr/local/src/cmake
 COPY CMakeLists.txt /usr/local/src/CMakeLists.txt
 
+ARG build_type=RELEASE
 # need to build dripline separately
 RUN mkdir -p /tmp/dl_build && \
     cd /tmp/dl_build && \
     cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
-          -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+          -DCMAKE_BUILD_TYPE=${build_type} \
           /usr/local/src/psyllid/dripline-cpp && \
     cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
-          -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+          -DCMAKE_BUILD_TYPE=${build_type} \
           /usr/local/src/psyllid/dripline-cpp && \
     make install && \
     /bin/true
@@ -58,11 +59,13 @@ RUN cd /usr/local/src && \
     cmake .. && \
     /bin/true
 RUN cd /usr/local/src/build && \
-    cmake -DPsyllid_ENABLE_TESTING=FALSE \
-          #-DMonarch_ENABLE_EXECUTABLES=FALSE \
+    cmake \
           -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
+          -DDripline_ENABLE_EXECUTABLES=FALSE \
+          -DPsyllid_ENABLE_TESTING=FALSE \
           -DPsyllid_ENABLE_STREAMED_FREQUENCY_OUTPUT=TRUE \
           -DFastDAQ_ENABLE_ATS:BOOL=${enable_ats} \
+          -DCMAKE_BUILD_TYPE=${build_type} \
           .. && \
      /bin/true
 RUN cd /usr/local/src/build && \
