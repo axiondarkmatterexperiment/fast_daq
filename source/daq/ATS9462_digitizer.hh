@@ -62,7 +62,7 @@ namespace fast_daq
             enum class reference_source_t
             {
                 internal,
-                external
+                external_10MHz
             };
             static uint32_t reference_source_to_uint( reference_source_t a_reference_source );
             static reference_source_t uint_to_reference_source( uint32_t a_reference_source_uint );
@@ -94,6 +94,7 @@ namespace fast_daq
         public:
             std::string get_reference_source_str() const;
         mv_accessible( U32, samples_per_sec );
+        mv_accessible( U32, decimation_factor ); // note that this is the "decimation_value"+1 (ie, to decimate by 10 -> returned_samples_per_sec = physical_samples_per_sec / 10; the "decimation_factor" is 10, and the "decimation_value" is 9)
         mv_accessible( double, acquisition_length_sec );
         mv_accessible( U32, samples_per_buffer );
         mv_accessible( U32, input_mag_range );
