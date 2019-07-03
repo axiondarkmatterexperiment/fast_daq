@@ -58,6 +58,16 @@ namespace fast_daq
     */
     class ats9462_digitizer : public midge::_producer< midge::type_list< real_time_data > >, public psyllid::control_access
     {
+        public:
+            enum class reference_source_t
+            {
+                internal,
+                external
+            };
+            static uint32_t reference_source_to_uint( reference_source_t a_reference_source );
+            static reference_source_t uint_to_reference_source( uint32_t a_reference_source_uint );
+            static std::string reference_source_to_string( reference_source_t a_reference_source );
+            static reference_source_t string_to_reference_source( const std::string& a_reference_source );
 
         private:
             typedef boost::bimap< uint32_t, ALAZAR_SAMPLE_RATES > sample_rate_code_map_t;
@@ -69,6 +79,7 @@ namespace fast_daq
         public:
             ats9462_digitizer();
             virtual ~ats9462_digitizer();
+            void set_reference_source( const std::string& a_reference_source );
 
         private:
             void set_internal_maps();
@@ -79,6 +90,9 @@ namespace fast_daq
             virtual void finalize();
 
         //TODO implement custom setters that do not allow changes after the board has been configured (for those parameters set in board configuration)
+        mv_accessible( reference_source_t, reference_source );
+        public:
+            std::string get_reference_source_str() const;
         mv_accessible( U32, samples_per_sec );
         mv_accessible( double, acquisition_length_sec );
         mv_accessible( U32, samples_per_buffer );
@@ -123,6 +137,23 @@ namespace fast_daq
             U32 buffers_per_acquisition();
 
     };
+
+    inline uint32_t ats9462_digitizer::reference_source_to_uint( reference_source_t a_reference_source )
+    {
+        return static_cast< uint32_t >( a_reference_source );
+    }
+    inline ats9462_digitizer::reference_source_t ats9462_digitizer::uint_to_reference_source( uint32_t a_reference_source_uint )
+    {
+        return static_cast< ats9462_digitizer::reference_source_t >( a_reference_source_uint );
+    }
+    inline void ats9462_digitizer::set_reference_source( const std::string& a_reference_source )
+    {
+        set_reference_source( string_to_reference_source( a_reference_source ) );
+    }
+    inline std::string ats9462_digitizer::get_reference_source_str() const
+    {
+        return reference_source_to_string( f_reference_source );
+    }
 
     class ats9462_digitizer_binding : public psyllid::_node_binding< ats9462_digitizer, ats9462_digitizer_binding >
     {

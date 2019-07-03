@@ -17,6 +17,21 @@ using midge::stream;
 
 namespace fast_daq
 {
+    std::string ats9462_digitizer::reference_source_to_string( reference_source_t a_reference_source )
+    {
+        switch (a_reference_source) {
+            case ats9462_digitizer::reference_source_t::internal: return "internal";
+            case ats9462_digitizer::reference_source_t::external: return "external";
+            default: throw psyllid::error() << "reference_source value <" << reference_source_to_uint( a_reference_source ) << "> not recognized";
+        }
+    }
+    ats9462_digitizer::reference_source_t ats9462_digitizer::string_to_reference_source( const std::string& a_reference_source )
+    {
+        if( a_reference_source == reference_source_to_string( ats9462_digitizer::reference_source_t::internal ) ) return reference_source_t::internal;
+        if( a_reference_source == reference_source_to_string( ats9462_digitizer::reference_source_t::external ) ) return reference_source_t::external;
+        throw psyllid::error() << "string <" << a_reference_source << "> not recognized as valid reference_source type";
+    }
+
     REGISTER_NODE_AND_BUILDER( ats9462_digitizer, "ats9462", ats9462_digitizer_binding );
 
     LOGGER( flog, "ats9462_digitizer" );
