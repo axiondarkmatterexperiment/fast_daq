@@ -190,11 +190,12 @@ namespace fast_daq
 
     void ats9462_digitizer::configure_board()
     {
-        ALAZAR_SAMPLE_RATES this_rate = f_sample_rate_to_code.left.at( f_samples_per_sec );
+        ALAZAR_SAMPLE_RATES this_rate;
         U32 t_decimation_value = f_decimation_factor - 1;
         switch (f_reference_source)
         {
             case ats9462_digitizer::reference_source_t::internal:
+                this_rate = f_sample_rate_to_code.left.at( f_samples_per_sec );
                 check_return_code_macro( AlazarSetCaptureClock, f_board_handle, INTERNAL_CLOCK, this_rate, CLOCK_EDGE_RISING, t_decimation_value );
                 break;
             case ats9462_digitizer::reference_source_t::external_10MHz:
