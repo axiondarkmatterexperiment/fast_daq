@@ -54,7 +54,7 @@ namespace fast_daq
         f_average_spectrum.resize( f_spectrum_size, 0. );
 
         f_rescale = f_num_to_average == 0 ? 1. : 1. / (float)f_num_to_average;
-        LWARN( flog, "f_rescale: " << f_rescale );
+//        LWARN( flog, "f_rescale: " << f_rescale );
         f_rescale *= 1000. / 50.; // scale to mW: 1000.0 is to get to mW from W, 50.0 is impedance to get W from
 
         f_avg_spectrum_bytes = f_average_spectrum.size() * sizeof(float);
@@ -146,13 +146,13 @@ namespace fast_daq
             throw 1;
         }
 
-        double t_prev = f_average_spectrum[100];
+//        double t_prev = f_average_spectrum[100];
         for (unsigned i_bin=0; i_bin < data_in->get_array_size(); ++i_bin)
         {
             // compute the power in mW (note, not W)
             f_average_spectrum[i_bin] += ( data_array_in[i_bin][0]*data_array_in[i_bin][0] + data_array_in[i_bin][1]*data_array_in[i_bin][1] ) * f_rescale;
         }
-        LWARN( flog, std::string("Bin 100: avg spect: ") << f_average_spectrum[100] << " = " << t_prev << " + (" << data_array_in[100][0] << "^2 + " << data_array_in[100][1] << "^2) * " << f_rescale);
+//        LWARN( flog, std::string("Bin 100: avg spect: ") << f_average_spectrum[100] << " = " << t_prev << " + (" << data_array_in[100][0] << "^2 + " << data_array_in[100][1] << "^2) * " << f_rescale);
 
         ++f_input_counter;
 
@@ -182,14 +182,14 @@ namespace fast_daq
                 LWARN( flog, "number of collected points <" <<f_input_counter<< "> is not as expected (" <<f_num_to_average<< "), fixing average normalization" );
             }
             float t_rescale_factor = std::max( static_cast<float>(1.0), static_cast<float>(f_num_to_average) ) / static_cast<float>(f_input_counter);
-            LWARN( flog, "t_rescale_factor: " << t_rescale_factor );
+//            LWARN( flog, "t_rescale_factor: " << t_rescale_factor );
             // If number of collected points is less than expected average, rescale
-            double t_prev = f_average_spectrum[100];
+//            double t_prev = f_average_spectrum[100];
             for (std::vector< float >::iterator bin_i = f_average_spectrum.begin(); bin_i != f_average_spectrum.end(); ++bin_i)
             {
                 *bin_i = t_rescale_factor * *bin_i;
             }
-            LWARN( flog, "Final bin 100: " << f_average_spectrum[100] << " = " << t_prev << " * " << t_rescale_factor );
+//            LWARN( flog, "Final bin 100: " << f_average_spectrum[100] << " = " << t_prev << " * " << t_rescale_factor );
         }
 
         // Copy data into output stream and re-zero the averager container
