@@ -69,7 +69,7 @@ namespace fast_daq
         f_board_handle = AlazarGetBoardBySystemID( f_system_id, f_board_id );
         if (f_board_handle == NULL)
         {
-            throw psyllid::error() << "Error: Unable to open board system Id " << f_system_id << " board Id " << f_board_id;
+            throw psyllid::fatal_error() << "Error: Unable to open board system Id " << f_system_id << " board Id " << f_board_id;
         }
         check_return_code_macro( AlazarGetChannelInfo, f_board_handle, &f_max_samples_per_channel, &f_bits_per_sample);
     }
