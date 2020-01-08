@@ -69,7 +69,7 @@ namespace fast_daq
         f_board_handle = AlazarGetBoardBySystemID( f_system_id, f_board_id );
         if (f_board_handle == NULL)
         {
-            throw psyllid::error() << "Error: Unable to open board system Id " << f_system_id << " board Id " << f_board_id;
+            throw psyllid::fatal_error() << "Error: Unable to open board system Id " << f_system_id << " board Id " << f_board_id;
         }
         check_return_code_macro( AlazarGetChannelInfo, f_board_handle, &f_max_samples_per_channel, &f_bits_per_sample);
     }
@@ -130,6 +130,7 @@ namespace fast_daq
     {
         try
         {
+	  LINFO( flog, "Chelsea Test");
             //TODO something interesting here?
             while (! is_canceled() )
             {
@@ -312,6 +313,7 @@ namespace fast_daq
         LTRACE( flog, "in process_a_buffer" );
         //grab the next buffer, once it is filled by the digitizer
         U16* this_buffer = f_board_buffers.at( f_next_read_buffer % f_board_buffers.size() );
+	LINFO("Testing the print statements")
         check_return_code_macro( AlazarWaitAsyncBufferComplete, f_board_handle, this_buffer, 5000 );
         ++f_next_read_buffer;
         //copy the int array into the output stream
