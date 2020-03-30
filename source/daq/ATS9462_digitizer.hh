@@ -93,7 +93,7 @@ namespace fast_daq
         public:
             std::string get_reference_source_str() const;
         mv_accessible( U32, samples_per_sec );
-	set_reference_source_and_decimation( U32 a_decimation_factor, reference_source_t a_reference_source);
+	void set_reference_source_and_decimation( reference_source_t a_reference_source, U32 a_decimation_factor );
         mv_accessible_noset( reference_source_t, reference_source );
         mv_accessible_noset( U32, decimation_factor ); // note that this is the "decimation_value"+1 (ie, to decimate by 10 -> returned_samples_per_sec = physical_samples_per_sec / 10; the "decimation_factor" is 10, and the "decimation_value" is 9)
         mv_accessible( double, acquisition_length_sec );

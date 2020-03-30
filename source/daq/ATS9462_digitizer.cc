@@ -384,15 +384,25 @@ namespace fast_daq
     {
     }
 
+    void ats9462_digitizer::set_reference_source_and_decimation( reference_source_t a_reference_source, U32 a_decimation_factor )
+    {
+        if ( a_reference_source == ats9462_digitizer::reference_source_t::internal and a_decimation_factor != 1)
+	{
+	    throw error() << "internal reference does not support decimation";
+        }
+	f_reference_source = a_reference_source;
+	f_decimation_factor = a_decimation_factor;
+    }
+
     void ats9462_digitizer_binding::do_apply_config(ats9462_digitizer* a_node, const scarab::param_node& a_config ) const
     {
-        a_node->set_reference_source( a_config.get_value( "reference-source", a_node->get_reference_source_str() ) );
+	a_node->set_reference_source_and_decimation( a_config.get_value( "reference-source", a_node->get_reference_source_str() ), a_config.get_value( "decimation-factor", a_node->get_decimation_factor() ) );
+
 	LINFO("do apply config reference-source: " + a_node->get_reference_source_str())
         a_node->set_samples_per_buffer( a_config.get_value( "samples-per-buffer", a_node->get_samples_per_buffer() ) );
         a_node->set_out_length( a_config.get_value( "out-length", a_node->get_out_length() ) );
         a_node->set_dma_buffer_count( a_config.get_value( "dma-buffer-count", a_node->get_dma_buffer_count() ) );
         a_node->set_samples_per_sec( a_config.get_value( "samples-per-sec", a_node->get_samples_per_sec() ) );
-        a_node->set_decimation_factor( a_config.get_value( "decimation-factor", a_node->get_decimation_factor() ) );
         a_node->set_acquisition_length_sec( a_config.get_value( "acquisition-length-sec", a_node->get_acquisition_length_sec() ) );
     }
 
