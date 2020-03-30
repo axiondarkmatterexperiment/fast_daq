@@ -90,11 +90,12 @@ namespace fast_daq
             virtual void finalize();
 
         //TODO implement custom setters that do not allow changes after the board has been configured (for those parameters set in board configuration)
-        mv_accessible( reference_source_t, reference_source );
         public:
             std::string get_reference_source_str() const;
         mv_accessible( U32, samples_per_sec );
-        mv_accessible( U32, decimation_factor ); // note that this is the "decimation_value"+1 (ie, to decimate by 10 -> returned_samples_per_sec = physical_samples_per_sec / 10; the "decimation_factor" is 10, and the "decimation_value" is 9)
+	set_reference_source_and_decimation( U32 a_decimation_factor, reference_source_t a_reference_source);
+        mv_accessible_noset( reference_source_t, reference_source );
+        mv_accessible_noset( U32, decimation_factor ); // note that this is the "decimation_value"+1 (ie, to decimate by 10 -> returned_samples_per_sec = physical_samples_per_sec / 10; the "decimation_factor" is 10, and the "decimation_value" is 9)
         mv_accessible( double, acquisition_length_sec );
         mv_accessible( U32, samples_per_buffer );
         mv_accessible( U32, input_mag_range );
