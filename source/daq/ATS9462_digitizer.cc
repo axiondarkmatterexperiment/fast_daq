@@ -388,7 +388,7 @@ namespace fast_daq
     {
         if ( a_reference_source == ats9462_digitizer::reference_source_t::internal and a_decimation_factor != 1)
 	{
-	    throw error() << "internal reference does not support decimation";
+	    throw psyllid::error() << "internal reference does not support decimation";
         }
 	f_reference_source = a_reference_source;
 	f_decimation_factor = a_decimation_factor;
