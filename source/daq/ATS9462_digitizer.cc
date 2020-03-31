@@ -42,6 +42,7 @@ namespace fast_daq
     // ats9462_digitizer methods
     ats9462_digitizer::ats9462_digitizer() :
         f_reference_source( reference_source_t::internal ),
+        //f_reference_source( reference_source_t::external_10MHz ),
         f_samples_per_sec( 50000000 ), //default is 50MS/s
         f_decimation_factor( 1 ),
         f_acquisition_length_sec( 0.1 ),
@@ -130,7 +131,6 @@ namespace fast_daq
     {
         try
         {
-	  LINFO( flog, "Chelsea Test");
             //TODO something interesting here?
             while (! is_canceled() )
             {
@@ -201,6 +201,7 @@ namespace fast_daq
                 break;
             case ats9462_digitizer::reference_source_t::external_10MHz:
                 check_return_code_macro( AlazarSetCaptureClock, f_board_handle, EXTERNAL_CLOCK_10MHZ_REF, f_samples_per_sec, CLOCK_EDGE_RISING, t_decimation_value );
+		LINFO("Im in the external_10MHz case")
                 break;
             default: throw psyllid::error() << "reference_type value <" << reference_source_to_uint(f_reference_source) << "> not recognized";
         }
@@ -313,7 +314,6 @@ namespace fast_daq
         LTRACE( flog, "in process_a_buffer" );
         //grab the next buffer, once it is filled by the digitizer
         U16* this_buffer = f_board_buffers.at( f_next_read_buffer % f_board_buffers.size() );
-	LINFO("Testing the print statements")
         check_return_code_macro( AlazarWaitAsyncBufferComplete, f_board_handle, this_buffer, 5000 );
         ++f_next_read_buffer;
         //copy the int array into the output stream
@@ -355,7 +355,7 @@ namespace fast_daq
     // Derived properties
     INT64 ats9462_digitizer::samples_per_acquisition()
     {
-        return (INT64)(double(f_samples_per_sec) * f_acquisition_length_sec + 0.5);
+        return (INT64)(double(f_samples_per_sec/f_decimation_factor) * f_acquisition_length_sec + 0.5);
     }
 
     float ats9462_digitizer::bytes_per_sample()
@@ -384,20 +384,32 @@ namespace fast_daq
     {
     }
 
+    void ats9462_digitizer::set_reference_source_and_decimation( reference_source_t a_reference_source, U32 a_decimation_factor )
+    {
+        if ( a_reference_source == ats9462_digitizer::reference_source_t::internal and a_decimation_factor != 1)
+	{
+	    throw psyllid::error() << "internal reference does not support decimation";
+        }
+	f_reference_source = a_reference_source;
+	f_decimation_factor = a_decimation_factor;
+    }
+
     void ats9462_digitizer_binding::do_apply_config(ats9462_digitizer* a_node, const scarab::param_node& a_config ) const
     {
-        a_node->set_reference_source( a_config.get_value( "reference-source", a_node->get_reference_source_str() ) );
+	a_node->set_reference_source_and_decimation( a_config.get_value( "reference-source", a_node->get_reference_source_str() ), a_config.get_value( "decimation-factor", a_node->get_decimation_factor() ) );
+
+	LINFO("do apply config reference-source: " + a_node->get_reference_source_str())
         a_node->set_samples_per_buffer( a_config.get_value( "samples-per-buffer", a_node->get_samples_per_buffer() ) );
         a_node->set_out_length( a_config.get_value( "out-length", a_node->get_out_length() ) );
         a_node->set_dma_buffer_count( a_config.get_value( "dma-buffer-count", a_node->get_dma_buffer_count() ) );
         a_node->set_samples_per_sec( a_config.get_value( "samples-per-sec", a_node->get_samples_per_sec() ) );
-        a_node->set_decimation_factor( a_config.get_value( "decimation-factor", a_node->get_decimation_factor() ) );
         a_node->set_acquisition_length_sec( a_config.get_value( "acquisition-length-sec", a_node->get_acquisition_length_sec() ) );
     }
 
     void ats9462_digitizer_binding::do_dump_config( const ats9462_digitizer* a_node, scarab::param_node& a_config ) const
     {
         a_config.add( "reference-source", scarab::param_value( ats9462_digitizer::reference_source_to_string( a_node->get_reference_source() ) ) );
+	LINFO("do dump config reference-source: " + a_node->get_reference_source_str())
         a_config.add( "samples-per-bufer", scarab::param_value( a_node->get_samples_per_buffer() ) );
         a_config.add( "out-length", scarab::param_value( a_node->get_out_length() ) );
         a_config.add( "dma-buffer-count", scarab::param_value( a_node->get_dma_buffer_count() ) );

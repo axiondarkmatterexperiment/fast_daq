@@ -61,8 +61,8 @@ namespace fast_daq
         public:
             enum class reference_source_t
             {
-                internal,
-                external_10MHz
+		internal = INTERNAL_CLOCK,
+                external_10MHz = EXTERNAL_CLOCK_10MHZ_REF
             };
             static uint32_t reference_source_to_uint( reference_source_t a_reference_source );
             static reference_source_t uint_to_reference_source( uint32_t a_reference_source_uint );
@@ -79,7 +79,7 @@ namespace fast_daq
         public:
             ats9462_digitizer();
             virtual ~ats9462_digitizer();
-            void set_reference_source( const std::string& a_reference_source );
+            void set_reference_source_and_decimation( const std::string& a_reference_source, U32 a_decimation_factor );
 
         private:
             void set_internal_maps();
@@ -90,11 +90,12 @@ namespace fast_daq
             virtual void finalize();
 
         //TODO implement custom setters that do not allow changes after the board has been configured (for those parameters set in board configuration)
-        mv_accessible( reference_source_t, reference_source );
         public:
             std::string get_reference_source_str() const;
         mv_accessible( U32, samples_per_sec );
-        mv_accessible( U32, decimation_factor ); // note that this is the "decimation_value"+1 (ie, to decimate by 10 -> returned_samples_per_sec = physical_samples_per_sec / 10; the "decimation_factor" is 10, and the "decimation_value" is 9)
+	void set_reference_source_and_decimation( reference_source_t a_reference_source, U32 a_decimation_factor );
+        mv_accessible_noset( reference_source_t, reference_source );
+        mv_accessible_noset( U32, decimation_factor ); // note that this is the "decimation_value"+1 (ie, to decimate by 10 -> returned_samples_per_sec = physical_samples_per_sec / 10; the "decimation_factor" is 10, and the "decimation_value" is 9)
         mv_accessible( double, acquisition_length_sec );
         mv_accessible( U32, samples_per_buffer );
         mv_accessible( U32, input_mag_range );
@@ -147,9 +148,9 @@ namespace fast_daq
     {
         return static_cast< ats9462_digitizer::reference_source_t >( a_reference_source_uint );
     }
-    inline void ats9462_digitizer::set_reference_source( const std::string& a_reference_source )
+    inline void ats9462_digitizer::set_reference_source_and_decimation( const std::string& a_reference_source, U32 a_decimation_factor )
     {
-        set_reference_source( string_to_reference_source( a_reference_source ) );
+        set_reference_source_and_decimation( string_to_reference_source( a_reference_source ), a_decimation_factor );
     }
     inline std::string ats9462_digitizer::get_reference_source_str() const
     {
