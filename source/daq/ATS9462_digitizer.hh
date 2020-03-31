@@ -150,7 +150,7 @@ namespace fast_daq
     }
     inline void ats9462_digitizer::set_reference_source_and_decimation( const std::string& a_reference_source, U32 a_decimation_factor )
     {
-        set_reference_source_and_decimation( string_to_reference_source( a_reference_source ), U32 a_decimation_factor );
+        set_reference_source_and_decimation( string_to_reference_source( a_reference_source ), a_decimation_factor );
     }
     inline std::string ats9462_digitizer::get_reference_source_str() const
     {
