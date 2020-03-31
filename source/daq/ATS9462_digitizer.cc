@@ -355,7 +355,7 @@ namespace fast_daq
     // Derived properties
     INT64 ats9462_digitizer::samples_per_acquisition()
     {
-        return (INT64)(double(f_samples_per_sec) * f_acquisition_length_sec + 0.5);
+        return (INT64)(double(f_samples_per_sec/f_decimation_factor) * f_acquisition_length_sec + 0.5);
     }
 
     float ats9462_digitizer::bytes_per_sample()
