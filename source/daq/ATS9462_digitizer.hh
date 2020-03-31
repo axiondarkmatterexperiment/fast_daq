@@ -79,7 +79,7 @@ namespace fast_daq
         public:
             ats9462_digitizer();
             virtual ~ats9462_digitizer();
-            void set_reference_source( const std::string& a_reference_source );
+            void set_reference_source_and_decimation( const std::string& a_reference_source, U32 a_decimation_factor );
 
         private:
             void set_internal_maps();
@@ -148,9 +148,9 @@ namespace fast_daq
     {
         return static_cast< ats9462_digitizer::reference_source_t >( a_reference_source_uint );
     }
-    inline void ats9462_digitizer::set_reference_source( const std::string& a_reference_source )
+    inline void ats9462_digitizer::set_reference_source_and_decimation( const std::string& a_reference_source, U32 a_decimation_factor )
     {
-        set_reference_source( string_to_reference_source( a_reference_source ) );
+        set_reference_source_and_decimation( string_to_reference_source( a_reference_source ), U32 a_decimation_factor );
     }
     inline std::string ats9462_digitizer::get_reference_source_str() const
     {
