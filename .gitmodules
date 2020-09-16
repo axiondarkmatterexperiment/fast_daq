@@ -1,3 +1,6 @@
 [submodule "sandfly"]
 	path = sandfly
 	url = git@github.com:project8/sandfly.git
+[submodule "monarch"]
+	path = monarch
+	url = git@github.com:project8/monarch.git
