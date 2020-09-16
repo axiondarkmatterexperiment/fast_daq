@@ -5,13 +5,13 @@
  *      Author: N.S. Oblath
  */
 
-#ifndef SANDFLY_DAQ_CONTROL_HH_
-#define SANDFLY_DAQ_CONTROL_HH_
+#ifndef FAST_DAQ_DAQ_CONTROL_HH_
+#define FAST_DAQ_DAQ_CONTROL_HH_
 
 #include "run_control.hh"
 
 
-namespace sandfly
+namespace fast_daq
 {
 
     /*!
@@ -22,11 +22,11 @@ namespace sandfly
 
      @details
     */
-    class daq_control : public sandfly::run_control
+    class daq_control : public fast_daq::run_control
     {
 
         public:
-            daq_control( const scarab::param_node& a_master_config, std::shared_ptr< sandfly::stream_manager > a_mgr );
+            daq_control( const scarab::param_node& a_master_config, std::shared_ptr< fast_daq::stream_manager > a_mgr );
             virtual ~daq_control();
 
         protected:
@@ -63,6 +63,6 @@ namespace sandfly
 
     };
 
-} /* namespace sandfly */
+} /* namespace fast_daq */
 
-#endif /* SANDFLY_DAQ_CONTROL_HH_ */
+#endif /* FAST_DAQ_DAQ_CONTROL_HH_ */

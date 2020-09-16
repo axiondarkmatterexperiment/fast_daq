@@ -23,8 +23,8 @@
  *        It is highly (highly highly) recommended that you only access a given stream from one thread.
  */
 
-#ifndef SANDFLY_BUTTERFLY_HOUSE_HH_
-#define SANDFLY_BUTTERFLY_HOUSE_HH_
+#ifndef FAST_DAQ_BUTTERFLY_HOUSE_HH_
+#define FAST_DAQ_BUTTERFLY_HOUSE_HH_
 
 #include "monarch3_wrap.hh"
 
@@ -38,7 +38,7 @@ namespace scarab
     class param_node;
 }
 
-namespace sandfly
+namespace fast_daq
 {
     class egg_writer;
 
@@ -51,10 +51,10 @@ namespace sandfly
      @details
      Holds one monarch pointer per file.
      Registers the writer and creates, prepares, starts and finishes egg files via monarch3_wrapper.
-     butterfly_house gets the file size from the sandfly config file and the filename, run duration and description from daq_control.
+     butterfly_house gets the file size from the fast_daq config file and the filename, run duration and description from daq_control.
      It adds this information to the file header.
      */
-    class butterfly_house : public scarab::singleton< butterfly_house >, public sandfly::control_access
+    class butterfly_house : public scarab::singleton< butterfly_house >, public fast_daq::control_access
     {
         public:
             mv_accessible( double, max_file_size_mb );
@@ -103,6 +103,6 @@ namespace sandfly
 
     };
 
-} /* namespace sandfly */
+} /* namespace fast_daq */
 
-#endif /* SANDFLY_BUTTERFLY_HOUSE_HH_ */
+#endif /* FAST_DAQ_BUTTERFLY_HOUSE_HH_ */

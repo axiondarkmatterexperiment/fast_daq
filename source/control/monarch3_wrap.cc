@@ -8,8 +8,8 @@
 #include "butterfly_house.hh"
 #include "monarch3_wrap.hh"
 
-#include "sandfly_return_codes.hh"
-#include "sandfly_error.hh"
+#include "fast_daq_return_codes.hh"
+#include "fast_daq_error.hh"
 
 #include "M3Exception.hh"
 
@@ -22,7 +22,7 @@
 #include <signal.h>
 
 
-namespace sandfly
+namespace fast_daq
 {
     LOGGER( plog, "monarch3_wrap" );
 
@@ -768,4 +768,4 @@ namespace sandfly
         return t_return;
     }
 
-} /* namespace sandfly */
+} /* namespace fast_daq */

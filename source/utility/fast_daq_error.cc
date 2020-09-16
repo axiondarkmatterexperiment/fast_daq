@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "sandfly_error.hh"
+#include "fast_daq_error.hh"
 
-namespace sandfly
+namespace fast_daq
 {
 
     error::error() :

@@ -8,7 +8,7 @@
 #include "butterfly_house.hh"
 
 #include "egg_writer.hh"
-#include "sandfly_error.hh"
+#include "fast_daq_error.hh"
 
 #include "run_control.hh"
 
@@ -17,7 +17,7 @@
 #include "time.hh"
 
 
-namespace sandfly
+namespace fast_daq
 {
     LOGGER( plog, "butterfly_house" );
 
@@ -60,7 +60,7 @@ namespace sandfly
             // creating default filenames; these can be changed when the run is started
             std::stringstream t_filename_sstr;
             unsigned t_file_num = fi_it - f_file_infos.begin();
-            t_filename_sstr << "sandfly_out_" << t_file_num << ".egg";
+            t_filename_sstr << "fast_daq_out_" << t_file_num << ".egg";
             fi_it->f_filename = t_filename_sstr.str();
             fi_it->f_description = "";
             LPROG( plog, "Prepared file <" << t_file_num << ">; default filename is <" << fi_it->f_filename << ">" );
@@ -216,4 +216,4 @@ namespace sandfly
         return f_file_infos[ a_file_num ].f_description;
     }
 
-} /* namespace sandfly */
+} /* namespace fast_daq */

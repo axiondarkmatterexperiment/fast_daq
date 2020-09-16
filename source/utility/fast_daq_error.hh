@@ -1,11 +1,11 @@
-#ifndef _sandfly_error_hh_
-#define _sandfly_error_hh_
+#ifndef _fast_daq_error_hh_
+#define _fast_daq_error_hh_
 
 #include <exception>
 #include <string>
 #include <sstream>
 
-namespace sandfly
+namespace fast_daq
 {
 
     class error : public std::exception

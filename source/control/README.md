@@ -1,3 +1,3 @@
-# sandfly/source/control
+# fast_daq/source/control
 
-This directory contains management side of sandfly.
+This directory contains management side of fast_daq.

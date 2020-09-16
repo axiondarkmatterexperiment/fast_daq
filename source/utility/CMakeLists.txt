@@ -3,18 +3,17 @@
 ###########
 
 set( headers
-    byte_swap.hh
-    sandfly_error.hh
-    sandfly_version.hh
+    fast_daq_error.hh
+    fast_daq_version.hh
 )
 set( sources
-    sandfly_error.cc
+    fast_daq_error.cc
 )
 
-configure_file( sandfly_version.cc.in ${CMAKE_CURRENT_BINARY_DIR}/sandfly_version.cc )
+configure_file( fast_daq_version.cc.in ${CMAKE_CURRENT_BINARY_DIR}/fast_daq_version.cc )
 set( sources
     ${sources}
-    ${CMAKE_CURRENT_BINARY_DIR}/sandfly_version.cc
+    ${CMAKE_CURRENT_BINARY_DIR}/fast_daq_version.cc
 )
 
 
@@ -23,7 +22,7 @@ set( sources
 ###########
 
 pbuilder_library(
-	TARGET SandflyUtility
+	TARGET Fast_daqUtility
     SOURCES ${sources}
 )
 

@@ -15,7 +15,7 @@ set( sources
 )
 
 set( dependencies
-    SandflyUtility
+    Fast_daqUtility
 )
 
 ###########
@@ -23,7 +23,7 @@ set( dependencies
 ###########
 
 pbuilder_library(
-    TARGET SandflyControl
+    TARGET Fast_daqControl
     SOURCES ${sources}
     PROJECT_LIBRARIES ${dependencies}
 )

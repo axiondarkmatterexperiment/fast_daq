@@ -8,7 +8,7 @@
 #include "daq_control.hh"
 
 #include "butterfly_house.hh"
-#include "sandfly_error.hh"
+#include "fast_daq_error.hh"
 
 #include "message_relayer.hh"
 
@@ -22,12 +22,12 @@ using dripline::request_ptr_t;
 
 using std::string;
 
-namespace sandfly
+namespace fast_daq
 {
     LOGGER( plog, "daq_control" );
 
-    daq_control::daq_control( const param_node& a_master_config, std::shared_ptr< sandfly::stream_manager > a_mgr ) :
-            sandfly::run_control( a_master_config, a_mgr ),
+    daq_control::daq_control( const param_node& a_master_config, std::shared_ptr< fast_daq::stream_manager > a_mgr ) :
+            fast_daq::run_control( a_master_config, a_mgr ),
             f_use_monarch( true )
     {
     }
@@ -291,4 +291,4 @@ namespace sandfly
         }
     }
 
-} /* namespace sandfly */
+} /* namespace fast_daq */

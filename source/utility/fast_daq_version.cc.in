@@ -1,0 +1,31 @@
+/*
+ * fast_daq_version.cc
+ *
+ *  Created on: Mar 21, 2014
+ *      Author: nsoblath
+ */
+
+#include "fast_daq_version.hh"
+
+#include "logger.hh" // for TOSTRING macro
+
+namespace fast_daq
+{
+    version::version() :
+            scarab::version_semantic()
+    {
+        f_major_ver = @Fast_daq_VERSION_MAJOR@;
+        f_minor_ver = @Fast_daq_VERSION_MINOR@;
+        f_patch_ver = @Fast_daq_VERSION_PATCH@;
+        f_version = TOSTRING(@Fast_daq_VERSION@);
+        f_package = TOSTRING(@Fast_daq_PACKAGE_NAME@);
+        f_commit = TOSTRING(@Fast_daq_GIT_COMMIT@);
+    }
+
+    version::~version()
+    {
+    }
+
+} /* namespace fast_daq */
+
+

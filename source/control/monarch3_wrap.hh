@@ -22,8 +22,8 @@
  *        It is highly (highly highly) recommended that you only access a given stream from one thread.
  */
 
-#ifndef SANDFLY_MONARCH3_WRAP_HH_
-#define SANDFLY_MONARCH3_WRAP_HH_
+#ifndef FAST_DAQ_MONARCH3_WRAP_HH_
+#define FAST_DAQ_MONARCH3_WRAP_HH_
 
 #include "M3Monarch.hh"
 
@@ -34,7 +34,7 @@
 #include <memory>
 #include <mutex>
 
-namespace sandfly
+namespace fast_daq
 {
 
     enum class monarch_stage
@@ -269,7 +269,7 @@ namespace sandfly
 
             header_wrapper& operator=( header_wrapper&& a_orig );
 
-            /// Get a reference to the M3Header; Will throw sandfly::error if the header object is not valid.
+            /// Get a reference to the M3Header; Will throw fast_daq::error if the header object is not valid.
             monarch3::M3Header& header();
 
             /// Get M3Header pointer
@@ -471,6 +471,6 @@ namespace sandfly
         return f_stream->GetChannelRecord( a_chan_no );
     }
 
-} /* namespace sandfly */
+} /* namespace fast_daq */
 
-#endif /* SANDFLY_MONARCH3_WRAP_HH_ */
+#endif /* FAST_DAQ_MONARCH3_WRAP_HH_ */

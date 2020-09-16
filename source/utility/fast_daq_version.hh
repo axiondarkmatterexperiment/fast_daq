@@ -1,16 +1,16 @@
 /*
- * sandfly_version.hh
+ * fast_daq_version.hh
  *
  *  Created on: Mar 20, 2013
  *      Author: nsoblath
  */
 
-#ifndef SANDFLY_VERSION_HH_
-#define SANDFLY_VERSION_HH_
+#ifndef FAST_DAQ_VERSION_HH_
+#define FAST_DAQ_VERSION_HH_
 
 #include "dripline_version.hh"
 
-namespace sandfly
+namespace fast_daq
 {
     class version : public scarab::version_semantic
     {
@@ -19,6 +19,6 @@ namespace sandfly
             ~version();
     };
 
-} // namespace sandfly
+} // namespace fast_daq
 
-#endif /* SANDFLY_VERSION_HH_ */
+#endif /* FAST_DAQ_VERSION_HH_ */
