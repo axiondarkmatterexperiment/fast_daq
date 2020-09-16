@@ -22,7 +22,7 @@ set( sources
 ###########
 
 pbuilder_library(
-	TARGET Fast_daqUtility
+	TARGET FastDaqUtility
     SOURCES ${sources}
 )
 

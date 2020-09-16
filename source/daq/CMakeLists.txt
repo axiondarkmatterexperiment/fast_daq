@@ -27,11 +27,20 @@ endif( ATS9462_FOUND )
 
 set( dependencies
     FastDaqData
+    FastDaqControl
+    FastDaqUtility
 )
 
 ###########
 # library #
 ###########
 
-midge_library( FastDAQ sources dependencies )
+pbuilder_library(
+    TARGET FastDaqDAQ
+    SOURCES ${sources}
+    PROJECT_LIBRARIES ${dependencies}
+    PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
+    PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
+)
+
 pbuilder_install_headers( ${headers} )

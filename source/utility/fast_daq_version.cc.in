@@ -14,12 +14,12 @@ namespace fast_daq
     version::version() :
             scarab::version_semantic()
     {
-        f_major_ver = @Fast_daq_VERSION_MAJOR@;
-        f_minor_ver = @Fast_daq_VERSION_MINOR@;
-        f_patch_ver = @Fast_daq_VERSION_PATCH@;
-        f_version = TOSTRING(@Fast_daq_VERSION@);
-        f_package = TOSTRING(@Fast_daq_PACKAGE_NAME@);
-        f_commit = TOSTRING(@Fast_daq_GIT_COMMIT@);
+        f_major_ver = @FastDaq_VERSION_MAJOR@;
+        f_minor_ver = @FastDaq_VERSION_MINOR@;
+        f_patch_ver = @FastDaq_VERSION_PATCH@;
+        f_version = TOSTRING(@FastDaq_VERSION@);
+        f_package = TOSTRING(@FastDaq_PACKAGE_NAME@);
+        f_commit = TOSTRING(@FastDaq_GIT_COMMIT@);
     }
 
     version::~version()

@@ -16,9 +16,18 @@ set( sources
     real_time_data.cc
 )
 
+set ( dependencies
+    FastDaqUtility
+)
+
 ###########
 # library #
 ###########
 
-midge_library( FastDaqData sources dependencies )
+pbuilder_library(
+    TARGET FastDaqData
+    SOURCES ${sources}
+    PROJECT_LIBRARIES ${dependencies}
+)
+
 pbuilder_install_headers( ${headers} )

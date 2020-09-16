@@ -15,7 +15,7 @@ set( sources
 )
 
 set( dependencies
-    Fast_daqUtility
+    FastDaqUtility
 )
 
 ###########
@@ -23,7 +23,7 @@ set( dependencies
 ###########
 
 pbuilder_library(
-    TARGET Fast_daqControl
+    TARGET FastDaqControl
     SOURCES ${sources}
     PROJECT_LIBRARIES ${dependencies}
 )
