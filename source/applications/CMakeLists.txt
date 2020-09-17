@@ -3,51 +3,43 @@
 ################
 
 set( lib_dependencies
-    PsyllidUtility
-    PsyllidData
-    PsyllidDAQ
-    PsyllidControl
+    FastDaqUtility
+    FastDaqData
+    FastDaqDAQ
+    FastDaqControl
 )
 
-set( psyllid_exe_PROGRAMS )
+set( fast_daq_exe_PROGRAMS )
 
 
-# Non-psyllid executables
+# Non-fast_daq executables
 set( programs
     grab_packet
     #psyllid
 )
 
-if( Psyllid_BUILD_FPA )
-    set( programs
-            ${programs}
-            roach_daq_1chan
-            roach_daq_streaming_1chan
-    )
-endif( FastDaq_BUILD_FPA )
-
 pbuilder_executables( 
     SOURCES ${programs}
-    TARGETS_VAR psyllid_exe_PROGRAMS
+    TARGETS_VAR fast_daq_exe_PROGRAMS
     PROJECT_LIBRARIES ${lib_dependencies}
     PUBLIC_EXTERNAL_LIBRARIES ${PUBLIC_EXT_LIBS}
     PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
 )
 
 
-# Psyllid executable
+# FastDaq executable
 build_sandfly_executable(
-    ALT_NAME psyllid
-    ALT_SOURCES psyllid.cc
+    ALT_NAME fast_daq
+    ALT_SOURCES fast_daq.cc
     SANDFLY_SUBMODULE_NAME Sandfly
     PROJECT_LIBRARIES ${lib_dependencies}
 )
 
-list( APPEND psyllid_exe_PROGRAMS psyllid )
+list( APPEND fast_daq_exe_PROGRAMS fast_daq )
 
 
 # Export
 pbuilder_component_install_and_export( 
     COMPONENT Executables
-    EXETARGETS ${psyllid_exe_PROGRAMS}
+    EXETARGETS ${fast_daq_exe_PROGRAMS}
 )

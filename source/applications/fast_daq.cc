@@ -1,5 +1,5 @@
 /*
- * psyllid.cc
+ * fast_daq.cc
  *
  *  Created on: Feb 1, 2016
  *      Author: N.S. Oblath
@@ -16,7 +16,7 @@
 #include "application.hh"
 #include "logger.hh"
 
-using namespace psyllid;
+using namespace fast_daq;
 using namespace sandfly;
 
 using std::string;
@@ -26,13 +26,18 @@ LOGGER( plog, "fast_daq" );
 int main( int argc, char** argv )
 {
     LINFO( plog, "Welcome to Fast Daq\n\n" <<
-      "\t\t        _____     _      ____     _____        ____       _       ___       \n" <<
-      "\t\t         |" ___|U  /"\  u / __"| u |_ " _|      |  _"\  U  /"\  u  / " \    \n" <<    
-      "\t\t         U| |_  u \/ _ \/ <\___ \/    | |       /| | | |  \/ _ \/  | |"| |  \n" <<     
-      "\t\t         \|  _|/  / ___ \  u___) |   /| |\      U| |_| |\ / ___ \ /| |_| |\ \n" <<     
-      "\t\t   |_|    /_/   \_\ |____/>> u |_|U       |____/ u/_/   \_\U \__\_\u        \n" <<
-      "\t\t    )(\\,-  \\    >>  )(  (__)_// \\_       |||_    \\    >>   \\//         \n" <<
-      "\t\t        (__)(_/ (__)  (__)(__)    (__) (__)     (__)_)  (__)  (__) (_(__)   \n\n");
+
+    "\t\t _______  _______  _______ _________   ______   _______  _______ \n" <<
+    "\t\t(  ____ \(  ___  )(  ____ \\__   __/  (  __  \ (  ___  )(  ___  )\n" <<
+    "\t\t| (    \/| (   ) || (    \/   ) (     | (  \  )| (   ) || (   ) |\n" <<
+    "\t\t| (__    | (___) || (_____    | |     | |   ) || (___) || |   | |\n" <<
+    "\t\t|  __)   |  ___  |(_____  )   | |     | |   | ||  ___  || |   | |\n" <<
+    "\t\t| (      | (   ) |      ) |   | |     | |   ) || (   ) || | /\| |\n" <<
+    "\t\t| )      | )   ( |/\____) |   | |     | (__/  )| )   ( || (_\ \ |\n" <<
+    "\t\t|/       |/     \|\_______)   )_(     (______/ |/     \|(____\/_)\n" <<
+    "\t\t                                                                 \n\n");
+
+            
     try
     {
         // The application
@@ -50,7 +55,7 @@ int main( int argc, char** argv )
         add_sandfly_options( the_main );
 
         // Package version
-        the_main.set_version( std::make_shared< psyllid::version >() );
+        the_main.set_version( std::make_shared< fast_daq::version >() );
 
         // Parse CL options and run the application
         CLI11_PARSE( the_main, argc, argv );
@@ -63,9 +68,9 @@ int main( int argc, char** argv )
         LERROR( plog, "configuration error: " << e.what() );
         return RETURN_ERROR;
     }
-    catch( psyllid::error& e )
+    catch( fast_daq::error& e )
     {
-        LERROR( plog, "psyllid error: " << e.what() );
+        LERROR( plog, "fast_daq error: " << e.what() );
         return RETURN_ERROR;
     }
     catch( sandfly::error& e )
