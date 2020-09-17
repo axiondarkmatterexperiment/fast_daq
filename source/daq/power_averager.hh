@@ -8,7 +8,7 @@
 #ifndef POWER_AVERAGER_HH_
 #define POWER_AVERAGER_HH_
 
-// psyllid includes
+// sandfly includes
 #include "node_builder.hh"
 
 #include "transformer.hh"
@@ -81,7 +81,7 @@ namespace fast_daq
 
     };
 
-    class power_averager_binding : public psyllid::_node_binding< power_averager, power_averager_binding >
+    class power_averager_binding : public sandfly::_node_binding< power_averager, power_averager_binding >
     {
         public:
             power_averager_binding();

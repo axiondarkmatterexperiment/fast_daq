@@ -5,10 +5,10 @@
  *      Author: laroque
  */
 
-#ifndef PSYLLID_FREQUENCY_TRANSFORM_HH_
-#define PSYLLID_FREQUENCY_TRANSFORM_HH_
+#ifndef FAST_DAQ_FREQUENCY_TRANSFORM_HH_
+#define FAST_DAQ_FREQUENCY_TRANSFORM_HH_
 
-//psyllid
+//sandfly
 #include "node_builder.hh"
 #include "time_data.hh"
 
@@ -61,7 +61,7 @@ namespace fast_daq
      Output Streams:
      - 0: frequency_data
     */
-    class frequency_transform : public midge::_transformer< midge::type_list< psyllid::time_data, real_time_data >, midge::type_list< frequency_data > >
+    class frequency_transform : public midge::_transformer< midge::type_list< fast_daq::time_data, real_time_data >, midge::type_list< frequency_data > >
     {
         public:
             // internal enums
@@ -146,7 +146,7 @@ namespace fast_daq
     }
 
 
-    class frequency_transform_binding : public psyllid::_node_binding< frequency_transform, frequency_transform_binding >
+    class frequency_transform_binding : public sandfly::_node_binding< frequency_transform, frequency_transform_binding >
     {
         public:
             frequency_transform_binding();
@@ -158,6 +158,6 @@ namespace fast_daq
             virtual bool do_run_command( frequency_transform* a_node, const std::string& a_cmd, const scarab::param_node& ) const;
     };
 
-} /* namespace psyllid */
+} /* namespace fast_daq */
 
-#endif /* PSYLLID_FREQUENCY_TRANSFORM_HH_ */
+#endif /* FAST_DAQ_FREQUENCY_TRANSFORM_HH_ */

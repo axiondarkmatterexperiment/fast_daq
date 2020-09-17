@@ -32,14 +32,14 @@ namespace fast_daq
         switch (an_input_type) {
             case frequency_transform::input_type_t::real: return "real";
             case frequency_transform::input_type_t::complex: return "complex";
-            default: throw psyllid::error() << "input_type value <" << input_type_to_uint(an_input_type) << "> not recognized";
+            default: throw fast_daq::error() << "input_type value <" << input_type_to_uint(an_input_type) << "> not recognized";
         }
     }
     frequency_transform::input_type_t frequency_transform::string_to_input_type( const std::string& an_input_type )
     {
         if( an_input_type == input_type_to_string( frequency_transform::input_type_t::real ) ) return input_type_t::real;
         if( an_input_type == input_type_to_string( frequency_transform::input_type_t::complex ) ) return input_type_t::complex;
-        throw psyllid::error() << "string <" << an_input_type << "> not recognized as valid input_type type";
+        throw fast_daq::error() << "string <" << an_input_type << "> not recognized as valid input_type type";
     }
 
 
@@ -148,7 +148,7 @@ namespace fast_daq
                 f_fftwf_input_complex = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * f_fft_size);
                 f_fftwf_plan = fftwf_plan_dft_1d(f_fft_size, f_fftwf_input_complex, f_fftwf_output, FFTW_FORWARD, transform_flag | FFTW_PRESERVE_INPUT);
                 break;
-            default: throw psyllid::error() << "input_type not fully implemented";
+            default: throw fast_daq::error() << "input_type not fully implemented";
         }
         //save plan
         if (f_fftwf_plan != NULL)
@@ -172,7 +172,7 @@ namespace fast_daq
         {
             LDEBUG( flog, "Executing the frequency transformer" );
 
-            psyllid::time_data* complex_time_data_in = nullptr;
+            fast_daq::time_data* complex_time_data_in = nullptr;
             real_time_data* real_time_data_in = nullptr;
             frequency_data* freq_data_out = nullptr;
 
@@ -265,7 +265,7 @@ namespace fast_daq
                                 LWARN( flog, "complex input transforms are currently not tested" );
                                 std::copy(&complex_time_data_in->get_array()[0][0], &complex_time_data_in->get_array()[0][0] + f_fft_size*2, &f_fftwf_input_complex[0][0]);
                                 break;
-                            default: throw psyllid::error() << "input_type not fully implemented";
+                            default: throw fast_daq::error() << "input_type not fully implemented";
                         }
                         // execute fft
                         fftwf_execute( f_fftwf_plan );
@@ -291,7 +291,7 @@ namespace fast_daq
                                 std::copy(&f_fftwf_output[0][0], &f_fftwf_output[0][0] + (t_center_bin - 1), &freq_data_out->get_data_array()[0][0] + t_center_bin);
                                 std::copy(&f_fftwf_output[0][0] + t_center_bin, &f_fftwf_output[0][0] + f_fft_size*2, &freq_data_out->get_data_array()[0][0]);
                                 break;
-                            default: throw psyllid::error() << "input_type not fully implemented";
+                            default: throw fast_daq::error() << "input_type not fully implemented";
                         }
                         if ( !out_stream< 0 >().set( stream::s_run ) )
                         {
@@ -301,7 +301,7 @@ namespace fast_daq
                     }
                 }
             }
-            catch( psyllid::error& e )
+            catch( fast_daq::error& e )
             {
                 throw;
             }
@@ -409,4 +409,4 @@ namespace fast_daq
         return false;
     }
 
-} /* namespace psyllid */
+} /* namespace fast_daq */

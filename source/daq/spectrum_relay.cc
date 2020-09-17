@@ -11,7 +11,7 @@
 #include "logger.hh"
 #include "param_json.hh"
 
-//psyllid
+//sandfly
 #include "daq_control.hh"
 #include "global_config.hh"
 #include "message_relayer.hh"
@@ -104,7 +104,7 @@ namespace fast_daq
         // grab the run description and load it into the broadcast payload
         scarab::param_ptr_t t_payload_ptr( new scarab::param_node() );
         scarab::param_node& t_payload = t_payload_ptr->as_node();
-        std::shared_ptr< psyllid::daq_control > t_daq_control = use_daq_control();
+        std::shared_ptr< sandfly::run_control > t_daq_control = use_daq_control();
         scarab::param_input_json t_param_codec;
         t_payload.merge( t_param_codec.read_string( t_daq_control->get_description() )->as_node() );
         scarab::param_array t_spectrum_array;
@@ -117,7 +117,7 @@ namespace fast_daq
         t_payload.add( "maximum_frequency", a_spectrum->get_minimum_frequency() + a_spectrum->get_array_size() * a_spectrum->get_bin_width() );
         t_payload.add( "frequency_resolution", a_spectrum->get_bin_width() );
         // send it
-        psyllid::message_relayer* t_message_relay = psyllid::message_relayer::get_instance();
+        ::message_relayer* t_message_relay = sandfly::message_relayer::get_instance();
         t_message_relay->send( dripline::msg_alert::create( std::move(t_payload_ptr), f_spectrum_alert_rk ) );
     }
 

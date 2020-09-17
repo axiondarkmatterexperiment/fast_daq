@@ -52,7 +52,7 @@ namespace fast_daq
     */
     class ats_streaming_writer :
             public midge::_consumer< midge::type_list< iq_time_data > >,
-            public psyllid::egg_writer
+            public sandfly::egg_writer
     {
         public:
             ats_streaming_writer();
@@ -72,7 +72,7 @@ namespace fast_daq
             mv_accessible( double, freq_range ); // Hz
 
         public:
-            virtual void prepare_to_write( psyllid::monarch_wrap_ptr a_mw_ptr, psyllid::header_wrap_ptr a_hw_ptr );
+            virtual void prepare_to_write( sandfly::monarch_wrap_ptr a_mw_ptr, sandfly::header_wrap_ptr a_hw_ptr );
 
             virtual void initialize();
             virtual void execute( midge::diptera* a_midge = nullptr );
@@ -81,13 +81,13 @@ namespace fast_daq
         private:
             unsigned f_last_pkt_in_batch;
 
-            psyllid::monarch_wrap_ptr f_monarch_ptr;
+            sandfly::monarch_wrap_ptr f_monarch_ptr;
             unsigned f_stream_no;
 
     };
 
 
-    class ats_streaming_writer_binding : public psyllid::_node_binding< ats_streaming_writer, ats_streaming_writer_binding >
+    class ats_streaming_writer_binding : public sandfly::_node_binding< ats_streaming_writer, ats_streaming_writer_binding >
     {
         public:
             ats_streaming_writer_binding();

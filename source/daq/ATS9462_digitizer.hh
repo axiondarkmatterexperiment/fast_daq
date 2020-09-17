@@ -16,7 +16,7 @@
 #include "AlazarApi.h"
 #include "AlazarCmd.h"
 
-// psyllid includes
+// sandfly includes
 #include "node_builder.hh"
 
 #include "producer.hh"
@@ -56,7 +56,7 @@ namespace fast_daq
      - 0: real_time_data
 
     */
-    class ats9462_digitizer : public midge::_producer< midge::type_list< real_time_data > >, public psyllid::control_access
+    class ats9462_digitizer : public midge::_producer< midge::type_list< real_time_data > >, public sandfly::control_access
     {
         public:
             enum class reference_source_t
@@ -157,7 +157,7 @@ namespace fast_daq
         return reference_source_to_string( f_reference_source );
     }
 
-    class ats9462_digitizer_binding : public psyllid::_node_binding< ats9462_digitizer, ats9462_digitizer_binding >
+    class ats9462_digitizer_binding : public sandfly::_node_binding< ats9462_digitizer, ats9462_digitizer_binding >
     {
         public:
             ats9462_digitizer_binding();
@@ -169,7 +169,7 @@ namespace fast_daq
     };
 
     // ATS-specific exceptions for handling in try/catch blocks
-    class buffer_overflow : public psyllid::error
+    class buffer_overflow : public fast_daq::error
     {
         public:
             buffer_overflow() { f_message = "ATS9462 has overflown the output buffer FIFO"; }

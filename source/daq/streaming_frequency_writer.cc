@@ -8,7 +8,7 @@
 #include "streaming_frequency_writer.hh"
 
 #include "butterfly_house.hh"
-#include "psyllid_error.hh"
+#include "fast_daq_error.hh"
 
 #include "midge_error.hh"
 
@@ -23,7 +23,7 @@ using midge::stream;
 using std::string;
 using std::vector;
 
-namespace psyllid
+namespace fast_daq
 {
     REGISTER_NODE_AND_BUILDER( streaming_frequency_writer, "streaming-frequency-writer", streaming_frequency_writer_binding );
 
@@ -261,4 +261,4 @@ namespace psyllid
         return;
     }
 
-} /* namespace psyllid */
+} /* namespace fast_daq */

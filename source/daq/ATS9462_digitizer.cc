@@ -22,14 +22,14 @@ namespace fast_daq
         switch (a_reference_source) {
             case ats9462_digitizer::reference_source_t::internal: return "internal";
             case ats9462_digitizer::reference_source_t::external_10MHz: return "external_10MHz";
-            default: throw psyllid::error() << "reference_source value <" << reference_source_to_uint( a_reference_source ) << "> not recognized";
+            default: throw fast_daq::error() << "reference_source value <" << reference_source_to_uint( a_reference_source ) << "> not recognized";
         }
     }
     ats9462_digitizer::reference_source_t ats9462_digitizer::string_to_reference_source( const std::string& a_reference_source )
     {
         if( a_reference_source == reference_source_to_string( ats9462_digitizer::reference_source_t::internal ) ) return reference_source_t::internal;
         if( a_reference_source == reference_source_to_string( ats9462_digitizer::reference_source_t::external_10MHz ) ) return reference_source_t::external_10MHz;
-        throw psyllid::error() << "string <" << a_reference_source << "> not recognized as valid reference_source type";
+        throw fast_daq::error() << "string <" << a_reference_source << "> not recognized as valid reference_source type";
     }
 
     REGISTER_NODE_AND_BUILDER( ats9462_digitizer, "ats9462", ats9462_digitizer_binding );
@@ -70,7 +70,7 @@ namespace fast_daq
         f_board_handle = AlazarGetBoardBySystemID( f_system_id, f_board_id );
         if (f_board_handle == NULL)
         {
-            throw psyllid::fatal_error() << "Error: Unable to open board system Id " << f_system_id << " board Id " << f_board_id;
+            throw sandfly::fatal_error() << "Error: Unable to open board system Id " << f_system_id << " board Id " << f_board_id;
         }
         check_return_code_macro( AlazarGetChannelInfo, f_board_handle, &f_max_samples_per_channel, &f_bits_per_sample);
     }
@@ -151,7 +151,7 @@ namespace fast_daq
                     if ( f_buffers_completed >= buffers_per_acquisition() )
                     {
                         LINFO( flog, "All requested buffers ("<<f_buffers_completed<<") completed, calling daq_control->stop_run and stopping board Reads" );
-                        std::shared_ptr< psyllid::daq_control > t_daq_control = use_daq_control();
+                        std::shared_ptr< sandfly::run_control > t_daq_control = use_daq_control();
                         t_daq_control->stop_run();
                         check_return_code_macro( AlazarAbortAsyncRead, f_board_handle );
                     }
@@ -185,7 +185,7 @@ namespace fast_daq
                 throw buffer_overflow();
                 break;
             default:
-                throw psyllid::error() << an_action << " at <" << a_file_line << "> failed, it returned with:\n" << "\t" << AlazarErrorToText(a_return_code);
+                throw fast_daq::error() << an_action << " at <" << a_file_line << "> failed, it returned with:\n" << "\t" << AlazarErrorToText(a_return_code);
         }
     }
 
@@ -203,7 +203,7 @@ namespace fast_daq
                 check_return_code_macro( AlazarSetCaptureClock, f_board_handle, EXTERNAL_CLOCK_10MHZ_REF, f_samples_per_sec, CLOCK_EDGE_RISING, t_decimation_value );
 		LINFO("Im in the external_10MHz case")
                 break;
-            default: throw psyllid::error() << "reference_type value <" << reference_source_to_uint(f_reference_source) << "> not recognized";
+            default: throw fast_daq::error() << "reference_type value <" << reference_source_to_uint(f_reference_source) << "> not recognized";
         }
 
         ALAZAR_INPUT_RANGES this_input_range = f_input_range_to_code.left.at( f_input_mag_range );
@@ -235,7 +235,7 @@ namespace fast_daq
             if (f_board_buffers.back() == NULL)
             {
                 clear_buffers();
-                throw psyllid::error() << "Error: unable to allocate buffer";
+                throw fast_daq::error() << "Error: unable to allocate buffer";
             }
         }
     }
@@ -388,7 +388,7 @@ namespace fast_daq
     {
         if ( a_reference_source == ats9462_digitizer::reference_source_t::internal and a_decimation_factor != 1)
 	{
-	    throw psyllid::error() << "internal reference does not support decimation";
+	    throw fast_daq::error() << "internal reference does not support decimation";
         }
 	f_reference_source = a_reference_source;
 	f_decimation_factor = a_decimation_factor;

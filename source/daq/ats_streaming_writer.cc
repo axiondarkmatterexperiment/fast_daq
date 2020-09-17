@@ -7,7 +7,7 @@
 #include "ats_streaming_writer.hh"
 
 #include "butterfly_house.hh"
-#include "psyllid_error.hh"
+#include "fast_daq_error.hh"
 
 #include "midge_error.hh"
 
@@ -50,7 +50,7 @@ namespace fast_daq
     {
     }
 
-    void ats_streaming_writer::prepare_to_write( psyllid::monarch_wrap_ptr a_mw_ptr, psyllid::header_wrap_ptr a_hw_ptr )
+    void ats_streaming_writer::prepare_to_write( sandfly::monarch_wrap_ptr a_mw_ptr, sandfly::header_wrap_ptr a_hw_ptr )
     {
         f_monarch_ptr = a_mw_ptr;
 
@@ -80,7 +80,7 @@ namespace fast_daq
 
     void ats_streaming_writer::initialize()
     {
-        psyllid::butterfly_house::get_instance()->register_writer( this, f_file_num );
+        fast_daq::butterfly_house::get_instance()->register_writer( this, f_file_num );
         return;
     }
 
@@ -93,7 +93,7 @@ namespace fast_daq
 
             iq_time_data* t_time_data = nullptr;
 
-            psyllid::stream_wrap_ptr t_swrap_ptr;
+            fast_daq::stream_wrap_ptr t_swrap_ptr;
 
             uint64_t t_bytes_per_record = f_record_size * f_sample_size * f_data_type_size;
             uint64_t t_record_length_nsec = llrint( (double)(f_record_size) / (double)f_acq_rate * 1.e3 );
@@ -210,7 +210,7 @@ namespace fast_daq
     void ats_streaming_writer::finalize()
     {
         LDEBUG( plog, "finalize streaming writer" );
-        psyllid::butterfly_house::get_instance()->unregister_writer( this );
+        fast_daq::butterfly_house::get_instance()->unregister_writer( this );
         return;
     }
 
@@ -263,4 +263,4 @@ namespace fast_daq
     }
 
 
-} /* namespace psyllid */
+} /* namespace fast_daq */

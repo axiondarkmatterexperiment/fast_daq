@@ -5,10 +5,10 @@
  *      Author: laroque
  */
 
-#ifndef INVERSE_PSYLLID_FREQUENCY_TRANSFORM_HH_
-#define INVERSE_PSYLLID_FREQUENCY_TRANSFORM_HH_
+#ifndef INVERSE_FAST_DAQ_FREQUENCY_TRANSFORM_HH_
+#define INVERSE_FAST_DAQ_FREQUENCY_TRANSFORM_HH_
 
-//psyllid
+//sandfly
 #include "node_builder.hh"
 //#include "time_data.hh"
 
@@ -53,7 +53,7 @@ namespace fast_daq
      - 0: frequency_data
 
      Output Streams:
-     - 0: psyllid::time_data (IQ)
+     - 0: fast_daq::time_data (IQ)
     */
     class inverse_frequency_transform : public midge::_transformer< midge::type_list< frequency_data >, midge::type_list< iq_time_data > >
     {
@@ -95,7 +95,7 @@ namespace fast_daq
     };
 
 
-    class inverse_frequency_transform_binding : public psyllid::_node_binding< inverse_frequency_transform, inverse_frequency_transform_binding >
+    class inverse_frequency_transform_binding : public sandfly::_node_binding< inverse_frequency_transform, inverse_frequency_transform_binding >
     {
         public:
             inverse_frequency_transform_binding();
@@ -107,6 +107,6 @@ namespace fast_daq
             virtual bool do_run_command( inverse_frequency_transform* a_node, const std::string& a_cmd, const scarab::param_node& ) const;
     };
 
-} /* namespace psyllid */
+} /* namespace fast_daq */
 
-#endif /* PSYLLID_INVERSE_FREQUENCY_TRANSFORM_HH_ */
+#endif /* FAST_DAQ_INVERSE_FREQUENCY_TRANSFORM_HH_ */

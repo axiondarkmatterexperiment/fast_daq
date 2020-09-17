@@ -168,7 +168,7 @@ namespace fast_daq
                     }
                 }
             }
-            catch( psyllid::error& e )
+            catch( fast_daq::error& e )
             {
                 throw;
             }
@@ -257,4 +257,4 @@ namespace fast_daq
         return false;
     }
 
-} /* namespace psyllid */
+} /* namespace fast_daq */

@@ -6,8 +6,8 @@
  *      (copied from streaming_writer)
  */
 
-#ifndef PSYLLID_STREAMING_FREQUENCY_WRITER_HH_
-#define PSYLLID_STREAMING_FREQUENCY_WRITER_HH_
+#ifndef FAST_DAQ_STREAMING_FREQUENCY_WRITER_HH_
+#define FAST_DAQ_STREAMING_FREQUENCY_WRITER_HH_
 
 #include "egg_writer.hh"
 #include "node_builder.hh"
@@ -15,7 +15,7 @@
 
 #include "consumer.hh"
 
-namespace psyllid
+namespace fast_daq
 {
 
     /*!
@@ -53,7 +53,7 @@ namespace psyllid
      Output Streams: (none)
     */
     class streaming_frequency_writer :
-            public midge::_consumer< midge::type_list< psyllid::freq_data > >,
+            public midge::_consumer< midge::type_list< fast_daq::freq_data > >,
             public egg_writer
     {
         public:
@@ -100,6 +100,6 @@ namespace psyllid
             virtual void do_dump_config( const streaming_frequency_writer* a_node, scarab::param_node& a_config ) const;
     };
 
-} /* namespace psyllid */
+} /* namespace fast_daq */
 
-#endif /* PSYLLID_STREAMING_FREQUENCY_WRITER_HH_ */
+#endif /* FAST_DAQ_STREAMING_FREQUENCY_WRITER_HH_ */

@@ -8,7 +8,7 @@
 #ifndef DEAD_END_HH_
 #define DEAD_END_HH_
 
-// psyllid includes
+// sandfly includes
 //#include "memory_block.hh"
 #include "node_builder.hh"
 
@@ -64,7 +64,7 @@ namespace fast_daq
 
     };
 
-    class dead_end_binding : public psyllid::_node_binding< dead_end, dead_end_binding >
+    class dead_end_binding : public sandfly::_node_binding< dead_end, dead_end_binding >
     {
         public:
             dead_end_binding();

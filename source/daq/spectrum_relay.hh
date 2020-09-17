@@ -8,7 +8,7 @@
 #ifndef SPECTRUM_RELAY_HH_
 #define SPECTRUM_RELAY_HH_
 
-// psyllid includes
+// sandfly includes
 #include "node_builder.hh"
 
 #include "control_access.hh"
@@ -42,7 +42,7 @@ namespace fast_daq
      - 1: power_data
 
     */
-    class spectrum_relay : public midge::_consumer< midge::type_list< power_data > >, public psyllid::control_access
+    class spectrum_relay : public midge::_consumer< midge::type_list< power_data > >, public sandfly::control_access
     {
         public:
             spectrum_relay();
@@ -62,7 +62,7 @@ namespace fast_daq
             void broadcast_spectrum( power_data* a_spectrum );
     };
 
-    class spectrum_relay_binding : public psyllid::_node_binding< spectrum_relay, spectrum_relay_binding >
+    class spectrum_relay_binding : public sandfly::_node_binding< spectrum_relay, spectrum_relay_binding >
     {
         public:
             spectrum_relay_binding();
