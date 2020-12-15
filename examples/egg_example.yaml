@@ -2,7 +2,7 @@ post-to-slack: false
 
 amqp:
     broker: rabbit_broker
-    queue: psyllid
+    queue: fast_daq
     #make-connection: false
 
 daq:

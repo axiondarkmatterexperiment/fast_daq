@@ -5,15 +5,15 @@
  *      Author: nsoblath
  */
 
-#ifndef PSYLLID_TIME_DATA_HH_
-#define PSYLLID_TIME_DATA_HH_
+#ifndef FAST_DAQ_TIME_DATA_HH_
+#define FAST_DAQ_TIME_DATA_HH_
 
 #include "roach_packet.hh"
 
 #include "member_variables.hh"
 
 
-namespace psyllid
+namespace fastdaq
 {
 
     class time_data : public roach_packet_data
@@ -77,6 +77,6 @@ namespace psyllid
     }
 */
 
-} /* namespace psyllid */
+} /* namespace fast_daq */
 
-#endif /* PSYLLID_TIME_DATA_HH_ */
+#endif /* FAST_DAQ_TIME_DATA_HH_ */

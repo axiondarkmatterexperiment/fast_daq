@@ -7,7 +7,7 @@
 
 #include "time_data.hh"
 
-namespace psyllid
+namespace fast_daq
 {
 
     time_data::time_data() :
@@ -22,4 +22,4 @@ namespace psyllid
     {
     }
 
-} /* namespace psyllid */
+} /* namespace fast_daq */

@@ -7,16 +7,9 @@ project( FastDaq VERSION 0.1.0 )
 
 # Setup the module path in the proper order for overriding dependencies
 list( APPEND CMAKE_MODULE_PATH 
-    ${PROJECT_SOURCE_DIR}/cmake 
-    ${PROJECT_SOURCE_DIR}/psyllid/cmake
-    ${PROJECT_SOURCE_DIR}/psyllid/midge/cmake
-    ${PROJECT_SOURCE_DIR}/psyllid/midge/scarab/cmake
+    ${PROJECT_SOURCE_DIR}/sandfly/cmake 
 )
-
-# Inclusions of dependencies' cmake files
-include( PackageBuilder )
-include( MidgeUtility )
-include( Psyllid )
+include( sandfly )
 
 pbuilder_prepare_project()
 
@@ -70,12 +63,12 @@ else (FFTW_FOUND)
 endif (FFTW_FOUND)
 include_directories (${FFTW_INCLUDE_DIR})
 
-# psyllid
-pbuilder_add_submodule( Psyllid psyllid )
+# Sandfly
+add_definitions( -DDRIPLINE_AUTH_FILE=~/.project8_authentications.json )
+pbuilder_add_submodule( Sandfly sandfly )
 
-# need definitions from Monarch
-set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} APPEND PROPERTY COMPILE_DEFINITIONS ${Monarch_COMPILE_DEFINITIONS} )
-
+# Monarch
+pbuilder_add_submodule( Monarch monarch )
 
 ############
 # fast_daq #
@@ -91,10 +84,7 @@ include_directories( BEFORE
 add_subdirectory( source/data )
 add_subdirectory( source/daq )
 
-# build psyllid, linking against fast_daq
-psyllid_build_executables()
-
 #add_subdirectory( source/applications )
 #add_subdirectory( source/test )
 
-pbuilder_variables_for_parent()
+pbuilder_do_package_config()

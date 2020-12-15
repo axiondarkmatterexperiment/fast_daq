@@ -34,7 +34,7 @@ RUN cd /tmp &&\
 
 # actually build the local project(s)
 
-COPY psyllid /usr/local/src/psyllid
+COPY fast_daq /usr/local/src/fast_daq
 COPY source /usr/local/src/source
 COPY cmake /usr/local/src/cmake
 COPY CMakeLists.txt /usr/local/src/CMakeLists.txt
@@ -45,10 +45,10 @@ RUN mkdir -p /tmp/dl_build && \
     cd /tmp/dl_build && \
     cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
           -DCMAKE_BUILD_TYPE=${build_type} \
-          /usr/local/src/psyllid/dripline-cpp && \
+          /usr/local/src/fast_daq/sandfly/dripline-cpp && \
     cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
           -DCMAKE_BUILD_TYPE=${build_type} \
-          /usr/local/src/psyllid/dripline-cpp && \
+          /usr/local/src/fast_daq/sandfly/dripline-cpp && \
     make install && \
     /bin/true
 
@@ -73,4 +73,4 @@ RUN cd /usr/local/src/build && \
     /bin/true
 
 # this is probalby not a good choice of default config
-RUN cp /usr/local/src/psyllid/examples/str_1ch_fpa.yaml /etc/psyllid_config.yaml
+RUN cp /usr/local/src/fast_daq/examples/str_1ch_fpa.yaml /etc/fast_daq_config.yaml
