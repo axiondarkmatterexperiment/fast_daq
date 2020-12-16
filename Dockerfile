@@ -48,10 +48,10 @@ RUN mkdir -p /tmp/dl_build && \
     cd /tmp/dl_build && \
     cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
           -DCMAKE_BUILD_TYPE=${build_type} \
-          /usr/local/src/fast_daq/sandfly/dripline-cpp && \
+          /usr/local/src/sandfly/dripline-cpp && \
     cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
           -DCMAKE_BUILD_TYPE=${build_type} \
-          /usr/local/src/fast_daq/sandfly/dripline-cpp && \
+          /usr/local/src/sandfly/dripline-cpp && \
     make install && \
     /bin/true
 
@@ -76,4 +76,4 @@ RUN cd /usr/local/src/build && \
     /bin/true
 
 # this is probalby not a good choice of default config
-RUN cp /usr/local/src/fast_daq/examples/str_1ch_fpa.yaml /etc/fast_daq_config.yaml
+RUN cp /usr/local/src/examples/str_1ch_fpa.yaml /etc/fast_daq_config.yaml
