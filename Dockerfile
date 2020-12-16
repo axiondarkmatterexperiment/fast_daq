@@ -16,7 +16,7 @@ RUN apt-get update && \
         libboost-all-dev \
         #libhdf5-dev \
         librabbitmq-dev \
-        rapidjson-devel \
+        rapidjson-dev \
         libyaml-cpp-dev \
         pybind11-dev \
         wget && \
