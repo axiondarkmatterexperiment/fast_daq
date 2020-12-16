@@ -34,9 +34,12 @@ RUN cd /tmp &&\
 
 # actually build the local project(s)
 
-COPY fast_daq /usr/local/src/fast_daq
-COPY source /usr/local/src/source
 COPY cmake /usr/local/src/cmake
+COPY monarch /usr/local/src/monarch
+COPY sandfly /usr/local/src/sandfly
+COPY source /usr/local/src/source
+COPY .gitignore /usr/local/src/.gitignore
+COPY .gitmodules /usr/local/src/.gitmodules
 COPY CMakeLists.txt /usr/local/src/CMakeLists.txt
 
 ARG build_type=RELEASE
