@@ -84,6 +84,8 @@ pbuilder_add_submodule( Monarch monarch )
 include_directories( BEFORE
     source/data
     source/daq
+    source/utility
+    source/control
 )
 
 # build this project
