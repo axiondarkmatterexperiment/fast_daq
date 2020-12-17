@@ -24,11 +24,11 @@ set ( dependencies
 # library #
 ###########
 
+pbuilder_use_sm_library(SandflyUtility Sandfly)
 pbuilder_library(
     TARGET FastDaqData
     SOURCES ${sources}
     PROJECT_LIBRARIES ${dependencies}
 )
 
-pbuilder_use_sm_library(SandflyUtility Sandfly)
 pbuilder_install_headers( ${headers} )

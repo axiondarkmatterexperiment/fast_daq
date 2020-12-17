@@ -22,14 +22,14 @@ set( dependencies
 # library #
 ###########
 
+pbuilder_use_sm_library(SandflyControl Sandfly)
+pbuilder_use_sm_library(Monarch Monarch)
 pbuilder_library(
     TARGET FastDaqControl
     SOURCES ${sources}
     PROJECT_LIBRARIES ${dependencies}
 )
 
-pbuilder_use_sm_library(SandflyControl Sandfly)
-pbuilder_use_sm_library(Monarch Monarch)
 pbuilder_install_headers( ${headers} )
 
 

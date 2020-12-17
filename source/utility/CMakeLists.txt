@@ -21,10 +21,10 @@ set( sources
 # library #
 ###########
 
+pbuilder_use_sm_library(SandflyUtility Sandfly)
 pbuilder_library(
 	TARGET FastDaqUtility
     SOURCES ${sources}
 )
 
-pbuilder_use_sm_library(SandflyUtility Sandfly)
 pbuilder_install_headers( ${headers} )
