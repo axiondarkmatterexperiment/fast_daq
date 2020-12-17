@@ -30,5 +30,5 @@ pbuilder_library(
     PROJECT_LIBRARIES ${dependencies}
 )
 
-pbuilder_install_headers( ${headers} )
 pbuilder_use_sm_library(SandflyUtility Sandfly)
+pbuilder_install_headers( ${headers} )

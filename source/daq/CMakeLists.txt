@@ -43,6 +43,6 @@ pbuilder_library(
     PRIVATE_EXTERNAL_LIBRARIES ${PRIVATE_EXT_LIBS}
 )
 
-pbuilder_install_headers( ${headers} )
 pbuilder_use_sm_library(SandflyUtility Sandfly)
 pbuilder_use_sm_library(Monarch Monarch)
+pbuilder_install_headers( ${headers} )
