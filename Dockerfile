@@ -44,6 +44,8 @@ COPY source /usr/local/src/source
 COPY .gitignore /usr/local/src/.gitignore
 COPY .gitmodules /usr/local/src/.gitmodules
 COPY CMakeLists.txt /usr/local/src/CMakeLists.txt
+COPY FastDaqConfig.cmake.in /usr/local/src/FastDaqConfig.cmake.in
+
 
 ARG build_type=RELEASE
 # need to build dripline separately
