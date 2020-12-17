@@ -8,6 +8,7 @@ project( FastDaq VERSION 0.1.0 )
 # Setup the module path in the proper order for overriding dependencies
 list( APPEND CMAKE_MODULE_PATH 
     ${PROJECT_SOURCE_DIR}/sandfly/cmake 
+    ${PROJECT_SOURCE_DIR}/cmake 
 )
 include( sandfly )
 
