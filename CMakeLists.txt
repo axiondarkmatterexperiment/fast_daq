@@ -22,6 +22,9 @@ option( FastDAQ_ENABLE_ATS "Flag to enable building of node to read from AlazarT
 option( FastDAQ_ENABLE_FFTW "Flag to enable FFTW features" TRUE )
 set_option( USE_CPP11 TRUE )
 
+set_option( Midge_ENABLE_EXECUTABLES FALSE )
+set_option( Sandfly_ENABLE_EXECUTABLES FALSE )
+
 
 ################
 # dependencies #
