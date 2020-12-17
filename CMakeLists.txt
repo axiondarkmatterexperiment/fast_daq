@@ -91,6 +91,8 @@ include_directories( BEFORE
 # build this project
 add_subdirectory( source/data )
 add_subdirectory( source/daq )
+add_subdirectory( source/utility )
+add_subdirectory( source/control )
 
 #add_subdirectory( source/applications )
 #add_subdirectory( source/test )
