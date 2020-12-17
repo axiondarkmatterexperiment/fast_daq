@@ -29,3 +29,7 @@ pbuilder_library(
 )
 
 pbuilder_install_headers( ${headers} )
+
+pbuilder_use_sm_library(SandflyControl Sandfly)
+pbuilder_use_sm_library(Monarch Monarch)
+
