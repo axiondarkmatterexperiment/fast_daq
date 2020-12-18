@@ -4,19 +4,23 @@
 set( headers
     ats_streaming_writer.hh
     dead_end.hh
+    egg_writer.hh
     frequency_transform.hh
     inverse_frequency_transform.hh
     power_averager.hh
     spectrum_relay.hh
+    streaming_frequency_writer.hh
 )
 
 set( sources
     ats_streaming_writer.cc
     dead_end.cc
+    egg_writer.cc
     frequency_transform.cc
     inverse_frequency_transform.cc
     power_averager.cc
     spectrum_relay.cc
+    streaming_frequency_writer.cc
 )
 
 if( ATS9462_FOUND )
