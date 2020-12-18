@@ -9,9 +9,9 @@
 
 //#include "logger.hh"
 
-//#include "psyllid_error.hh"
+//#include "fast_daq_error.hh"
 
-namespace psyllid
+namespace fast_daq
 {
     LOGGER( plog, "egg_writer" );
 
@@ -23,4 +23,4 @@ namespace psyllid
     {
     }
 
-} /* namespace psyllid */
+} /* namespace fast_daq */

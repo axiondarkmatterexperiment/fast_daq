@@ -1,4 +1,4 @@
-/*
+/
  * egg_writer.hh
  *
  *  Created on: Mar 14, 2017
@@ -6,12 +6,12 @@
  *
  */
 
-#ifndef PSYLLID_EGG_WRITER_HH_
-#define PSYLLID_EGG_WRITER_HH_
+#ifndef FAST_DAQ_EGG_WRITER_HH_
+#define FAST_DAQ_EGG_WRITER_HH_
 
 #include "monarch3_wrap.hh"
 
-namespace psyllid
+namespace fast_daq
 {
     /*!
      @class egg_writer
@@ -30,6 +30,6 @@ namespace psyllid
             virtual void prepare_to_write( monarch_wrap_ptr a_mw_ptr, header_wrap_ptr a_hw_ptr ) = 0;
     };
 
-} /* namespace psyllid */
+} /* namespace fast_daq */
 
-#endif /* PSYLLID_EGG_WRITER_HH_ */
+#endif /* FAST_DAQ_EGG_WRITER_HH_ */
