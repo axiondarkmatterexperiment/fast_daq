@@ -72,7 +72,7 @@ namespace fast_daq
             mv_accessible( double, freq_range ); // Hz
 
         public:
-            virtual void prepare_to_write( sandfly::monarch_wrap_ptr a_mw_ptr, sandfly::header_wrap_ptr a_hw_ptr );
+            virtual void prepare_to_write( fast_daq::monarch_wrap_ptr a_mw_ptr, sandfly::header_wrap_ptr a_hw_ptr );
 
             virtual void initialize();
             virtual void execute( midge::diptera* a_midge = nullptr );
@@ -81,7 +81,7 @@ namespace fast_daq
         private:
             unsigned f_last_pkt_in_batch;
 
-            sandfly::monarch_wrap_ptr f_monarch_ptr;
+            fast_daq::monarch_wrap_ptr f_monarch_ptr;
             unsigned f_stream_no;
 
     };
