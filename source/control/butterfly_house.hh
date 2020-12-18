@@ -54,7 +54,7 @@ namespace fast_daq
      butterfly_house gets the file size from the fast_daq config file and the filename, run duration and description from daq_control.
      It adds this information to the file header.
      */
-    class butterfly_house : public scarab::singleton< butterfly_house >, public fast_daq::control_access
+    class butterfly_house : public scarab::singleton< butterfly_house >, public sandfly::control_access
     {
         public:
             mv_accessible( double, max_file_size_mb );
