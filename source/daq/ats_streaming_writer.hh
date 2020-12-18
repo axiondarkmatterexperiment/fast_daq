@@ -52,7 +52,7 @@ namespace fast_daq
     */
     class ats_streaming_writer :
             public midge::_consumer< midge::type_list< iq_time_data > >,
-            public sandfly::egg_writer
+            public fast_daq::egg_writer
     {
         public:
             ats_streaming_writer();
