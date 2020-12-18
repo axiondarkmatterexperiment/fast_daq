@@ -1,4 +1,4 @@
-/
+/*
  * egg_writer.hh
  *
  *  Created on: Mar 14, 2017
