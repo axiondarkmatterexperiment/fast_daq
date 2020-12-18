@@ -22,7 +22,7 @@ namespace fast_daq
 
      @details
     */
-    class daq_control : public fast_daq::run_control
+    class daq_control : public sandfly::run_control
     {
 
         public:
