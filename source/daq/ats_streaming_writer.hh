@@ -72,7 +72,7 @@ namespace fast_daq
             mv_accessible( double, freq_range ); // Hz
 
         public:
-            virtual void prepare_to_write( fast_daq::monarch_wrap_ptr a_mw_ptr, sandfly::header_wrap_ptr a_hw_ptr );
+            virtual void prepare_to_write( fast_daq::monarch_wrap_ptr a_mw_ptr, fast_daq::header_wrap_ptr a_hw_ptr );
 
             virtual void initialize();
             virtual void execute( midge::diptera* a_midge = nullptr );

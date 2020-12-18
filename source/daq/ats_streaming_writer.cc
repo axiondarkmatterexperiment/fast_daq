@@ -50,7 +50,7 @@ namespace fast_daq
     {
     }
 
-    void ats_streaming_writer::prepare_to_write( fast_daq::monarch_wrap_ptr a_mw_ptr, sandfly::header_wrap_ptr a_hw_ptr )
+    void ats_streaming_writer::prepare_to_write( fast_daq::monarch_wrap_ptr a_mw_ptr, fast_daq::header_wrap_ptr a_hw_ptr )
     {
         f_monarch_ptr = a_mw_ptr;
 
