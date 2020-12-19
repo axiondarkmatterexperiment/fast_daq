@@ -61,7 +61,7 @@ namespace fast_daq
      Output Streams:
      - 0: frequency_data
     */
-    class frequency_transform : public midge::_transformer< midge::type_list< fast_daq::time_data, real_time_data >, midge::type_list< frequency_data > >
+    class frequency_transform : public midge::_transformer< midge::type_list< time_data, real_time_data >, midge::type_list< frequency_data > >
     {
         public:
             // internal enums
