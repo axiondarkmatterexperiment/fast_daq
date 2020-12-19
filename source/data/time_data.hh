@@ -8,7 +8,6 @@
 #ifndef FAST_DAQ_TIME_DATA_HH_
 #define FAST_DAQ_TIME_DATA_HH_
 
-#include "roach_packet.hh"
 
 #include "member_variables.hh"
 
