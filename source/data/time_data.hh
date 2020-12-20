@@ -15,7 +15,7 @@
 namespace fastdaq
 {
 
-    class time_data : public roach_packet_data
+    class time_data
     {
         public:
             time_data();
