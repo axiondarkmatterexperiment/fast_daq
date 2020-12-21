@@ -12,7 +12,7 @@
 #include "member_variables.hh"
 
 
-namespace fastdaq
+namespace fast_daq
 {
 
     class time_data
