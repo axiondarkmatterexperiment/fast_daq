@@ -16,6 +16,7 @@
 #include "iq_time_data.hh"
 #include "real_time_data.hh"
 #include "power_data.hh"
+#include "fast_daq_error.hh"
 
 
 using midge::stream;
@@ -85,7 +86,7 @@ namespace fast_daq
                         break;
                     default:
                         LERROR( flog, "input type not recognized!" );
-                        throw sandfly::error() << "input index <" << f_input_index << "> not recognized";
+                        throw fast_daq::error() << "input index <" << f_input_index << "> not recognized";
                 }
                 if ( input_command == midge::stream::s_none )
                 {

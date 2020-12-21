@@ -168,7 +168,7 @@ namespace fast_daq
                     }
                 }
             }
-            catch( fast_daq::error& e )
+            catch( sandfly::error& e )
             {
                 throw;
             }

@@ -20,6 +20,7 @@
 #include "transformer.hh"
 #include "shared_cancel.hh"
 
+#include "fast_daq_error.hh"
 //external
 #include <fftw3.h>
 
