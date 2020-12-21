@@ -83,15 +83,15 @@ pbuilder_add_submodule( Monarch monarch )
 # add include directories
 include_directories( BEFORE
     source/utility
-    source/data
     source/control
+    source/data
     source/daq
 )
 
 # build this project
 add_subdirectory( source/utility )
-add_subdirectory( source/data )
 add_subdirectory( source/control )
+add_subdirectory( source/data )
 add_subdirectory( source/daq )
 
 #add_subdirectory( source/applications )
