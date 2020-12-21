@@ -70,8 +70,7 @@ RUN cd /usr/local/src/build && \
     cmake \
           -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
           -DDripline_ENABLE_EXECUTABLES=FALSE \
-          -DPsyllid_ENABLE_TESTING=FALSE \
-          -DPsyllid_ENABLE_STREAMED_FREQUENCY_OUTPUT=TRUE \
+          -DFastDaq_ENABLE_TESTING=FALSE \
           -DFastDAQ_ENABLE_ATS:BOOL=${enable_ats} \
           -DCMAKE_BUILD_TYPE=${build_type} \
           .. && \
