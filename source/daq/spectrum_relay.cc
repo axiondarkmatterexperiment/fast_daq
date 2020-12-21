@@ -13,7 +13,6 @@
 
 //sandfly
 #include "daq_control.hh"
-#include "global_config.hh"
 #include "message_relayer.hh"
 
 //fast_daq includes
