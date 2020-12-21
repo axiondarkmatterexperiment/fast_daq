@@ -21,6 +21,7 @@
 
 #include "producer.hh"
 #include "control_access.hh"
+#include "fast_daq_error.hh"
 
 
 #define check_return_code_macro( function, ... ) \

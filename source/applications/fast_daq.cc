@@ -15,6 +15,7 @@
 
 #include "application.hh"
 #include "logger.hh"
+#include "fast_daq_error.hh"
 
 using namespace fast_daq;
 using namespace sandfly;

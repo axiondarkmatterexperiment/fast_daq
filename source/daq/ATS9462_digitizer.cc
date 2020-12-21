@@ -11,6 +11,7 @@
 #include "real_time_data.hh"
 
 #include "ATS9462_digitizer.hh"
+#include "fast_daq_error.hh"
 
 using midge::stream;
 

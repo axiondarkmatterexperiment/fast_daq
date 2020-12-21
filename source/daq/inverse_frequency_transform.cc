@@ -16,6 +16,8 @@
 #include <memory>
 #include <sys/types.h>
 
+#include "fast_daq_error.hh"
+
 
 using midge::stream;
 
