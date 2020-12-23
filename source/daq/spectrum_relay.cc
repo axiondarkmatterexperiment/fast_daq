@@ -103,7 +103,7 @@ namespace fast_daq
         // grab the run description and load it into the broadcast payload
         scarab::param_ptr_t t_payload_ptr( new scarab::param_node() );
         scarab::param_node& t_payload = t_payload_ptr->as_node();
-        std::shared_ptr< daq_control > t_daq_control = std::dynamic_pointer_cast< daq_control >( use_daq_control() );
+        std::shared_ptr< daq_control > t_daq_control = std::dynamic_pointer_cast< daq_control >( sandfly::use_run_control() );
         scarab::param_input_json t_param_codec;
         t_payload.merge( t_param_codec.read_string( t_daq_control->get_description() )->as_node() );
         scarab::param_array t_spectrum_array;
