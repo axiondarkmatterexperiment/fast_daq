@@ -92,7 +92,7 @@ namespace fast_daq
         {
             midge::enum_t t_time_command = stream::s_none;
 
-            freq_data* t_freq_data = nullptr;
+            frequency_data* t_freq_data = nullptr;
 
             stream_wrap_ptr t_swrap_ptr;
 

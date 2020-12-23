@@ -11,7 +11,7 @@
 
 #include "egg_writer.hh"
 #include "node_builder.hh"
-#include "freq_data.hh"
+#include "frequency_data.hh"
 
 #include "consumer.hh"
 
@@ -53,7 +53,7 @@ namespace fast_daq
      Output Streams: (none)
     */
     class streaming_frequency_writer :
-            public midge::_consumer< midge::type_list< fast_daq::freq_data > >,
+            public midge::_consumer< midge::type_list< fast_daq::frequency_data > >,
             public egg_writer
     {
         public:
