@@ -97,9 +97,9 @@ namespace fast_daq
             stream_wrap_ptr t_swrap_ptr;
 
             uint64_t t_bytes_per_record = f_record_size * f_sample_size * f_data_type_size;
-            uint64_t t_record_length_nsec = llrint( (double)(PAYLOAD_SIZE / 2) / (double)f_acq_rate * 1.e3 );
+            uint64_t t_record_length_nsec = llrint( (double)(f_record_size) / (double)f_acq_rate * 1.e3 );
 
-            uint64_t t_first_pkt_in_run = 0;
+            uint64_t t_record_counter = 0;
 
             bool t_is_new_acquisition = true;
             bool t_start_file_with_next_data = false;
@@ -159,22 +159,16 @@ namespace fast_daq
                     {
                         LDEBUG( plog, "Handling first packet in run" );
 
-                        t_first_pkt_in_run = t_freq_data->get_pkt_in_session();
+                        t_record_counter = 0;
 
                         t_is_new_acquisition = true;
 
                         t_start_file_with_next_data = false;
                     }
 
-                    uint64_t t_time_id = t_freq_data->get_pkt_in_session();
                     LTRACE( plog, "Writing packet (in session) " << t_time_id );
 
-                    uint32_t t_expected_pkt_in_batch = f_last_pkt_in_batch + 1;
-                    if( t_expected_pkt_in_batch >= BATCH_COUNTER_SIZE ) t_expected_pkt_in_batch = 0;
-                    if( ! t_is_new_acquisition && t_freq_data->get_pkt_in_batch() != t_expected_pkt_in_batch ) t_is_new_acquisition = true;
-                    f_last_pkt_in_batch = t_freq_data->get_pkt_in_batch();
-
-                    if( ! t_swrap_ptr->write_record( t_time_id, t_record_length_nsec * ( t_time_id - t_first_pkt_in_run ), t_freq_data->get_raw_array(), t_bytes_per_record, t_is_new_acquisition ) )
+                    if( ! t_swrap_ptr->write_record( t_time_id, t_record_length_nsec * t_record_counter, t_freq_data->get_raw_array(), t_bytes_per_record, t_is_new_acquisition ) )
                     {
                         throw midge::node_nonfatal_error() << "Unable to write record to file; record ID: " << t_time_id;
                     }
