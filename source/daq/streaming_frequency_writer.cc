@@ -166,14 +166,14 @@ namespace fast_daq
                         t_start_file_with_next_data = false;
                     }
 
-                    LTRACE( plog, "Writing packet (in session) " << t_time_id );
+                    LTRACE( plog, "Writing packet (in session) " << t_record_counter );
 
-                    if( ! t_swrap_ptr->write_record( t_time_id, t_record_length_nsec * t_record_counter, t_freq_data->get_raw_array(), t_bytes_per_record, t_is_new_acquisition ) )
+                    if( ! t_swrap_ptr->write_record( t_record_counter, t_record_length_nsec * t_record_counter, t_freq_data->get_raw_array(), t_bytes_per_record, t_is_new_acquisition ) )
                     {
-                        throw midge::node_nonfatal_error() << "Unable to write record to file; record ID: " << t_time_id;
+                        throw midge::node_nonfatal_error() << "Unable to write record to file; record ID: " << t_record_counter;
                     }
 
-                    LTRACE( plog, "Packet written (" << t_time_id << ")" );
+                    LTRACE( plog, "Packet written (" << t_record_counter << ")" );
 
                     t_is_new_acquisition = false;
 
