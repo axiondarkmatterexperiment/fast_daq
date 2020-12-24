@@ -79,5 +79,3 @@ RUN cd /usr/local/src/build && \
     make install && \
     /bin/true
 
-# this is probalby not a good choice of default config
-RUN cp /usr/local/src/examples/str_1ch_fpa.yaml /etc/fast_daq_config.yaml
