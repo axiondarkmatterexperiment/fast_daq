@@ -152,7 +152,7 @@ namespace fast_daq
                     if ( f_buffers_completed >= buffers_per_acquisition() )
                     {
                         LINFO( flog, "All requested buffers ("<<f_buffers_completed<<") completed, calling daq_control->stop_run and stopping board Reads" );
-                        std::shared_ptr< sandfly::run_control > t_daq_control = use_daq_control();
+                        std::shared_ptr< daq_control > t_daq_control = std::dynamic_pointer_cast< daq_control >( use_run_control() )
                         t_daq_control->stop_run();
                         check_return_code_macro( AlazarAbortAsyncRead, f_board_handle );
                     }
