@@ -1,5 +1,5 @@
 ARG base_image_repo=debian
-ARG base_image_tag=9
+ARG base_image_tag=10
 
 FROM ${base_image_repo}:${base_image_tag}
 
