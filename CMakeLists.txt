@@ -89,13 +89,21 @@ include_directories( BEFORE
 )
 
 # build this project
-add_subdirectory( source/utility )
-add_subdirectory( source/control )
-add_subdirectory( source/data )
-add_subdirectory( source/daq )
+add_subdirectory( source/ )
 
-#add_subdirectory( source/applications )
-#add_subdirectory( source/test )
+if( FastDaq_ENABLE_EXECUTABLES )
+    add_subdirectory( source/applications )
+endif()
+
+if( FastDaq_ENABLE_TESTING )
+    #add_subdirectory( source/test )
+endif()
+
+
+##################
+# package config #
+##################
+
 configure_file( ${PROJECT_SOURCE_DIR}/FastDaqConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/FastDaqConfig.cmake @ONLY     )
 
 pbuilder_do_package_config()
