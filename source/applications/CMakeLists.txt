@@ -14,7 +14,6 @@ set( fast_daq_exe_PROGRAMS )
 
 # Non-fast_daq executables
 set( programs
-    grab_packet
     #psyllid
 )
 
