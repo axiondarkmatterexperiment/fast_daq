@@ -168,7 +168,7 @@ namespace fast_daq
 
                     LTRACE( plog, "Writing packet (in session) " << t_record_counter );
 
-                    if( ! t_swrap_ptr->write_record( t_record_counter, t_record_length_nsec * t_record_counter, t_freq_data->get_raw_array(), t_bytes_per_record, t_is_new_acquisition ) )
+                    if( ! t_swrap_ptr->write_record( t_record_counter, t_record_length_nsec * t_record_counter, t_freq_data->get_data_array(), t_bytes_per_record, t_is_new_acquisition ) )
                     {
                         throw midge::node_nonfatal_error() << "Unable to write record to file; record ID: " << t_record_counter;
                     }
