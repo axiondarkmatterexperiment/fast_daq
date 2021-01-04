@@ -47,7 +47,7 @@ COPY CMakeLists.txt /usr/local/src/CMakeLists.txt
 COPY FastDaqConfig.cmake.in /usr/local/src/FastDaqConfig.cmake.in
 
 
-ARG build_type=RELEASE
+ARG build_type=DEBUG
 # need to build dripline separately
 RUN mkdir -p /tmp/dl_build && \
     cd /tmp/dl_build && \
