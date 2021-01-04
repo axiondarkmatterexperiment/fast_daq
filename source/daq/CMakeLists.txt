@@ -9,7 +9,7 @@ set( headers
     inverse_frequency_transform.hh
     power_averager.hh
     spectrum_relay.hh
-    #streaming_frequency_writer.hh
+    streaming_frequency_writer.hh
 )
 
 set( sources
@@ -20,7 +20,7 @@ set( sources
     inverse_frequency_transform.cc
     power_averager.cc
     spectrum_relay.cc
-    #streaming_frequency_writer.cc
+    streaming_frequency_writer.cc
 )
 
 if( ATS9462_FOUND )
