@@ -2,7 +2,7 @@
 # daq #
 #######
 set( headers
-    #ats_streaming_writer.hh
+    ats_streaming_writer.hh
     dead_end.hh
     egg_writer.hh
     frequency_transform.hh
@@ -13,7 +13,7 @@ set( headers
 )
 
 set( sources
-    #ats_streaming_writer.cc
+    ats_streaming_writer.cc
     dead_end.cc
     egg_writer.cc
     frequency_transform.cc
