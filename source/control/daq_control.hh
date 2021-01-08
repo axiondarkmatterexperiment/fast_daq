@@ -9,6 +9,7 @@
 #define FAST_DAQ_DAQ_CONTROL_HH_
 
 #include "run_control.hh"
+#include "request_receiver.hh"
 
 
 namespace fast_daq
@@ -37,9 +38,6 @@ namespace fast_daq
             /// Handle called after run finishes (i.e. control is paused)
             virtual void on_post_run();
 
-
-        public:
-
         public:
             dripline::reply_ptr_t handle_start_run_request( const dripline::request_ptr_t a_request );
 
@@ -51,6 +49,8 @@ namespace fast_daq
             dripline::reply_ptr_t handle_get_description_request( const dripline::request_ptr_t a_request );
             dripline::reply_ptr_t handle_get_use_monarch_request( const dripline::request_ptr_t a_request );
 
+        protected:
+            virtual void derived_register_handlers( std::shared_ptr< sandfly::request_receiver > a_receiver_ptr );
 
         public:
             void set_filename( const std::string& a_filename, unsigned a_file_num = 0 );
