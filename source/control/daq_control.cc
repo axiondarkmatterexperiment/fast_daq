@@ -30,6 +30,8 @@ namespace fast_daq
             sandfly::run_control( a_master_config, a_mgr ),
             f_use_monarch( true )
     {
+            set_use_monarch( f_daq_config.get_value( "use-monarch", get_use_monarch() ) );
+            LDEBUG( plog, "Use-monarch set to: " << f_use_monarch );
     }
 
     daq_control::~daq_control()
@@ -38,7 +40,10 @@ namespace fast_daq
 
     void daq_control::on_initialize()
     {
-        butterfly_house::get_instance()->prepare_files( f_daq_config );
+        if( f_use_monarch )
+        {
+            butterfly_house::get_instance()->prepare_files( f_daq_config );
+        }
         return;
     }
 
