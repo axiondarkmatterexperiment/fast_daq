@@ -405,7 +405,7 @@ namespace fast_daq
         a_node->set_dma_buffer_count( a_config.get_value( "dma-buffer-count", a_node->get_dma_buffer_count() ) );
         a_node->set_samples_per_sec( a_config.get_value( "samples-per-sec", a_node->get_samples_per_sec() ) );
         a_node->set_acquisition_length_sec( a_config.get_value( "acquisition-length-sec", a_node->get_acquisition_length_sec() ) );
-	      LINFO("Get acquisition-length-sec " + a_node->get_acquisition_length_sec_str())
+	      LINFO("Get acquisition-length-sec " + a_node->get_acquisition_length_sec())
     }
 
     void ats9462_digitizer_binding::do_dump_config( const ats9462_digitizer* a_node, scarab::param_node& a_config ) const
