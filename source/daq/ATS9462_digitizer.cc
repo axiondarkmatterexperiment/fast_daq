@@ -202,7 +202,6 @@ namespace fast_daq
                 break;
             case ats9462_digitizer::reference_source_t::external_10MHz:
                 check_return_code_macro( AlazarSetCaptureClock, f_board_handle, EXTERNAL_CLOCK_10MHZ_REF, f_samples_per_sec, CLOCK_EDGE_RISING, t_decimation_value );
-		LINFO("Im in the external_10MHz case")
                 break;
             default: throw fast_daq::error() << "reference_type value <" << reference_source_to_uint(f_reference_source) << "> not recognized";
         }
@@ -397,21 +396,19 @@ namespace fast_daq
 
     void ats9462_digitizer_binding::do_apply_config(ats9462_digitizer* a_node, const scarab::param_node& a_config ) const
     {
-	a_node->set_reference_source_and_decimation( a_config.get_value( "reference-source", a_node->get_reference_source_str() ), a_config.get_value( "decimation-factor", a_node->get_decimation_factor() ) );
+	      a_node->set_reference_source_and_decimation( a_config.get_value( "reference-source", a_node->get_reference_source_str() ), a_config.get_value( "decimation-factor", a_node->get_decimation_factor() ) );
 
-	LINFO("do apply config reference-source: " + a_node->get_reference_source_str())
+	      LINFO("do apply config reference-source: " + a_node->get_reference_source_str())
         a_node->set_samples_per_buffer( a_config.get_value( "samples-per-buffer", a_node->get_samples_per_buffer() ) );
         a_node->set_out_length( a_config.get_value( "out-length", a_node->get_out_length() ) );
         a_node->set_dma_buffer_count( a_config.get_value( "dma-buffer-count", a_node->get_dma_buffer_count() ) );
         a_node->set_samples_per_sec( a_config.get_value( "samples-per-sec", a_node->get_samples_per_sec() ) );
         a_node->set_acquisition_length_sec( a_config.get_value( "acquisition-length-sec", a_node->get_acquisition_length_sec() ) );
-	      LINFO("Get acquisition-length-sec " << a_node->get_acquisition_length_sec());
     }
 
     void ats9462_digitizer_binding::do_dump_config( const ats9462_digitizer* a_node, scarab::param_node& a_config ) const
     {
         a_config.add( "reference-source", scarab::param_value( ats9462_digitizer::reference_source_to_string( a_node->get_reference_source() ) ) );
-	LINFO("do dump config reference-source: " + a_node->get_reference_source_str())
         a_config.add( "samples-per-bufer", scarab::param_value( a_node->get_samples_per_buffer() ) );
         a_config.add( "out-length", scarab::param_value( a_node->get_out_length() ) );
         a_config.add( "dma-buffer-count", scarab::param_value( a_node->get_dma_buffer_count() ) );
