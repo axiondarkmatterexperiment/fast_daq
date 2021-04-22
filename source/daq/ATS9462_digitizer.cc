@@ -333,7 +333,7 @@ namespace fast_daq
             }
             catch( buffer_overflow& )
             { // if posting the buffer fails, we're in an overrun; collect all buffers then restart
-                LINFO( flog, "DMA buffer overrun detected; flushing buffers then will increment acquisition" );
+                LWARN( flog, "DMA buffer overrun detected; flushing buffers then will increment acquisition" );
                 f_overrun_collected = 1;
             }
         }
