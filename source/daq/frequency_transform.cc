@@ -72,7 +72,7 @@ namespace fast_daq
     // calculate derived params from members
     float frequency_transform::bin_width_hz()
     {
-        return ( f_samples_per_sec ) / f_fft_size;
+        return (float) f_samples_per_sec  / (float) f_fft_size;
     }
 
     unsigned frequency_transform::first_output_index()
