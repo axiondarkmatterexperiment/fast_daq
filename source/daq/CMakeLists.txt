@@ -3,6 +3,7 @@
 #######
 set( headers
     ats_streaming_writer.hh
+    data_producer.hh
     dead_end.hh
     egg_writer.hh
     frequency_transform.hh
@@ -14,6 +15,7 @@ set( headers
 
 set( sources
     ats_streaming_writer.cc
+    data_producer.cc
     dead_end.cc
     egg_writer.cc
     frequency_transform.cc

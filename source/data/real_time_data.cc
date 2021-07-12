@@ -10,11 +10,11 @@
 namespace fast_daq
 {
     real_time_data::real_time_data() :
-        f_time_series(),
-        f_array_size(),
-        f_dynamic_range(),
+        f_time_series( nullptr ),
+        f_array_size( 0 ),
+        f_dynamic_range( 0. ),
         f_volts_data(),
-        f_chunk_counter()
+        f_chunk_counter( 0 )
     {
     }
 
@@ -22,18 +22,21 @@ namespace fast_daq
     {
         if (f_time_series != nullptr)
         {
-            delete f_time_series;
+            delete [] f_time_series;
         }
     }
 
     void real_time_data::allocate_array( unsigned n_samples )
     {
-        if (f_time_series == nullptr )
+        if ( n_samples != 0 && 
+             (f_time_series == nullptr || n_samples != f_array_size) 
+           )
         {
+            delete [] f_time_series;
             f_time_series = new U16[n_samples];
+            f_array_size = n_samples;
+            f_volts_data.resize( n_samples );
         }
-        f_array_size = n_samples;
-        f_volts_data.resize( n_samples );
     }
 
     std::vector<float> real_time_data::as_volts()
