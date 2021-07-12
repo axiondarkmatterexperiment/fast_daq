@@ -12,8 +12,6 @@ list( APPEND CMAKE_MODULE_PATH
 )
 include( sandfly )
 
-pbuilder_prepare_project()
-
 
 #########
 # flags #
@@ -71,6 +69,19 @@ include_directories (${FFTW_INCLUDE_DIR})
 
 # Sandfly
 add_definitions( -DDRIPLINE_AUTH_FILE=/etc/rabbitmq-secret/authentications.json )
+
+
+#####################
+# prepare for build #
+#####################
+
+pbuilder_prepare_project()
+
+
+##############
+# submodules #
+##############
+
 pbuilder_add_submodule( Sandfly sandfly )
 
 # Monarch
