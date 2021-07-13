@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+
+  rabbit-broker:
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=fast_daq
+      - RABBITMQ_DEFAULT_PASS=fast_daq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  # this should be a fast_daq image; there's not currently one on docker hub
+  drip-mon:
+    image: [some image]
+    depends_on:
+      - rabbit-broker
+    volumes:
+      - ./authentications.json:/root/authentications.json
+    command:
+      - dl-mon
+      - --auth-file
+      - /root/authentications.json
+      - -b
+      - rabbit-broker
+      - -a
+      - 'fast_daq'

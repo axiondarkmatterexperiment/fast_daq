@@ -1,0 +1,7 @@
+{
+    "amqp": {
+        "broker": "rabbit-broker",
+        "username": "fast_daq",
+        "password": "fast_daq"
+    }
+}
