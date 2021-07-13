@@ -46,16 +46,19 @@ RUN mkdir -p /tmp/dl_build && \
     cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
           -DCMAKE_BUILD_TYPE=${build_type} \
           /usr/local/src/sandfly/dripline-cpp && \
-    make install && \
+    make -j3 install && \
     /bin/true
 
 ARG enable_ats=FALSE
-RUN cd /usr/local/src && \
-    mkdir -p build && \
-    cd build && \
-    cmake .. && \
-    /bin/true
-RUN cd /usr/local/src/build && \
+RUN mkdir -p /usr/local/src/build && \
+    cd /usr/local/src/build && \
+    cmake \
+          -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
+          -DDripline_ENABLE_EXECUTABLES=FALSE \
+          -DFastDaq_ENABLE_TESTING=FALSE \
+          -DFastDAQ_ENABLE_ATS:BOOL=${enable_ats} \
+          -DCMAKE_BUILD_TYPE=${build_type} \
+          .. && \
     cmake \
           -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
           -DDripline_ENABLE_EXECUTABLES=FALSE \
@@ -65,6 +68,6 @@ RUN cd /usr/local/src/build && \
           .. && \
      /bin/true
 RUN cd /usr/local/src/build && \
-    make install && \
+    make -j3 install && \
     /bin/true
 
