@@ -15,7 +15,7 @@
 
 #include "application.hh"
 #include "logger.hh"
-#include "fast_daq_error.hh"
+#include "signal_handler.hh"
 
 using namespace fast_daq;
 using namespace sandfly;
@@ -50,7 +50,13 @@ int main( int argc, char** argv )
         the_main.default_config() = server_config();
 
         // The main execution callback
-        the_main.callback( [&](){ the_conductor.execute( the_main.primary_config() ); } );
+        the_main.callback( [&](){ 
+                scarab::signal_handler t_sig_hand;
+                auto t_cwrap = scarab::wrap_cancelable( the_conductor );
+                t_sig_hand.add_cancelable( t_cwrap );
+
+                the_conductor.execute( the_main.primary_config() ); 
+            } );
 
         // Command line options
         add_sandfly_options( the_main );
