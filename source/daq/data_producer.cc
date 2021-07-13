@@ -9,12 +9,14 @@
 
 #include "logger.hh"
 
+#include <thread>
+#include <chrono>
 
 LOGGER( plog, "data_producer" );
 
 using midge::stream;
 
-namespace psyllid
+namespace fast_daq
 {
 
     REGISTER_NODE_AND_BUILDER( data_producer, "data-producer", data_producer_binding );
@@ -24,6 +26,7 @@ namespace psyllid
             f_data_size( 16384 ),
             f_data_value( 5 ),
             f_dynamic_range( 1. ),
+            f_delay_time_ms( 500 ),
             f_primary_packet()
     {
         write_primary_packet();
@@ -86,6 +89,8 @@ namespace psyllid
                     LERROR( plog, "Exiting due to stream error" );
                     break;
                 }
+
+                std::this_thread::sleep_for( std::chrono::milliseconds(f_delay_time_ms) );
             }
 
             LINFO( plog, "Data producer is exiting" );
@@ -137,6 +142,7 @@ namespace psyllid
         a_node->set_data_size( a_config.get_value( "data-size", a_node->get_data_size() ) );
         a_node->set_data_value( a_config.get_value( "data-value", a_node->get_data_value() ) );
         a_node->set_dynamic_range( a_config.get_value( "dynamic-range", a_node->get_dynamic_range() ) );
+        a_node->set_delay_time_ms( a_config.get_value( "delay-time-ms", a_node->get_delay_time_ms() ) );
         return;
     }
 
@@ -147,8 +153,9 @@ namespace psyllid
         a_config.add( "data-size", scarab::param_value( a_node->get_data_size() ) );
         a_config.add( "data-value", scarab::param_value( a_node->get_data_value() ) );
         a_config.add( "dynamic-range", scarab::param_value( a_node->get_dynamic_range() ) );
+        a_config.add( "delay-time-ms", scarab::param_value( a_node->get_delay_time_ms() ) );
         return;
 
     }
 
-} /* namespace dripline */
+} /* namespace fast_daq */

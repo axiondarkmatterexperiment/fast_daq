@@ -25,8 +25,7 @@ namespace fast_daq
 
      @details
 
-     The data are all output as `memory_block` objects.
-     However the underlying data that is output is time_data.
+     The data are all output as `real_time_data` objects.
 
      Parameter setting is not thread-safe.  Executing is thread-safe.
 
@@ -34,10 +33,13 @@ namespace fast_daq
 
      Available configuration values:
      - "length": uint -- The size of the output data buffer
-     - "data-size": uint -- The size of the output data objects
+     - "data-size": uint -- The number of bins of the output data objects
+     - "data-value": uint16 -- The value of the digitized data (all bins will be the same)
+     - "dynamic-range": double -- The dynamic range of the data when converted to floating-point
+     - "record-delay-ms": uint -- Delay time between outputting data objects in ms
 
      Output Stream:
-     - 0: memory_block
+     - 0: real_time_data
 
     */
     class data_producer : public midge::_producer< midge::type_list< real_time_data > >
@@ -50,6 +52,7 @@ namespace fast_daq
             mv_accessible( uint32_t, data_size );
             mv_accessible( uint16_t, data_value );
             mv_accessible( double, dynamic_range );
+            mv_accessible( uint32_t, delay_time_ms );
 
             mv_referrable( real_time_data, primary_packet );
 

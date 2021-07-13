@@ -1,0 +1,33 @@
+post-to-slack: false
+
+dripline:
+    broker: rabbit-broker
+    queue: fast_daq
+    #make-connection: false
+
+daq:
+    activate-at-startup: true
+    # n-files must be >= 1 in order to set a description on a run
+    n-files: 0
+    max-file-size-mb: 500
+
+streams:
+    ch0:
+        preset:
+            type: dp-to-de
+            nodes:
+              - type: data-producer
+                name: dp
+              - type: dead-end
+                name: de
+            connections:
+              - "dp.out_0:de.in_0"
+
+        dp:
+            length: 20 # number of buffers of node output to the next node
+            data-size: 16384 # number of samples per record
+            data-value: 15 # value of all samples
+            dynamic-range: 1.0
+
+        dend:
+            input-index: 0 # for real_time_data input
