@@ -1,5 +1,5 @@
-# Minimum cmake verison 3.1 required for the variable CMAKE_CXX_STANDARD
-cmake_minimum_required (VERSION 3.9)
+# Minimum cmake verison 3.12 required by Scarab
+cmake_minimum_required (VERSION 3.12)
 
 # Define the project
 cmake_policy( SET CMP0048 NEW ) # version in project()
