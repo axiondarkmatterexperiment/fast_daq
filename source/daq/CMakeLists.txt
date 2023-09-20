@@ -25,8 +25,8 @@ set( sources
 
 if( ATS9462_FOUND )
     # digitizer node
-    set( headers ${headers} ATS9462_digitizer.hh )
-    set( sources ${sources} ATS9462_digitizer.cc )
+    set( headers ${headers} ATS9462_digitizer.hh ATS9462_digitizer_idler.hh)
+    set( sources ${sources} ATS9462_digitizer.cc ATS9462_digitizer_idler.cc)
 endif( ATS9462_FOUND )
 
 set( dependencies
