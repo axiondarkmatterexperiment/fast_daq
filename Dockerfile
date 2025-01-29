@@ -3,6 +3,7 @@ ARG base_image_tag=9
 
 FROM ${base_image_repo}:${base_image_tag}
 
+RUN echo "deb http://archive.debian.org/debian stretch main contrib non-free" > /etc/apt/sources.list
 # Most dependencies
 
 RUN apt-get update && \

@@ -70,11 +70,14 @@ namespace fast_daq
         // member variable macros
         mv_accessible( uint64_t, time_length );
         public:
-        mv_accessible( unsigned, fft_size ); // I really wish I could get this the upstream node
-        // the upstream node could put it on the data objects when it inits them
-        mv_accessible( std::string, transform_flag );
-        mv_accessible( bool, use_wisdom );
-        mv_accessible( std::string, wisdom_filename );
+            mv_accessible( unsigned, fft_size ); // I really wish I could get this the upstream node
+            // the upstream node could put it on the data objects when it inits them
+            mv_accessible( unsigned, fft_size_fraction );
+            mv_accessible( std::string, transform_flag );
+            mv_accessible( bool, use_wisdom );
+            mv_accessible( std::string, wisdom_filename );
+            mv_accessible( double, start_fraction );
+            mv_accessible( double, stop_fraction );
 
         public:
             virtual void initialize();
@@ -85,6 +88,7 @@ namespace fast_daq
             transform_flag_map_t f_transform_flag_map;
             fftwf_complex* f_fftwf_input;
             fftwf_complex* f_fftwf_output;
+            fftwf_complex* f_fftwf_input_part;
             fftwf_plan f_fftwf_plan;
 
             bool f_multithreaded_is_initialized;

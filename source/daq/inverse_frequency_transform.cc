@@ -29,12 +29,16 @@ namespace fast_daq
     inverse_frequency_transform::inverse_frequency_transform() :
             f_time_length( 10 ),
             f_fft_size( 4096 ),
+            f_fft_size_fraction( 4096 ),
             f_transform_flag( "ESTIMATE" ),
             f_use_wisdom( true ),
             f_wisdom_filename( "wisdom_complex_inversefft.fftw3" ),
+            f_start_fraction( 0 ),
+            f_stop_fraction( 1 ),
             f_transform_flag_map(),
             f_fftwf_input(),
             f_fftwf_output(),
+            f_fftwf_input_part(),
             f_fftwf_plan(),
             f_multithreaded_is_initialized( false )
     {
@@ -44,6 +48,8 @@ namespace fast_daq
     inverse_frequency_transform::~inverse_frequency_transform()
     {
     }
+
+    
 
     void inverse_frequency_transform::initialize()
     {
@@ -73,8 +79,9 @@ namespace fast_daq
         unsigned transform_flag = iter->second;
         // initialize FFTW IO arrays and plan
         f_fftwf_input= (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * f_fft_size);
-        f_fftwf_output = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * f_fft_size);
-        f_fftwf_plan = fftwf_plan_dft_1d(f_fft_size, f_fftwf_input, f_fftwf_output, FFTW_BACKWARD, transform_flag | FFTW_PRESERVE_INPUT);
+        f_fftwf_input_part= (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * f_fft_size_fraction);
+        f_fftwf_output = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * f_fft_size_fraction);
+        f_fftwf_plan = fftwf_plan_dft_1d(f_fft_size_fraction, f_fftwf_input_part, f_fftwf_output, FFTW_BACKWARD, transform_flag | FFTW_PRESERVE_INPUT);
         //save plan
         if (f_fftwf_plan != NULL)
         {
@@ -145,21 +152,29 @@ namespace fast_daq
                         output_time_data = out_stream< 0 >().data();
                         output_time_data->set_chunk_counter( input_freq_data->get_chunk_counter() );
                         // copy input data into fft input array
-                        std::copy(&input_freq_data->get_data_array()[0][0], &input_freq_data->get_data_array()[0][0] + 2*f_fft_size, &f_fftwf_input[0][0] );
-
+                        int bin_start = f_fft_size * f_start_fraction;
+			//std::copy(&input_freq_data->get_data_array()[0][0], &input_freq_data->get_data_array()[0][0] + 2*f_fft_size, &f_fftwf_input[0][0] );
+			//for (size_t i_bin=0; i_bin<f_fft_size_fraction; ++i_bin)
+                        //{
+			//    //std::copy(&input_freq_data->get_data_array()[i_bin+bin_start][0], &input_freq_data->get_data_array()[i_bin+bin_start][2],&f_fftwf_input_part[i_bin][0]);
+			//    f_fftwf_input_part[i_bin][0]  = f_fftwf_input[i_bin+bin_start][0];
+                        //    f_fftwf_input_part[i_bin][1] = f_fftwf_input[i_bin+bin_start][1];
+                        //}
+                        
+                        std::copy(&input_freq_data->get_data_array()[0][0] + 2 * bin_start, &input_freq_data->get_data_array()[0][0] + 2 * (bin_start + f_fft_size_fraction), & f_fftwf_input_part[0][0]); 
                         // execute fft
                         fftwf_execute( f_fftwf_plan );
 
                         //take care of FFT normalization
                         //is this the normalization we want?
-                        float fft_norm = sqrt(input_freq_data->get_fft_size()) / sqrt((float)f_fft_size);
-                        for (size_t i_bin=0; i_bin<f_fft_size; ++i_bin)
+                        float fft_norm = sqrt(input_freq_data->get_fft_size() / (float)f_fft_size );
+                        for (size_t i_bin=0; i_bin<f_fft_size_fraction; ++i_bin)
                         {
-                            f_fftwf_output[i_bin][0] *= fft_norm;
-                            f_fftwf_output[i_bin][1] *= fft_norm;
+                            f_fftwf_output[i_bin][0]  *= fft_norm;
+                            f_fftwf_output[i_bin][1]  *= fft_norm;
                         }
                         // Is there anything weird in the output ordering of the inverse transform?
-                        std::copy(&f_fftwf_output[0][0], &f_fftwf_output[f_fft_size][1], &output_time_data->get_data_array()[0][0]);
+                        std::copy(&f_fftwf_output[0][0], &f_fftwf_output[f_fft_size_fraction][1], &output_time_data->get_data_array()[0][0]);
                         if ( !out_stream< 0 >().set( stream::s_run ) )
                         {
                             LERROR( flog, "inverse_frequency_transform error setting frequency output stream to s_run" );
@@ -208,6 +223,12 @@ namespace fast_daq
             fftwf_free(f_fftwf_output);
             f_fftwf_output = NULL;
         }
+        if (f_fftwf_input_part != NULL)
+        {
+            fftwf_free(f_fftwf_input_part);
+            f_fftwf_input_part = NULL;
+        }
+
         return;
     }
 
@@ -236,9 +257,12 @@ namespace fast_daq
         LDEBUG( flog, "Configuring inverse_frequency_transform with:\n" << a_config );
         a_node->set_time_length( a_config.get_value( "time-length", a_node->get_time_length() ) );
         a_node->set_fft_size( a_config.get_value( "fft-size", a_node->get_fft_size() ) );
+        a_node->set_fft_size_fraction( a_config.get_value( "fft-size-fraction", a_node->get_fft_size_fraction() ) );
         a_node->set_transform_flag( a_config.get_value( "transform-flag", a_node->get_transform_flag() ) );
         a_node->set_use_wisdom( a_config.get_value( "use-wisdom", a_node->get_use_wisdom() ) );
         a_node->set_wisdom_filename( a_config.get_value( "wisdom-filename", a_node->get_wisdom_filename() ) );
+        a_node->set_start_fraction( a_config.get_value( "start-fraction", a_node->get_start_fraction() ) );
+        a_node->set_stop_fraction( a_config.get_value( "stop-fraction", a_node->get_stop_fraction() ) );
     }
 
     void inverse_frequency_transform_binding::do_dump_config( const inverse_frequency_transform* a_node, scarab::param_node& a_config ) const
@@ -246,9 +270,12 @@ namespace fast_daq
         LDEBUG( flog, "Dumping inverse_frequency_transform configuration" );
         a_config.add( "time-length", scarab::param_value( a_node->get_time_length() ) );
         a_config.add( "fft-size", scarab::param_value( a_node->get_fft_size() ) );
+        a_config.add( "fft-size-fraction", scarab::param_value( a_node->get_fft_size_fraction() ) );
         a_config.add( "transform-flag", scarab::param_value( a_node->get_transform_flag() ) );
         a_config.add( "use-wisdom", scarab::param_value( a_node->get_use_wisdom() ) );
         a_config.add( "wisdom-filename", scarab::param_value( a_node->get_wisdom_filename() ) );
+        a_config.add( "start-fraction", scarab::param_value( a_node->get_start_fraction() ) );
+        a_config.add( "stop-fraction", scarab::param_value( a_node->get_stop_fraction() ) );
     }
 
     bool inverse_frequency_transform_binding::do_run_command( inverse_frequency_transform* /* a_node */, const std::string& a_cmd, const scarab::param_node& ) const
