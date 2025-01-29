@@ -153,15 +153,9 @@ namespace fast_daq
                         output_time_data->set_chunk_counter( input_freq_data->get_chunk_counter() );
                         // copy input data into fft input array
                         int bin_start = f_fft_size * f_start_fraction;
-			//std::copy(&input_freq_data->get_data_array()[0][0], &input_freq_data->get_data_array()[0][0] + 2*f_fft_size, &f_fftwf_input[0][0] );
-			//for (size_t i_bin=0; i_bin<f_fft_size_fraction; ++i_bin)
-                        //{
-			//    //std::copy(&input_freq_data->get_data_array()[i_bin+bin_start][0], &input_freq_data->get_data_array()[i_bin+bin_start][2],&f_fftwf_input_part[i_bin][0]);
-			//    f_fftwf_input_part[i_bin][0]  = f_fftwf_input[i_bin+bin_start][0];
-                        //    f_fftwf_input_part[i_bin][1] = f_fftwf_input[i_bin+bin_start][1];
-                        //}
                         
                         std::copy(&input_freq_data->get_data_array()[0][0] + 2 * bin_start, &input_freq_data->get_data_array()[0][0] + 2 * (bin_start + f_fft_size_fraction), & f_fftwf_input_part[0][0]); 
+
                         // execute fft
                         fftwf_execute( f_fftwf_plan );
 
