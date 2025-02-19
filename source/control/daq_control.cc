@@ -26,8 +26,8 @@ namespace fast_daq
 {
     LOGGER( plog, "daq_control" );
 
-    daq_control::daq_control( const param_node& a_master_config, std::shared_ptr< sandfly::stream_manager > a_mgr ) :
-            sandfly::run_control( a_master_config, a_mgr ),
+    daq_control::daq_control( const param_node& a_master_config, std::shared_ptr< sandfly::stream_manager > a_mgr, std::shared_ptr< sandfly::message_relayer > a_relayer ) :
+            sandfly::run_control( a_master_config, a_mgr, a_relayer ),
             f_use_monarch( true )
     {
             set_use_monarch( f_daq_config.get_value( "use-monarch", get_use_monarch() ) );

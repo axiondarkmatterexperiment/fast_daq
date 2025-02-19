@@ -27,7 +27,7 @@ namespace fast_daq
     {
 
         public:
-            daq_control( const scarab::param_node& a_master_config, std::shared_ptr< sandfly::stream_manager > a_mgr );
+            daq_control( const scarab::param_node& a_master_config, std::shared_ptr< sandfly::stream_manager > a_mgr, std::shared_ptr< sandfly::message_relayer > a_relayer = nullptr );
             virtual ~daq_control();
 
         protected:
