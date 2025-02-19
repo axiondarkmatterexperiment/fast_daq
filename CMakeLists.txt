@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.12)
 
 # Define the project
 cmake_policy( SET CMP0048 NEW ) # version in project()
-project( FastDaq VERSION 0.1.0 )
+project( FastDaq VERSION 0.2.0 )
 
 # Setup the module path in the proper order for overriding dependencies
 list( APPEND CMAKE_MODULE_PATH 
@@ -17,20 +17,23 @@ include( sandfly )
 # flags #
 #########
 
-option( FastDAQ_ENABLE_ATS "Flag to enable building of node to read from AlazarTech digitizer" )
-option( FastDAQ_ENABLE_FFTW "Flag to enable FFTW features" TRUE )
+set_to_max( CMAKE_CXX_STANDARD 17 )
 
-set( CMAKE_CXX_STANDARD 11 )
+option( FastDAQ_ENABLE_ATS "Flag to enable building of node to read from AlazarTech digitizer" FALSE )
+option( FastDAQ_ENABLE_FFTW "Flag to enable FFTW features" TRUE )
 
 set_option( Midge_ENABLE_EXECUTABLES FALSE )
 set_option( Sandfly_ENABLE_EXECUTABLES FALSE )
 
+# We don't need Python bindings
+set_option( Scarab_BUILD_PYTHON FALSE )
 
 ################
 # dependencies #
 ################
 
 set( PUBLIC_EXT_LIBS )
+set( PRIVATE_EXT_LIBS )
 
 # AlazarTech
 if (FastDAQ_ENABLE_ATS)
@@ -101,7 +104,7 @@ include_directories( BEFORE
 )
 
 # build this project
-add_subdirectory( source/ )
+add_subdirectory( source )
 
 if( FastDaq_ENABLE_EXECUTABLES )
     add_subdirectory( source/applications )
