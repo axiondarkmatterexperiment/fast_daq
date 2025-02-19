@@ -47,6 +47,7 @@ int main( int argc, char** argv )
 
         // Default configuration
         the_main.default_config() = server_config();
+        the_main.default_config()["name"]() = "fast_daq";
 
         // The main execution callback
         the_main.callback( [&](){ 
