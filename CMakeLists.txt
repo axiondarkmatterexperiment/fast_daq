@@ -71,9 +71,6 @@ else (FFTW_FOUND)
 endif (FFTW_FOUND)
 include_directories (${FFTW_INCLUDE_DIR})
 
-# Sandfly
-add_definitions( -DDRIPLINE_AUTH_FILE=/etc/rabbitmq-secret/authentications.json )
-
 
 #####################
 # prepare for build #
