@@ -1,6 +1,4 @@
-post-to-slack: false
-
-dripline:
+dripline_mesh:
     broker: rabbit-broker
     queue: fast_daq
     #make-connection: false
