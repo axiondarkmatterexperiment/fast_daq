@@ -114,8 +114,10 @@ namespace fast_daq
         t_payload.add( "maximum_frequency", a_spectrum->get_minimum_frequency() + a_spectrum->get_array_size() * a_spectrum->get_bin_width() );
         t_payload.add( "frequency_resolution", a_spectrum->get_bin_width() );
         // send it
-        sandfly::message_relayer* t_message_relay = sandfly::message_relayer::get_instance();
-        t_message_relay->send( dripline::msg_alert::create( std::move(t_payload_ptr), f_spectrum_alert_rk ) );
+        auto t_run_control = use_run_control();
+        t_run_control->relayer().send_notice( );
+//        sandfly::message_relayer* t_message_relay = sandfly::message_relayer::get_instance();
+//        t_message_relay->send( dripline::msg_alert::create( std::move(t_payload_ptr), f_spectrum_alert_rk ) );
     }
 
     /* spectrum_relay_binding class */
