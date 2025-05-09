@@ -35,17 +35,6 @@ set_option( Scarab_BUILD_PYTHON FALSE )
 set( PUBLIC_EXT_LIBS )
 set( PRIVATE_EXT_LIBS )
 
-# AlazarTech
-if (FastDAQ_ENABLE_ATS)
-    find_package(ATS9462 REQUIRED)
-else (FastDAQ_ENABLE_ATS)
-    set (ATS9462_FOUND FALSE)
-endif (FastDAQ_ENABLE_ATS)
-if (ATS9462_FOUND)
-    list( APPEND PUBLIC_EXT_LIBS ${ATS9462_LIBRARIES} )
-    include_directories (${ATS9462_INCLUDE_DIR})
-    add_definitions( -DATS_ENABLED )
-endif (ATS9462_FOUND)
 
 # FFTW
 if (FastDAQ_ENABLE_FFTW)
@@ -92,6 +81,17 @@ pbuilder_add_submodule( Monarch monarch )
 # fast_daq #
 ############
 
+# AlazarTech
+if (FastDAQ_ENABLE_ATS)
+    find_package(ATS9462 REQUIRED)
+else (FastDAQ_ENABLE_ATS)
+    set (ATS9462_FOUND FALSE)
+endif (FastDAQ_ENABLE_ATS)
+if (ATS9462_FOUND)
+    list( APPEND PUBLIC_EXT_LIBS ${ATS9462_LIBRARIES} )
+    include_directories (${ATS9462_INCLUDE_DIR})
+    add_definitions( -DATS_ENABLED )
+endif (ATS9462_FOUND)
 # add include directories
 include_directories( BEFORE
     source/utility

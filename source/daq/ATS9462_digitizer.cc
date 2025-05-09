@@ -398,7 +398,7 @@ namespace fast_daq
     {
 	      a_node->set_reference_source_and_decimation( a_config.get_value( "reference-source", a_node->get_reference_source_str() ), a_config.get_value( "decimation-factor", a_node->get_decimation_factor() ) );
 
-	      LINFO("do apply config reference-source: " + a_node->get_reference_source_str())
+	      LINFO(flog, "do apply config reference-source: " + a_node->get_reference_source_str())
         a_node->set_samples_per_buffer( a_config.get_value( "samples-per-buffer", a_node->get_samples_per_buffer() ) );
         a_node->set_out_length( a_config.get_value( "out-length", a_node->get_out_length() ) );
         a_node->set_dma_buffer_count( a_config.get_value( "dma-buffer-count", a_node->get_dma_buffer_count() ) );
@@ -409,7 +409,7 @@ namespace fast_daq
     void ats9462_digitizer_binding::do_dump_config( const ats9462_digitizer* a_node, scarab::param_node& a_config ) const
     {
         a_config.add( "reference-source", scarab::param_value( ats9462_digitizer::reference_source_to_string( a_node->get_reference_source() ) ) );
-        a_config.add( "samples-per-bufer", scarab::param_value( a_node->get_samples_per_buffer() ) );
+        a_config.add( "samples-per-buffer", scarab::param_value( a_node->get_samples_per_buffer() ) );
         a_config.add( "out-length", scarab::param_value( a_node->get_out_length() ) );
         a_config.add( "dma-buffer-count", scarab::param_value( a_node->get_dma_buffer_count() ) );
         a_config.add( "samples-per-sec", scarab::param_value( a_node->get_samples_per_sec() ) );

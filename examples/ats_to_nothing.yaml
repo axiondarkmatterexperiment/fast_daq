@@ -9,28 +9,10 @@ daq:
     # n-files must be >= 1 in order to set a description on a run
     n-files: 1
     max-file-size-mb: 500
+    duration: 100
+    use-monarch: 0
 
-on-startup:
-  - type: wait-for
-    rks: daq-status
-    payload: {}
-    sleep-for: 100
-  - type: set
-    rks: use-monarch
-    payload:
-        values: [ false ]
-    sleep-for: 10
-  #- type: cmd
-  #  rks: "start-run"
-  #  payload:
-  #    duration: 0
-  #    description: "a test description"
-  #    #filename: ["foo.egg"]
-  #  sleep-for: 0
-  #- type: wait-for
-  #  rks: daq-status
-  #  payload: {}
-  #  sleep-for: 100
+use-relayer: true
 
 streams:
     ch0:
