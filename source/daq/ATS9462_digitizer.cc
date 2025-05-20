@@ -23,6 +23,7 @@ namespace fast_daq
         switch (a_reference_source) {
             case ats9462_digitizer::reference_source_t::internal: return "internal";
             case ats9462_digitizer::reference_source_t::external_10MHz: return "external_10MHz";
+            case ats9462_digitizer::reference_source_t::external_AC: return "external_AC";
             default: throw fast_daq::error() << "reference_source value <" << reference_source_to_uint( a_reference_source ) << "> not recognized";
         }
     }
@@ -30,6 +31,7 @@ namespace fast_daq
     {
         if( a_reference_source == reference_source_to_string( ats9462_digitizer::reference_source_t::internal ) ) return reference_source_t::internal;
         if( a_reference_source == reference_source_to_string( ats9462_digitizer::reference_source_t::external_10MHz ) ) return reference_source_t::external_10MHz;
+        if( a_reference_source == reference_source_to_string( ats9462_digitizer::reference_source_t::external_AC ) ) return reference_source_t::external_AC;
         throw fast_daq::error() << "string <" << a_reference_source << "> not recognized as valid reference_source type";
     }
 
@@ -202,6 +204,9 @@ namespace fast_daq
                 break;
             case ats9462_digitizer::reference_source_t::external_10MHz:
                 check_return_code_macro( AlazarSetCaptureClock, f_board_handle, EXTERNAL_CLOCK_10MHZ_REF, f_samples_per_sec, CLOCK_EDGE_RISING, t_decimation_value );
+                break;
+            case ats9462_digitizer::reference_source_t::external_AC:
+                check_return_code_macro( AlazarSetCaptureClock, f_board_handle, EXTERNAL_CLOCK_AC, f_samples_per_sec, CLOCK_EDGE_RISING, t_decimation_value );
                 break;
             default: throw fast_daq::error() << "reference_type value <" << reference_source_to_uint(f_reference_source) << "> not recognized";
         }
