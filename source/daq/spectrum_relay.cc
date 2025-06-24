@@ -19,6 +19,7 @@
 //fast_daq includes
 #include "spectrum_relay.hh"
 #include "power_data.hh"
+#include "butterfly_house.hh"
 
 using dripline::msg_alert;
 
