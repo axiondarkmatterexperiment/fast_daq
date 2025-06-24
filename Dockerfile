@@ -8,7 +8,7 @@ FROM ${base_image}:${base_tag}
 # Set bash as the default shell
 SHELL ["/bin/bash", "-c"]
 
-ARG build_type=Release
+ARG build_type=DEBUG
 ARG narg=2
 
 
@@ -30,6 +30,7 @@ RUN apt-get update &&\
         cmake \
         git \
         openssl \
+	curl \
         libfftw3-dev \
         libboost-chrono-dev \
         libboost-filesystem-dev \
@@ -38,6 +39,8 @@ RUN apt-get update &&\
         librabbitmq-dev \
         libyaml-cpp-dev \
         rapidjson-dev \
+	python3 \
+	python3-pip \
         &&\
     apt-get clean &&\
     rm -rf /var/lib/apt/lists/* &&\
@@ -54,6 +57,8 @@ RUN apt-get update &&\
     /bin/true
 
 # Build fast_daq in the deps image
+RUN curl -O https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v3.7.8/bin/rabbitmqadmin && \
+   chmod +x rabbitmqadmin && mv rabbitmqadmin /usr/local/bin/
 RUN mkdir -p /usr/include && mkdir -p /usr/lib && mkdir -p /tmp_source
 COPY . /tmp_source
 COPY ./ATS_local/usr /usr
@@ -73,6 +78,8 @@ RUN mkdir -p /build &&\
     cmake ${CMAKE_CONFIG_ARGS_LIST} /tmp_source &&\
     make -j${NARG} install &&\
     /bin/true
+
+
 
 COPY ./entrypoint.sh /root/entrypoint.sh
 RUN rm -rf /tmp_source
