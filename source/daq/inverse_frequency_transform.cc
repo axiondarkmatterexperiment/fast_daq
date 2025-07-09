@@ -154,7 +154,9 @@ namespace fast_daq
 
                         //take care of FFT normalization
                         //is this the normalization we want?
-                        float fft_norm = sqrt(input_freq_data->get_fft_size()) / sqrt((float)f_fft_size);
+                        //DZ comment: the fftw library says a forward and backward operation gives the result of original array * the number of data points
+                        // to cancel out the normalization in the forward operation, I put in 1/sqrt(2)
+                        float fft_norm = 1. / sqrt(2.);
                         for (size_t i_bin=0; i_bin<f_fft_size; ++i_bin)
                         {
                             f_fftwf_output[i_bin][0] *= fft_norm;
