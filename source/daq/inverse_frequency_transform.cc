@@ -34,6 +34,7 @@ namespace fast_daq
             f_transform_flag( "ESTIMATE" ),
             f_use_wisdom( true ),
             f_wisdom_filename( "wisdom_complex_inversefft.fftw3" ),
+            f_sampling_rate(50000000),
             f_transform_flag_map(),
             f_fftwf_input(),
             f_fftwf_output(),
@@ -155,8 +156,8 @@ namespace fast_daq
                         //take care of FFT normalization
                         //is this the normalization we want?
                         //DZ comment: the fftw library says a forward and backward operation gives the result of original array * the number of data points
-                        // to cancel out the normalization in the forward operation, I put in 1/sqrt(2)
-                        float fft_norm = 1. / sqrt(2.);
+                        // to cancel out the normalization in the forward operation, I put in sqrt(2*Fs/N)
+                        float fft_norm = 1. * sqrt( (double) f_sampling_rate /2./ (double)f_fft_size);
                         for (size_t i_bin=0; i_bin<f_fft_size; ++i_bin)
                         {
                             f_fftwf_output[i_bin][0] *= fft_norm;
@@ -240,6 +241,7 @@ namespace fast_daq
         LDEBUG( flog, "Configuring inverse_frequency_transform with:\n" << a_config );
         a_node->set_time_length( a_config.get_value( "time-length", a_node->get_time_length() ) );
         a_node->set_fft_size( a_config.get_value( "fft-size", a_node->get_fft_size() ) );
+        a_node->set_sampling_rate( a_config.get_value( "sampling-rate", a_node->get_sampling_rate() ) );
         a_node->set_transform_flag( a_config.get_value( "transform-flag", a_node->get_transform_flag() ) );
         a_node->set_use_wisdom( a_config.get_value( "use-wisdom", a_node->get_use_wisdom() ) );
         a_node->set_wisdom_filename( a_config.get_value( "wisdom-filename", a_node->get_wisdom_filename() ) );
@@ -250,6 +252,7 @@ namespace fast_daq
         LDEBUG( flog, "Dumping inverse_frequency_transform configuration" );
         a_config.add( "time-length", scarab::param_value( a_node->get_time_length() ) );
         a_config.add( "fft-size", scarab::param_value( a_node->get_fft_size() ) );
+        a_config.add( "sampling-rate", scarab::param_value( a_node->get_sampling_rate() ) );
         a_config.add( "transform-flag", scarab::param_value( a_node->get_transform_flag() ) );
         a_config.add( "use-wisdom", scarab::param_value( a_node->get_use_wisdom() ) );
         a_config.add( "wisdom-filename", scarab::param_value( a_node->get_wisdom_filename() ) );

@@ -272,7 +272,7 @@ namespace fast_daq
 
                         //take care of FFT normalization
                         //is this the normalization we want? ... it is not symmetric, but seems to give the correct result
-                        float fft_norm = sqrt(2.) / (double)f_fft_size;
+                        float fft_norm = sqrt(2. / (double)f_fft_size / (double) f_samples_per_sec);
 			//DZ comment: I confirmed with a SA that sqrt(2) is needed for the normalization May 2025
                         //float fft_norm = sqrt(2.) / (double)f_fft_size;
                         for (size_t i_bin=0; i_bin<f_fft_size; ++i_bin)
