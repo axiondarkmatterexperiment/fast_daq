@@ -32,6 +32,7 @@ else (ATS9462_INCLUDE_DIR AND ATS9462_LIBRARIES)
     endif (NOT ATS9462_INCLUDE_DIR)
     set(ATS9462_LIBRARIES /usr/local/lib/x86_64-linux-gnu)
     set(ATS9462_FOUND TRUE)
+    #I commented out the three lines below and added the two lines above. JS Aug 12, 2025.
     #if (NOT ATS9462_LIBRARIES)
     #  message (STATUS "Unable to find ATS9462 library files!")
     #endif (NOT ATS9462_LIBRARIES)
