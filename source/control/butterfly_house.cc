@@ -15,6 +15,7 @@
 #include "logger.hh"
 #include "param.hh"
 #include "time.hh"
+#include <filesystem>
 
 
 namespace fast_daq
@@ -188,6 +189,14 @@ namespace fast_daq
 
     void butterfly_house::set_filename( const std::string& a_filename, unsigned a_file_num )
     {
+	std::filesystem::path filePath(a_filename);
+	std::filesystem::path folderName = filePath.parent_path();
+	LPROG( plog,folderName<<" check path");
+	if (!std::filesystem::exists(folderName))
+	{
+	    std::filesystem::create_directory(folderName);
+	    LPROG( plog,folderName<<" create path");
+	}
         std::unique_lock< std::mutex > t_lock( f_house_mutex );
         if( a_file_num > f_file_infos.size() ) throw error() << "Currently configured number of files is <" << f_file_infos.size() << ">, but filename-set was for file <" << a_file_num << ">.";
         f_file_infos[ a_file_num ].f_filename = a_filename;
