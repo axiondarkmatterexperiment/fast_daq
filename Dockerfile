@@ -56,6 +56,8 @@ RUN apt-get update &&\
     rm -rf /usr/local/quill &&\
     /bin/true
 
+
+RUN ln /usr/bin/python3 /usr/bin/python
 # Build fast_daq in the deps image
 RUN curl -O https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v3.7.8/bin/rabbitmqadmin && \
    chmod +x rabbitmqadmin && mv rabbitmqadmin /usr/local/bin/
@@ -83,5 +85,5 @@ RUN mkdir -p /build &&\
 
 COPY ./entrypoint.sh /root/entrypoint.sh
 RUN rm -rf /tmp_source
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$FAST_DAQ_INSTALL_PREFIX
+ENV LD_LIBRARY_PATH=:$FAST_DAQ_INSTALL_PREFIX
 WORKDIR /root
