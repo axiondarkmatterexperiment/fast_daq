@@ -54,6 +54,7 @@ namespace fast_daq
 
         public:
             void set_filename( const std::string& a_filename, unsigned a_file_num = 0 );
+            void set_values(const scarab::param_array& values);
             const std::string& get_filename( unsigned a_file_num = 0 );
 
             void set_description( const std::string& a_desc, unsigned a_file_num = 0 );

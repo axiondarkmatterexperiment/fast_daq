@@ -118,6 +118,10 @@ namespace fast_daq
                         set_description( t_descriptions[i_fn]().as_string(), i_fn );
                     }
                 }
+		if (t_payload.has("values"))
+		{
+			set_values(t_payload["values"].as_array());
+		}
 
                 f_run_duration = a_request->payload().get_value( "duration", f_run_duration );
             }
@@ -258,9 +262,9 @@ namespace fast_daq
         a_receiver_ptr->register_get_handler( "use-monarch", std::bind( &daq_control::handle_get_use_monarch_request, this, _1 ) );
 
         // add set request handlers
-        a_receiver_ptr->register_set_handler( "filename", std::bind( &daq_control::handle_set_filename_request, this, _1 ) );
-        a_receiver_ptr->register_set_handler( "description", std::bind( &daq_control::handle_set_description_request, this, _1 ) );
-        a_receiver_ptr->register_set_handler( "use-monarch", std::bind( &daq_control::handle_set_use_monarch_request, this, _1 ) );
+        //a_receiver_ptr->register_set_handler( "filename", std::bind( &daq_control::handle_set_filename_request, this, _1 ) );
+        //a_receiver_ptr->register_set_handler( "description", std::bind( &daq_control::handle_set_description_request, this, _1 ) );
+        //a_receiver_ptr->register_set_handler( "use-monarch", std::bind( &daq_control::handle_set_use_monarch_request, this, _1 ) );
 
         return;
     }
@@ -288,6 +292,27 @@ namespace fast_daq
         {
             throw;
         }
+    }
+
+    void daq_control::set_values(const scarab::param_array& values)
+    {
+	std::vector<std::string> extra_info;
+        for(unsigned ii=0; ii < values.size();++ii)
+	{
+		LPROG( plog,"check values: "<<values[ii]().as_string());
+		std::string str_ref = values[ii]().as_string();
+		extra_info.push_back(str_ref);
+	}	
+    	try
+        {
+            butterfly_house::get_instance()->set_values( extra_info );
+            return;
+        }
+        catch( error& )
+        {
+            throw;
+        }
+    
     }
 
     void daq_control::set_description( const std::string& a_desc, unsigned a_file_num )
