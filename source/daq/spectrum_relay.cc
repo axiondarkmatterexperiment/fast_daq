@@ -118,8 +118,18 @@ namespace fast_daq
         t_payload.add( "minimum_frequency", a_spectrum->get_minimum_frequency() );
         t_payload.add( "maximum_frequency", a_spectrum->get_minimum_frequency() + a_spectrum->get_array_size() * a_spectrum->get_bin_width() );
         t_payload.add( "frequency_resolution", a_spectrum->get_bin_width() );
+	
         auto notes = butterfly_house::get_instance()->get_description(0);
         t_payload.add( "notes", notes);
+	double t_run_duration = butterfly_house::get_instance()->get_run_duration();
+	t_payload.add( "duration", t_run_duration);
+	if (butterfly_house::get_instance()->get_extra_info().size() >0)
+	{
+
+		auto freq_lo = butterfly_house::get_instance()->get_extra_info()[0];
+		//LPROG(flog,"freq_lo: "<<freq_lo);
+		t_payload.add( "freq_lo",freq_lo);
+	}
 
 	std::string a_specifier = "";
 	LDEBUG( flog, "test spectrum 0: " << t_payload["value_raw"][1] << this->get_spectrum_alert_rk());
