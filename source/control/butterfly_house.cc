@@ -64,7 +64,7 @@ namespace fast_daq
             t_filename_sstr << "fast_daq_out_" << t_file_num << ".egg";
             fi_it->f_filename = t_filename_sstr.str();
             fi_it->f_description = "";
-            LPROG( plog, "Prepared file <" << t_file_num << ">; default filename is <" << fi_it->f_filename << ">" );
+            LDEBUG( plog, "Prepared file <" << t_file_num << ">; default filename is <" << fi_it->f_filename << ">" );
         }
         return;
     }
@@ -78,7 +78,9 @@ namespace fast_daq
             LERROR( plog, "Unable to get access to the DAQ control" );
             throw error() << "Butterfly house is unable to get access to the DAQ control";
         }
-        unsigned t_run_duration = use_run_control()->get_run_duration();
+        unsigned t_run_duration_1 = use_run_control()->get_run_duration();
+	LDEBUG( plog,"set duration"<<t_run_duration_1);
+	set_duration(t_run_duration_1);
 
         LINFO( plog, "Starting egg3 files" );
         try
@@ -191,11 +193,11 @@ namespace fast_daq
     {
 	std::filesystem::path filePath(a_filename);
 	std::filesystem::path folderName = filePath.parent_path();
-	LPROG( plog,folderName<<" check path");
+	LDEBUG( plog,folderName<<" check path");
 	if (!std::filesystem::exists(folderName))
 	{
-	    std::filesystem::create_directory(folderName);
-	    LPROG( plog,folderName<<" create path");
+	    std::filesystem::create_directories(folderName);
+	    LDEBUG( plog,folderName<<" create path");
 	}
         std::unique_lock< std::mutex > t_lock( f_house_mutex );
         if( a_file_num > f_file_infos.size() ) throw error() << "Currently configured number of files is <" << f_file_infos.size() << ">, but filename-set was for file <" << a_file_num << ">.";
@@ -218,11 +220,38 @@ namespace fast_daq
         return;
     }
 
+    void butterfly_house::set_duration(unsigned duration)
+    {
+    	t_run_duration=duration;
+    }
+
+    void butterfly_house::set_values(std::vector<std::string> values)
+    {
+    	t_extra_info=values;
+	LDEBUG( plog,"check values1 : "<< t_extra_info[0]);
+
+    }
+
     const std::string& butterfly_house::get_description( unsigned a_file_num )
     {
         std::unique_lock< std::mutex > t_lock( f_house_mutex );
         if( a_file_num > f_file_infos.size() ) throw error() << "Currently configured number of files is <" << f_file_infos.size() << ">, but description-get was for file <" << a_file_num << ">.";
         return f_file_infos[ a_file_num ].f_description;
+    }
+
+    std::vector<std::string> butterfly_house::get_extra_info()
+    {
+        return t_extra_info;
+    }
+
+    const double butterfly_house::get_freq_lo()
+    {
+        return freq_lo;
+    }
+
+    const double butterfly_house::get_run_duration()
+    {
+        return ((double)t_run_duration)/1000.;
     }
 
 } /* namespace fast_daq */

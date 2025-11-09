@@ -76,7 +76,12 @@ namespace fast_daq
             const std::string& get_filename( unsigned a_file_num );
 
             void set_description( const std::string& a_desc, unsigned a_file_num = 0 );
+            void set_duration(unsigned duration);
+            void set_values(std::vector<std::string> values);
             const std::string& get_description( unsigned a_file_num );
+            const double get_run_duration();
+            std::vector<std::string> get_extra_info();
+            const double get_freq_lo();
 
         private:
             struct file_info
@@ -93,6 +98,9 @@ namespace fast_daq
             std::multimap< egg_writer*, unsigned > f_writers;
 
             mutable std::mutex f_house_mutex;
+            unsigned t_run_duration;
+            std::vector<std::string> t_extra_info;
+            double freq_lo;
 
         private:
             friend class scarab::singleton< butterfly_house >;
