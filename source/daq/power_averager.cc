@@ -85,7 +85,7 @@ namespace fast_daq
                 }
                 else if ( input_command == stream::s_error )
                 {
-                    LWARN( flog, " got an s_error on slot <" << stream_index << ">, ... not doing anything about that." );
+                    LERROR( flog, " got an s_error on slot <" << stream_index << ">, return an error" );
                     continue;
                 }
                 else if ( input_command == stream::s_stop )
@@ -145,7 +145,10 @@ namespace fast_daq
         {
             LERROR( flog, "input array size [" << data_in->get_array_size() <<"] != output array size ["<<f_average_spectrum.size()<<"]");
             //TODO throw something smart please
-            throw 1;
+	    f_average_spectrum.resize(data_in->get_array_size(), 0.);
+            f_avg_spectrum_bytes = f_average_spectrum.size() * sizeof(float);
+            LPROG( flog, "Resized average spectrum to match input: " << data_in->get_array_size() );
+            //throw 1;
         }
 
         for (unsigned i_bin=0; i_bin < data_in->get_array_size(); ++i_bin)
