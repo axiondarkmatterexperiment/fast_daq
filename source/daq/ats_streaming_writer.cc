@@ -59,6 +59,7 @@ namespace fast_daq
 
         vector< unsigned > t_chan_vec;
         //TODO this name should be generated, not hard-coded
+        LPROG(plog,"f_record_size: "<<f_record_size);
         f_stream_no = a_hw_ptr->header().AddStream( "fast_daq - ATS9462",
                 f_acq_rate, f_record_size, f_sample_size, f_data_type_size,
                 monarch3::sAnalog, f_bit_depth, monarch3::sBitsAlignedLeft, &t_chan_vec );
@@ -234,13 +235,13 @@ namespace fast_daq
             a_node->set_bit_depth( t_dev_config.get_value( "bit-depth", a_node->get_bit_depth() ) );
             a_node->set_data_type_size( t_dev_config.get_value( "data-type-size", a_node->get_data_type_size() ) );
             a_node->set_sample_size( t_dev_config.get_value( "sample-size", a_node->get_sample_size() ) );
-            a_node->set_record_size( t_dev_config.get_value( "record-size", a_node->get_record_size() ) );
             a_node->set_acq_rate( t_dev_config.get_value( "acq-rate", a_node->get_acq_rate() ) );
             a_node->set_v_offset( t_dev_config.get_value( "v-offset", a_node->get_v_offset() ) );
             a_node->set_v_range( t_dev_config.get_value( "v-range", a_node->get_v_range() ) );
         }
         a_node->set_center_freq( a_config.get_value( "center-freq", a_node->get_center_freq() ) );
         a_node->set_freq_range( a_config.get_value( "freq-range", a_node->get_freq_range() ) );
+        a_node->set_record_size( a_config.get_value( "record-size", a_node->get_record_size() ) );
         return;
     }
 
@@ -252,11 +253,11 @@ namespace fast_daq
         t_dev_node.add( "bit-depth", a_node->get_bit_depth() );
         t_dev_node.add( "data-type-size", a_node->get_data_type_size() );
         t_dev_node.add( "sample-size", a_node->get_sample_size() );
-        t_dev_node.add( "record-size", a_node->get_record_size() );
         t_dev_node.add( "acq-rate", a_node->get_acq_rate() );
         t_dev_node.add( "v-offset", a_node->get_v_offset() );
         t_dev_node.add( "v-range", a_node->get_v_range() );
         a_config.add( "device", t_dev_node );
+        a_config.add( "record-size", a_node->get_record_size() );
         a_config.add( "center-freq", a_node->get_center_freq() );
         a_config.add( "freq-range", a_node->get_freq_range() );
         return;
