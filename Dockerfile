@@ -1,70 +1,90 @@
-ARG base_image_repo=debian
-ARG base_image_tag=10
+ARG base_image=debian
+ARG base_tag=12
 
-FROM ${base_image_repo}:${base_image_tag}
+# Base image with environment variables set
+#FROM ${base_image}:${base_tag} AS base
+FROM ${base_image}:${base_tag}
 
-# Most dependencies
-
-RUN apt-get update && \
-    apt-get clean && \
-    apt-get --fix-missing  -y install \
-        build-essential \
-        cmake \
-        libfftw3-3 \
-        libfftw3-dev \
-        gdb \
-        libboost-all-dev \
-        libhdf5-dev \
-        librabbitmq-dev \
-        rapidjson-dev \
-        libyaml-cpp-dev \
-        pybind11-dev \
-        wget && \
-    rm -rf /var/lib/apt/lists/*
-
-# note that the build dir is *not* in source, this is so that the source can me mounted onto the container without covering the build target
-
-# actually build the local project(s)
-
-COPY cmake /usr/local/src/cmake
-COPY monarch /usr/local/src/monarch
-COPY sandfly /usr/local/src/sandfly
-COPY source /usr/local/src/source
-COPY .gitignore /usr/local/src/.gitignore
-COPY .gitmodules /usr/local/src/.gitmodules
-COPY CMakeLists.txt /usr/local/src/CMakeLists.txt
-COPY FastDaqConfig.cmake.in /usr/local/src/FastDaqConfig.cmake.in
-
+# Set bash as the default shell
+SHELL ["/bin/bash", "-c"]
 
 ARG build_type=DEBUG
-# need to build dripline separately
-RUN mkdir -p /tmp/dl_build && \
-    cd /tmp/dl_build && \
-    cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
-          -DCMAKE_BUILD_TYPE=${build_type} \
-          /usr/local/src/sandfly/dripline-cpp && \
-    cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
-          -DCMAKE_BUILD_TYPE=${build_type} \
-          /usr/local/src/sandfly/dripline-cpp && \
-    make install && \
+ARG narg=2
+
+
+ENV ADMX_ROOT=/usr/local/
+ENV FAST_DAQ_INSTALL_PREFIX=${ADMX_ROOT}
+ENV NARG=${narg}
+ENV LD_LIBRARY_PATH=${ADMX_ROOT}
+
+ENV PATH="${PATH}:${FAST_DAQ_INSTALL_PREFIX}"
+
+# Build image with dev dependencies
+
+# use quill_checkout to specify a tag or branch name to checkout
+ARG quill_checkout=v8.1.1
+ENV QUILL_CHECKOUT=${quill_checkout}
+
+RUN apt-get update &&\
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        build-essential \
+        cmake \
+        git \
+        openssl \
+	curl \
+        libfftw3-dev \
+        libboost-chrono-dev \
+        libboost-filesystem-dev \
+        libboost-system-dev \
+        libhdf5-dev \
+        librabbitmq-dev \
+        libyaml-cpp-dev \
+        rapidjson-dev \
+	python3 \
+	python3-pip \
+        &&\
+    apt-get clean &&\
+    rm -rf /var/lib/apt/lists/* &&\
+    cd /usr/local &&\
+    git clone https://github.com/odygrd/quill.git &&\
+    cd quill &&\
+    git checkout ${QUILL_CHECKOUT} &&\
+    mkdir build &&\
+    cd build &&\
+    cmake .. &&\
+    make -j${narg} install &&\
+    cd / &&\
+    rm -rf /usr/local/quill &&\
     /bin/true
 
-ARG enable_ats=FALSE
-RUN cd /usr/local/src && \
-    mkdir -p build && \
-    cd build && \
-    cmake .. && \
-    /bin/true
-RUN cd /usr/local/src/build && \
-    cmake \
-          -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
-          -DDripline_ENABLE_EXECUTABLES=FALSE \
-          -DFastDaq_ENABLE_TESTING=FALSE \
-          -DFastDAQ_ENABLE_ATS:BOOL=${enable_ats} \
-          -DCMAKE_BUILD_TYPE=${build_type} \
-          .. && \
-     /bin/true
-RUN cd /usr/local/src/build && \
-    make install && \
+
+RUN ln /usr/bin/python3 /usr/bin/python
+# Build fast_daq in the deps image
+RUN curl -O https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v3.7.8/bin/rabbitmqadmin && \
+   chmod +x rabbitmqadmin && mv rabbitmqadmin /usr/local/bin/
+RUN mkdir -p /usr/include && mkdir -p /usr/lib && mkdir -p /tmp_source
+COPY . /tmp_source
+COPY ./ATS_local/usr /usr
+
+## store cmake args because we'll need to run twice (known package_builder issue)
+## use `extra_cmake_args` to add or replace options at build time; CMAKE_CONFIG_ARGS_LIST are defaults
+ARG extra_cmake_args=""
+ENV CMAKE_CONFIG_ARGS_LIST="\
+      -D CMAKE_BUILD_TYPE=$build_type \
+      -D CMAKE_INSTALL_PREFIX:PATH=$FAST_DAQ_INSTALL_PREFIX \
+      -D FastDAQ_ENABLE_ATS=TRUE \
+      ${extra_cmake_args} \
+      "
+
+RUN mkdir -p /build &&\
+    cd /build &&\
+    cmake ${CMAKE_CONFIG_ARGS_LIST} /tmp_source &&\
+    make -j${NARG} install &&\
     /bin/true
 
+
+
+COPY ./entrypoint.sh /root/entrypoint.sh
+RUN rm -rf /tmp_source
+ENV LD_LIBRARY_PATH=:$FAST_DAQ_INSTALL_PREFIX
+WORKDIR /root

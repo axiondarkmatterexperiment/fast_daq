@@ -23,6 +23,7 @@ namespace fast_daq
         switch (a_reference_source) {
             case ats9462_digitizer::reference_source_t::internal: return "internal";
             case ats9462_digitizer::reference_source_t::external_10MHz: return "external_10MHz";
+            case ats9462_digitizer::reference_source_t::external_AC: return "external_AC";
             default: throw fast_daq::error() << "reference_source value <" << reference_source_to_uint( a_reference_source ) << "> not recognized";
         }
     }
@@ -30,6 +31,7 @@ namespace fast_daq
     {
         if( a_reference_source == reference_source_to_string( ats9462_digitizer::reference_source_t::internal ) ) return reference_source_t::internal;
         if( a_reference_source == reference_source_to_string( ats9462_digitizer::reference_source_t::external_10MHz ) ) return reference_source_t::external_10MHz;
+        if( a_reference_source == reference_source_to_string( ats9462_digitizer::reference_source_t::external_AC ) ) return reference_source_t::external_AC;
         throw fast_daq::error() << "string <" << a_reference_source << "> not recognized as valid reference_source type";
     }
 
@@ -202,6 +204,9 @@ namespace fast_daq
                 break;
             case ats9462_digitizer::reference_source_t::external_10MHz:
                 check_return_code_macro( AlazarSetCaptureClock, f_board_handle, EXTERNAL_CLOCK_10MHZ_REF, f_samples_per_sec, CLOCK_EDGE_RISING, t_decimation_value );
+                break;
+            case ats9462_digitizer::reference_source_t::external_AC:
+                check_return_code_macro( AlazarSetCaptureClock, f_board_handle, EXTERNAL_CLOCK_AC, f_samples_per_sec, CLOCK_EDGE_RISING, t_decimation_value );
                 break;
             default: throw fast_daq::error() << "reference_type value <" << reference_source_to_uint(f_reference_source) << "> not recognized";
         }
@@ -398,7 +403,7 @@ namespace fast_daq
     {
 	      a_node->set_reference_source_and_decimation( a_config.get_value( "reference-source", a_node->get_reference_source_str() ), a_config.get_value( "decimation-factor", a_node->get_decimation_factor() ) );
 
-	      LINFO("do apply config reference-source: " + a_node->get_reference_source_str())
+	      LINFO(flog, "do apply config reference-source: " + a_node->get_reference_source_str())
         a_node->set_samples_per_buffer( a_config.get_value( "samples-per-buffer", a_node->get_samples_per_buffer() ) );
         a_node->set_out_length( a_config.get_value( "out-length", a_node->get_out_length() ) );
         a_node->set_dma_buffer_count( a_config.get_value( "dma-buffer-count", a_node->get_dma_buffer_count() ) );
@@ -409,7 +414,7 @@ namespace fast_daq
     void ats9462_digitizer_binding::do_dump_config( const ats9462_digitizer* a_node, scarab::param_node& a_config ) const
     {
         a_config.add( "reference-source", scarab::param_value( ats9462_digitizer::reference_source_to_string( a_node->get_reference_source() ) ) );
-        a_config.add( "samples-per-bufer", scarab::param_value( a_node->get_samples_per_buffer() ) );
+        a_config.add( "samples-per-buffer", scarab::param_value( a_node->get_samples_per_buffer() ) );
         a_config.add( "out-length", scarab::param_value( a_node->get_out_length() ) );
         a_config.add( "dma-buffer-count", scarab::param_value( a_node->get_dma_buffer_count() ) );
         a_config.add( "samples-per-sec", scarab::param_value( a_node->get_samples_per_sec() ) );

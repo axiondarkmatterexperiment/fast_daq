@@ -19,7 +19,9 @@
 //fast_daq includes
 #include "spectrum_relay.hh"
 #include "power_data.hh"
+#include "butterfly_house.hh"
 
+using dripline::msg_alert;
 
 using midge::stream;
 
@@ -107,20 +109,45 @@ namespace fast_daq
         scarab::param_array t_spectrum_array;
         for (unsigned i_bin=0; i_bin < a_spectrum->get_array_size(); ++i_bin)
         {
-            t_spectrum_array.push_back( a_spectrum->get_data_array()[i_bin] );
+            //t_spectrum_array.push_back( a_spectrum->get_data_array()[i_bin] )
+	    std::stringstream ss;
+	    ss << std::scientific<< a_spectrum->get_data_array()[i_bin];
+	    t_spectrum_array.push_back(ss.str());
         }
         t_payload.add( "value_raw", std::move( t_spectrum_array) );
         t_payload.add( "minimum_frequency", a_spectrum->get_minimum_frequency() );
         t_payload.add( "maximum_frequency", a_spectrum->get_minimum_frequency() + a_spectrum->get_array_size() * a_spectrum->get_bin_width() );
         t_payload.add( "frequency_resolution", a_spectrum->get_bin_width() );
-        // send it
-        sandfly::message_relayer* t_message_relay = sandfly::message_relayer::get_instance();
-        t_message_relay->send( dripline::msg_alert::create( std::move(t_payload_ptr), f_spectrum_alert_rk ) );
-    }
+	
+        auto notes = butterfly_house::get_instance()->get_description(0);
+        t_payload.add( "notes", notes);
+	double t_run_duration = butterfly_house::get_instance()->get_run_duration();
+	t_payload.add( "duration", t_run_duration);
+	if (butterfly_house::get_instance()->get_extra_info().size() >0)
+	{
 
+		auto freq_lo = butterfly_house::get_instance()->get_extra_info()[0];
+		//LPROG(flog,"freq_lo: "<<freq_lo);
+		t_payload.add( "freq_lo",freq_lo);
+	}
+
+	std::string a_specifier = "";
+	LDEBUG( flog, "test spectrum 0: " << t_payload["value_raw"][1] << this->get_spectrum_alert_rk());
+    LDEBUG( flog, "notes: " << notes);
+	
+	// send it
+	auto t_run_control = use_run_control();
+	t_run_control->relayer().send(dripline::msg_alert::create(
+                                std::move(t_payload_ptr), 
+					this->get_spectrum_alert_rk()));
+
+    }
+    
+    
     /* spectrum_relay_binding class */
     /***********************************/
     // spectrum_relay_binding methods
+	
     spectrum_relay_binding::spectrum_relay_binding()
     {
     }

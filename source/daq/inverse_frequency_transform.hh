@@ -45,6 +45,7 @@ namespace fast_daq
      Available configuration values:
      - "time-length": uint -- The size of the output time-data buffer
      - "fft-size": unsigned -- The length of the fft input/output array (each element is 2-component)
+     - "sampling-rate": unsigned -- Sampling rate of digitizer with samples per second as unit
      - "transform-flag": string -- FFTW flag to indicate how much optimization of the fftwf_plan is desired
      - "use-wisdom": bool -- whether to use a plan from a wisdom file and save the plan to that file
      - "wisdom-filename": string -- if "use-wisdom" is true, resolvable path to the wisdom file
@@ -71,10 +72,13 @@ namespace fast_daq
         mv_accessible( uint64_t, time_length );
         public:
         mv_accessible( unsigned, fft_size ); // I really wish I could get this the upstream node
+        mv_accessible( unsigned, fft_size_fraction );
+        mv_accessible( unsigned, sampling_rate);
         // the upstream node could put it on the data objects when it inits them
         mv_accessible( std::string, transform_flag );
         mv_accessible( bool, use_wisdom );
         mv_accessible( std::string, wisdom_filename );
+        mv_accessible( double, start_fraction );
 
         public:
             virtual void initialize();
@@ -85,6 +89,7 @@ namespace fast_daq
             transform_flag_map_t f_transform_flag_map;
             fftwf_complex* f_fftwf_input;
             fftwf_complex* f_fftwf_output;
+            fftwf_complex* f_fftwf_input_part;
             fftwf_plan f_fftwf_plan;
 
             bool f_multithreaded_is_initialized;

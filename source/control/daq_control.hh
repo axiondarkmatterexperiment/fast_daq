@@ -27,7 +27,7 @@ namespace fast_daq
     {
 
         public:
-            daq_control( const scarab::param_node& a_master_config, std::shared_ptr< sandfly::stream_manager > a_mgr );
+            daq_control( const scarab::param_node& a_master_config, std::shared_ptr< sandfly::stream_manager > a_mgr, std::shared_ptr< sandfly::message_relayer > a_relayer = nullptr );
             virtual ~daq_control();
 
         protected:
@@ -54,6 +54,7 @@ namespace fast_daq
 
         public:
             void set_filename( const std::string& a_filename, unsigned a_file_num = 0 );
+            void set_values(const scarab::param_array& values);
             const std::string& get_filename( unsigned a_file_num = 0 );
 
             void set_description( const std::string& a_desc, unsigned a_file_num = 0 );

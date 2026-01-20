@@ -63,7 +63,8 @@ namespace fast_daq
             enum class reference_source_t
             {
 		internal = INTERNAL_CLOCK,
-                external_10MHz = EXTERNAL_CLOCK_10MHZ_REF
+                external_10MHz = EXTERNAL_CLOCK_10MHZ_REF,
+                external_AC = EXTERNAL_CLOCK_AC
             };
             static uint32_t reference_source_to_uint( reference_source_t a_reference_source );
             static reference_source_t uint_to_reference_source( uint32_t a_reference_source_uint );

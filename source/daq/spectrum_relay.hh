@@ -56,9 +56,6 @@ namespace fast_daq
             virtual void finalize();
 
         private:
-            std::thread f_dl_relay_thread;
-
-        private:
             void broadcast_spectrum( power_data* a_spectrum );
     };
 

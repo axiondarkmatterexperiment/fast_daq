@@ -1,10 +1,4 @@
-# CMakeLists.txt for psyllid/library
-
-if( TARGET TKSpline )
-    message( STATUS "######## HAVE tkspline" )
-else()
-    message( STATUS "######## DO NOT HAVE tkspline" )
-endif()
+# CMakeLists.txt for fast_daq/library
 
 pbuilder_use_sm_library( SandflyUtility Sandfly )
 pbuilder_use_sm_library( SandflyControl Sandfly )

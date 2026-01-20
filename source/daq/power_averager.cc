@@ -53,9 +53,12 @@ namespace fast_daq
 
         f_average_spectrum.resize( f_spectrum_size, 0. );
 
-        f_rescale = f_num_to_average == 0 ? 1. : 1. / (float)f_num_to_average;
+        //f_rescale = f_num_to_average == 0 ? 1. : 1. / (float)f_num_to_average;
+	
+	f_rescale = 1.; 
+	//DZ comment July 2025: PSD is a integral instead of an average
+	//DZ: it looks like num_to_average is set to 0, so it's aleardy a sum
         f_rescale *= 1000. / 50.; // scale to mW: 1000.0 is to get to mW from W, 50.0 is impedance to get W from
-
         f_avg_spectrum_bytes = f_average_spectrum.size() * sizeof(float);
     }
 
@@ -82,7 +85,7 @@ namespace fast_daq
                 }
                 else if ( input_command == stream::s_error )
                 {
-                    LWARN( flog, " got an s_error on slot <" << stream_index << ">, ... not doing anything about that." );
+                    LERROR( flog, " got an s_error on slot <" << stream_index << ">, return an error" );
                     continue;
                 }
                 else if ( input_command == stream::s_stop )
@@ -142,7 +145,10 @@ namespace fast_daq
         {
             LERROR( flog, "input array size [" << data_in->get_array_size() <<"] != output array size ["<<f_average_spectrum.size()<<"]");
             //TODO throw something smart please
-            throw 1;
+	    f_average_spectrum.resize(data_in->get_array_size(), 0.);
+            f_avg_spectrum_bytes = f_average_spectrum.size() * sizeof(float);
+            LPROG( flog, "Resized average spectrum to match input: " << data_in->get_array_size() );
+            //throw 1;
         }
 
         for (unsigned i_bin=0; i_bin < data_in->get_array_size(); ++i_bin)

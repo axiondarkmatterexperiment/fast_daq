@@ -22,7 +22,7 @@ namespace fast_daq
     {
         if (f_data_array != nullptr)
         {
-            delete f_data_array;
+            delete [] f_data_array;
             f_data_array = nullptr;
         }
     }
