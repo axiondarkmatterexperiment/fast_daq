@@ -1,5 +1,5 @@
 ARG base_image=debian
-ARG base_tag=12
+ARG base_tag=13
 
 # Base image with environment variables set
 #FROM ${base_image}:${base_tag} AS base
@@ -21,10 +21,6 @@ ENV PATH="${PATH}:${FAST_DAQ_INSTALL_PREFIX}"
 
 # Build image with dev dependencies
 
-# use quill_checkout to specify a tag or branch name to checkout
-ARG quill_checkout=v8.1.1
-ENV QUILL_CHECKOUT=${quill_checkout}
-
 RUN apt-get update &&\
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
         build-essential \
@@ -45,16 +41,6 @@ RUN apt-get update &&\
         &&\
     apt-get clean &&\
     rm -rf /var/lib/apt/lists/* &&\
-    cd /usr/local &&\
-    git clone https://github.com/odygrd/quill.git &&\
-    cd quill &&\
-    git checkout ${QUILL_CHECKOUT} &&\
-    mkdir build &&\
-    cd build &&\
-    cmake .. &&\
-    make -j${narg} install &&\
-    cd / &&\
-    rm -rf /usr/local/quill &&\
     /bin/true
 
 
@@ -83,6 +69,22 @@ RUN mkdir -p /build &&\
     /bin/true
 
 
+RUN apt-get update &&\
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        build-essential \
+        libssl3 \
+        libfftw3-double3 \
+        libboost-chrono1.83.0t64 \
+        libboost-filesystem1.83.0 \
+        libboost-system1.83.0 \
+        libhdf5-cpp-103-1t64 \
+        librabbitmq4 \
+        libyaml-cpp0.8 \
+        rapidjson-dev \
+        &&\
+    apt-get clean &&\
+    rm -rf /var/lib/apt/lists/* &&\
+    /bin/true
 
 COPY ./entrypoint.sh /root/entrypoint.sh
 RUN rm -rf /tmp_source
