@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.12)
 
 # Define the project
 cmake_policy( SET CMP0048 NEW ) # version in project()
-project( FastDaq VERSION 0.2.0 )
+project( FastDaq VERSION 1.2.0 )
 
 # Setup the module path in the proper order for overriding dependencies
 list( APPEND CMAKE_MODULE_PATH 
