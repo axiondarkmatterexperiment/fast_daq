@@ -2,24 +2,25 @@ ARG base_image=debian
 ARG base_tag=13
 
 # Base image with environment variables set
-#FROM ${base_image}:${base_tag} AS base
-FROM ${base_image}:${base_tag}
+FROM ${base_image}:${base_tag} AS base
 
 # Set bash as the default shell
 SHELL ["/bin/bash", "-c"]
 
 ARG build_type=DEBUG
 ARG narg=2
+ARG enable_ats=FALSE
 
-
-ENV ADMX_ROOT=/usr/local/
-ENV FAST_DAQ_INSTALL_PREFIX=${ADMX_ROOT}
 ENV NARG=${narg}
-ENV LD_LIBRARY_PATH=${ADMX_ROOT}
+ENV ENABLE_ATS=${enable_ats}
 
-ENV PATH="${PATH}:${FAST_DAQ_INSTALL_PREFIX}"
+ENV INSTALL_PREFIX=/usr/local
+ENV LD_LIBRARY_PATH=${INSTALL_PREFIX}
+ENV PATH="${PATH}:${INSTALL_PREFIX}"
+
 
 # Build image with dev dependencies
+FROM base AS deps
 
 RUN apt-get update &&\
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -27,7 +28,7 @@ RUN apt-get update &&\
         cmake \
         git \
         openssl \
-	curl \
+        curl \
         libfftw3-dev \
         libboost-chrono-dev \
         libboost-filesystem-dev \
@@ -36,29 +37,31 @@ RUN apt-get update &&\
         librabbitmq-dev \
         libyaml-cpp-dev \
         rapidjson-dev \
-	python3 \
-	python3-pip \
+#        python3 \
+#        python3-pip \
         &&\
     apt-get clean &&\
     rm -rf /var/lib/apt/lists/* &&\
+    curl -O https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v3.7.8/bin/rabbitmqadmin && \
+    chmod +x rabbitmqadmin && \
+    mv rabbitmqadmin /usr/local/bin/ && \
     /bin/true
 
-
-RUN ln /usr/bin/python3 /usr/bin/python
-# Build fast_daq in the deps image
-RUN curl -O https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v3.7.8/bin/rabbitmqadmin && \
-   chmod +x rabbitmqadmin && mv rabbitmqadmin /usr/local/bin/
-RUN mkdir -p /usr/include && mkdir -p /usr/lib && mkdir -p /tmp_source
-COPY . /tmp_source
+# ATS installation, if present
 COPY ./ATS_local/usr /usr
+
+# Build fast_daq in the deps image
+FROM deps AS build
+
+COPY . /tmp_source
 
 ## store cmake args because we'll need to run twice (known package_builder issue)
 ## use `extra_cmake_args` to add or replace options at build time; CMAKE_CONFIG_ARGS_LIST are defaults
 ARG extra_cmake_args=""
 ENV CMAKE_CONFIG_ARGS_LIST="\
       -D CMAKE_BUILD_TYPE=$build_type \
-      -D CMAKE_INSTALL_PREFIX:PATH=$FAST_DAQ_INSTALL_PREFIX \
-      -D FastDAQ_ENABLE_ATS=TRUE \
+      -D CMAKE_INSTALL_PREFIX:PATH=$INSTALL_PREFIX \
+      -D FastDAQ_ENABLE_ATS=$ENABLE_ATS \
       ${extra_cmake_args} \
       "
 
@@ -68,6 +71,8 @@ RUN mkdir -p /build &&\
     make -j${NARG} install &&\
     /bin/true
 
+# Final production image
+FROM base
 
 RUN apt-get update &&\
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -77,7 +82,7 @@ RUN apt-get update &&\
         libboost-chrono1.83.0t64 \
         libboost-filesystem1.83.0 \
         libboost-system1.83.0 \
-        libhdf5-cpp-103-1t64 \
+        libhdf5-cpp-310 \
         librabbitmq4 \
         libyaml-cpp0.8 \
         rapidjson-dev \
@@ -87,6 +92,7 @@ RUN apt-get update &&\
     /bin/true
 
 COPY ./entrypoint.sh /root/entrypoint.sh
-RUN rm -rf /tmp_source
-ENV LD_LIBRARY_PATH=:$FAST_DAQ_INSTALL_PREFIX
+
+COPY --from=build /usr/local /usr/local
+
 WORKDIR /root
