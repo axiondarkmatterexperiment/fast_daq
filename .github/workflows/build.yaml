@@ -10,7 +10,7 @@ on:
 env:
   BASE_IMAGE_REPO: debian
   BASE_IMAGE_VER: '13'
-  REGISTRY: docker.io
+  REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
