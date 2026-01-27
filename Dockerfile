@@ -30,6 +30,7 @@ RUN apt-get update &&\
         openssl \
         curl \
         libfftw3-dev \
+        libboost-atomic-dev \
         libboost-chrono-dev \
         libboost-filesystem-dev \
         libboost-system-dev \
@@ -78,7 +79,8 @@ RUN apt-get update &&\
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
         build-essential \
         libssl3 \
-        libfftw3-double3 \
+        libfftw3-single3 \
+        libboost-atomic1.83.0 \
         libboost-chrono1.83.0t64 \
         libboost-filesystem1.83.0 \
         libboost-system1.83.0 \
