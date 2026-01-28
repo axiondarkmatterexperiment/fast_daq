@@ -9,8 +9,8 @@ on:
 
 env:
   BASE_IMAGE_REPO: debian
-  BASE_IMAGE_VER: '10'
-  REGISTRY: docker.io
+  BASE_IMAGE_VER: '13'
+  REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
   test_docker:
     name: Build and Test in Docker
 
-    runs-on: debian-10
+    runs-on: ubuntu-22.04
 
     steps:
 
@@ -53,7 +53,7 @@ jobs:
 
   build_and_push:
 
-    runs-on: debain-10
+    runs-on: ubuntu-22.04
 
     permissions:
       contents: read
