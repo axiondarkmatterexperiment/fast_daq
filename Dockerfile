@@ -78,7 +78,7 @@ FROM base
 RUN apt-get update &&\
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
         build-essential \
-        libssl3 \
+        libssl3t64 \
         libfftw3-single3 \
         libboost-atomic1.83.0 \
         libboost-chrono1.83.0t64 \
