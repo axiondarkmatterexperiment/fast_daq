@@ -19,8 +19,14 @@ include( sandfly )
 
 set_to_max( CMAKE_CXX_STANDARD 17 )
 
+set( default__fpa_flag FALSE )
+if( UNIX AND NOT APPLE )
+    set( default__fpa_flag TRUE )
+endif()
+
 option( FastDAQ_ENABLE_ATS "Flag to enable building of node to read from AlazarTech digitizer" FALSE )
 option( FastDAQ_ENABLE_FFTW "Flag to enable FFTW features" TRUE )
+option( FastDAQ_ENABLE_FPA "Flag to enable use of the fast-packet acquisition" ${default__fpa_flag} )
 
 set_option( Midge_ENABLE_EXECUTABLES FALSE )
 set_option( Sandfly_ENABLE_EXECUTABLES FALSE )

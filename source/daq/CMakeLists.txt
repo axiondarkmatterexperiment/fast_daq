@@ -8,6 +8,7 @@ set( headers
     egg_writer.hh
     frequency_transform.hh
     inverse_frequency_transform.hh
+    packet_receiver_socket.hh
     power_averager.hh
     spectrum_relay.hh
     streaming_frequency_writer.hh
@@ -20,10 +21,23 @@ set( sources
     egg_writer.cc
     frequency_transform.cc
     inverse_frequency_transform.cc
+    packet_receiver_socket.cc
     power_averager.cc
     spectrum_relay.cc
     streaming_frequency_writer.cc
 )
+
+if( FastDAQ_ENABLE_FPA )
+    set( headers
+        ${headers}
+        packet_receiver_fpa.hh
+    )
+
+    set( sources
+        ${sources}
+        packet_receiver_fpa.cc
+    )
+endif()
 
 if( ATS9462_FOUND )
     # digitizer node
