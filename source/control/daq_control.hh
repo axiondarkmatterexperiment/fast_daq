@@ -14,7 +14,6 @@
 
 namespace fast_daq
 {
-
     /*!
      @class daq_control
      @author N. S. Oblath

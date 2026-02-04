@@ -5,12 +5,14 @@
 set( headers
     butterfly_house.hh
     daq_control.hh
+    fast_daq_config.hh
     monarch3_wrap.hh
 )
 
 set( sources
     butterfly_house.cc
     daq_control.cc
+    fast_daq_config.cc
     monarch3_wrap.cc
 )
 
