@@ -1,5 +1,5 @@
 ARG base_image=debian
-ARG base_tag=13
+ARG base_tag=12
 
 # Base image with environment variables set
 FROM ${base_image}:${base_tag} AS base
@@ -78,15 +78,15 @@ FROM base
 RUN apt-get update &&\
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
         build-essential \
-        libssl3t64 \
+        libssl3 \
         libfftw3-single3 \
-        libboost-atomic1.83.0 \
-        libboost-chrono1.83.0t64 \
-        libboost-filesystem1.83.0 \
-        libboost-system1.83.0 \
-        libhdf5-cpp-310 \
+        libboost-atomic1.74.0 \
+        libboost-chrono1.74.0 \
+        libboost-filesystem1.74.0 \
+        libboost-system1.74.0 \
+        libhdf5-cpp-103 \
         librabbitmq4 \
-        libyaml-cpp0.8 \
+        libyaml-cpp0.7 \
         rapidjson-dev \
         &&\
     apt-get clean &&\
