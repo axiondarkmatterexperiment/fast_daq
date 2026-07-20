@@ -137,7 +137,7 @@ namespace fast_daq
 	
 	// send it
 	auto t_run_control = use_run_control();
-	t_run_control->relayer().send(dripline::msg_alert::create(
+	t_run_control->relayer()->send(dripline::msg_alert::create(
                                 std::move(t_payload_ptr), 
 					this->get_spectrum_alert_rk()));
 

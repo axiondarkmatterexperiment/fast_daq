@@ -171,7 +171,7 @@ namespace fast_daq
                         //    f_fftwf_output[i_bin][1] *= fft_norm;
                         //}
                         //// Is there anything weird in the output ordering of the inverse transform?
-                        std::copy(&f_fftwf_output[0][0], &f_fftwf_output[f_fft_size_fraction][1], &output_time_data->get_data_array()[0][0]);
+                        std::copy(&f_fftwf_output[0][0], &f_fftwf_output[f_fft_size_fraction][0], &output_time_data->get_data_array()[0][0]);
                         if ( !out_stream< 0 >().set( stream::s_run ) )
                         {
                             LERROR( flog, "inverse_frequency_transform error setting frequency output stream to s_run" );
