@@ -51,7 +51,7 @@ namespace fast_daq
         f_acquisition_length_sec( 0.1 ),
         f_samples_per_buffer( 204800 ),
         f_input_mag_range( 400 ), // in +/- mV, must be a valid value from the enum
-        f_dma_buffer_count( 4883 ),
+        f_dma_buffer_count( 20 ),  // was 4883; reduced to mitigate IOMMU DMA PTE leak per run
         f_next_read_buffer( 0 ),
         f_system_id( 1 ),
         f_board_id( 1 ),
@@ -66,6 +66,7 @@ namespace fast_daq
         f_bits_per_sample(),
         f_max_samples_per_channel(),
         f_paused( true ),
+        f_stopping( false ),
         f_board_buffers(),
         f_buffers_completed( 0 )
     {
@@ -149,7 +150,7 @@ namespace fast_daq
                     process_instructions();
                 }
                 // If not paused continue to process
-                if ( ! f_paused )
+                if ( ! f_paused && ! f_stopping )
                 {
                     if ( f_buffers_completed >= buffers_per_acquisition() )
                     {
@@ -157,6 +158,18 @@ namespace fast_daq
                         std::shared_ptr< daq_control > t_daq_control = std::dynamic_pointer_cast< daq_control >( use_run_control() );
                         t_daq_control->stop_run();
                         check_return_code_macro( AlazarAbortAsyncRead, f_board_handle );
+                        // Workaround for ats9462 driver IOMMU DMA PTE leak:
+                        // AlazarAbortAsyncRead does not call dma_unmap_sg_attrs, so
+                        // IOMMU PTEs accumulate across runs.  Freeing and reallocating
+                        // the buffer pool gives AlazarPostAsyncBuffer fresh virtual
+                        // addresses, avoiding PTE collisions on the next run.
+                        // The stale PTEs for the old VAs still leak, but with a small
+                        // dma-buffer-count this grows slowly enough for long tests.
+                        LINFO( flog, "recycling DMA buffer pool to avoid IOMMU PTE collisions" );
+                        clear_buffers();
+                        allocate_buffers();
+                        LINFO( flog, "DMA buffer pool recycled (" << f_board_buffers.size() << " buffers)" );
+                        f_stopping = true;
                     }
                     else
                     {
@@ -250,13 +263,14 @@ namespace fast_daq
         LDEBUG( flog, "clearing up DMA buffers" );
         check_return_code_macro( AlazarAbortAsyncRead, f_board_handle );
         LDEBUG( flog, "async read abort sent to board" );
-        for (std::vector<U16*>::iterator a_buffer=f_board_buffers.begin(); a_buffer != f_board_buffers.end(); )
+        for (std::vector<U16*>::iterator a_buffer = f_board_buffers.begin(); a_buffer != f_board_buffers.end(); )
         {
             if (*a_buffer != nullptr)
             {
                 free(*a_buffer);
+                *a_buffer = nullptr;
             }
-            f_board_buffers.erase(a_buffer);
+            a_buffer = f_board_buffers.erase(a_buffer);
         }
     }
 
@@ -294,6 +308,7 @@ namespace fast_daq
             f_buffers_completed = 0;
             f_chunk_counter = 0;
             f_paused = false;
+            f_stopping = false;
             LINFO( flog, "run status members set" );
             //initial run setup for the board
             commence_buffer_collection();
@@ -349,8 +364,9 @@ namespace fast_daq
         }
         if ( f_overrun_collected == f_dma_buffer_count )
         {
-            LINFO( flog, "all buffers cleared, incrementing acquistition number and restarting digitization" );
-            ++f_chunk_counter;
+            LINFO( flog, "all buffers cleared, restarting digitization" );
+            // Abort the current async read to release DMA mappings before restarting
+            check_return_code_macro( AlazarAbortAsyncRead, f_board_handle );
             commence_buffer_collection();
         }
         ++f_buffers_completed;
