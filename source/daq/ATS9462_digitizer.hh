@@ -120,6 +120,7 @@ namespace fast_daq
             U32 f_max_samples_per_channel;
             HANDLE f_board_handle;
             bool f_paused;
+            bool f_stopping;
             std::vector<U16*> f_board_buffers;
             U32 f_buffers_completed;
 
