@@ -10,7 +10,7 @@
 #include "butterfly_house.hh"
 #include "fast_daq_error.hh"
 
-#include "message_relayer.hh"
+#include "fast_daq_relayer.hh"
 
 
 using scarab::param_array;

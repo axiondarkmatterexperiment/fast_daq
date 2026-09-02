@@ -20,6 +20,7 @@ namespace fast_daq
 {
     // forward declarations
     class power_data;
+    class fast_daq_relayer;
 
     /*!
      @class spectrum_relay
@@ -57,6 +58,8 @@ namespace fast_daq
 
         private:
             void broadcast_spectrum( power_data* a_spectrum );
+
+            std::shared_ptr< fast_daq::fast_daq_relayer > f_relayer_ptr;
     };
 
     class spectrum_relay_binding : public sandfly::_node_binding< spectrum_relay, spectrum_relay_binding >
