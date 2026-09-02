@@ -6,12 +6,13 @@
  */
 
 #include "daq_control.hh"
+#include "fast_daq_config.hh"
 #include "fast_daq_error.hh"
+#include "fast_daq_relayer.hh"
 #include "fast_daq_version.hh"
 
 #include "conductor.hh"
 #include "sandfly_error.hh"
-#include "server_config.hh"
 
 #include "application.hh"
 #include "logger.hh"
@@ -26,18 +27,20 @@ LOGGER( plog, "fast_daq" );
 
 int main( int argc, char** argv )
 {
-    LINFO( plog, "Welcome to Fast Daq\n\n" <<
 
-    "\t\t _______  _______  _______ _________   ______   _______  _______ \n" <<
-    "\t\t(  ____ \\(  ___  )(  ____ \\__   __/  (  __  \\ (  ___  )(  ___  )\n" <<
-    "\t\t| (    \\/| (   ) || (    \\/   ) (     | (  \\  )| (   ) || (   ) |\n" <<
-    "\t\t| (__    | (___) || (_____    | |     | |   ) || (___) || |   | |\n" <<
-    "\t\t|  __)   |  ___  |(_____  )   | |     | |   | ||  ___  || |   | |\n" <<
-    "\t\t| (      | (   ) |      ) |   | |     | |   ) || (   ) || | /\\| |\n" <<
-    "\t\t| )      | )   ( |/\\____) |   | |     | (__/  )| )   ( || (_\\ \\ |\n" <<
-    "\t\t|/       |/     \\|\\_______)   )_(     (______/ |/     \\|(____\\/_)\n" <<
-    "\t\t                                                                 \n\n");
+    auto t_splash = []() {
+        LINFO( plog, "Welcome to Fast Daq\n\n" <<
 
+        "\t\t _______  _______  _______ _________   ______   _______  _______ \n" <<
+        "\t\t(  ____ \\(  ___  )(  ____ \\__   __/  (  __  \\ (  ___  )(  ___  )\n" <<
+        "\t\t| (    \\/| (   ) || (    \\/   ) (     | (  \\  )| (   ) || (   ) |\n" <<
+        "\t\t| (__    | (___) || (_____    | |     | |   ) || (___) || |   | |\n" <<
+        "\t\t|  __)   |  ___  |(_____  )   | |     | |   | ||  ___  || |   | |\n" <<
+        "\t\t| (      | (   ) |      ) |   | |     | |   ) || (   ) || | /\\| |\n" <<
+        "\t\t| )      | )   ( |/\\____) |   | |     | (__/  )| )   ( || (_\\ \\ |\n" <<
+        "\t\t|/       |/     \\|\\_______)   )_(     (______/ |/     \\|(____\\/_)\n" <<
+        "\t\t                                                                 \n\n");
+    };
             
     try
     {
@@ -45,8 +48,11 @@ int main( int argc, char** argv )
         scarab::main_app the_main;
         conductor the_conductor;
 
+        // splash text
+        the_main.splash() = t_splash;
+
         // Default configuration
-        the_main.default_config() = server_config();
+        the_main.default_config() = fast_daq_config();
         the_main.default_config()["name"]() = "fast_daq";
 
         // The main execution callback
@@ -55,7 +61,9 @@ int main( int argc, char** argv )
                 auto t_cwrap = scarab::wrap_cancelable( the_conductor );
                 t_sig_hand.add_cancelable( t_cwrap );
 
-                the_conductor.execute< daq_control >( the_main.primary_config(), the_main.auth() ); 
+                std::shared_ptr< message_relayer > t_relayer = std::make_shared< fast_daq_relayer >( the_main.primary_config(), the_main.auth() );
+
+                the_conductor.execute< daq_control >( the_main.primary_config(), the_main.auth(), t_relayer ); 
             } );
 
         // Command line options
