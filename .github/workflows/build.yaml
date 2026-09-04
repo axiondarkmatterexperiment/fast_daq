@@ -43,6 +43,7 @@ jobs:
           build-args: |
             base_image=${{ env.BASE_IMAGE_REPO }}
             base_tag=${{ env.BASE_IMAGE_VER }}
+            enable_testing=TRUE
           platforms: linux/amd64
 
 # For debugging

@@ -21,6 +21,8 @@ set_to_max( CMAKE_CXX_STANDARD 17 )
 
 option( FastDAQ_ENABLE_ATS "Flag to enable building of node to read from AlazarTech digitizer" FALSE )
 option( FastDAQ_ENABLE_FFTW "Flag to enable FFTW features" TRUE )
+option( FastDaq_ENABLE_BENCHMARKS      "Build benchmark executables"         FALSE )
+option( FastDaq_ENABLE_TEST_SANITIZERS "Build tests with ASan/UBSan"         FALSE )
 
 set_option( Midge_ENABLE_EXECUTABLES FALSE )
 set_option( Sandfly_ENABLE_EXECUTABLES FALSE )
@@ -108,7 +110,8 @@ if( FastDaq_ENABLE_EXECUTABLES )
 endif()
 
 if( FastDaq_ENABLE_TESTING )
-    #add_subdirectory( source/test )
+    enable_testing()                 # MUST be here, not in source/test, or ctest
+    add_subdirectory( source/test )  # finds no tests at the build root
 endif()
 
 

@@ -38,6 +38,7 @@ RUN apt-get update &&\
         librabbitmq-dev \
         libyaml-cpp-dev \
         rapidjson-dev \
+        catch2 \
 #        python3 \
 #        python3-pip \
         &&\
@@ -59,10 +60,12 @@ COPY . /tmp_source
 ## store cmake args because we'll need to run twice (known package_builder issue)
 ## use `extra_cmake_args` to add or replace options at build time; CMAKE_CONFIG_ARGS_LIST are defaults
 ARG extra_cmake_args=""
+ARG enable_testing=FALSE
 ENV CMAKE_CONFIG_ARGS_LIST="\
       -D CMAKE_BUILD_TYPE=$build_type \
       -D CMAKE_INSTALL_PREFIX:PATH=$INSTALL_PREFIX \
       -D FastDAQ_ENABLE_ATS=$ENABLE_ATS \
+      -D FastDaq_ENABLE_TESTING=${enable_testing} \
       ${extra_cmake_args} \
       "
 
@@ -70,6 +73,7 @@ RUN mkdir -p /build &&\
     cd /build &&\
     cmake ${CMAKE_CONFIG_ARGS_LIST} /tmp_source &&\
     make -j${NARG} install &&\
+    if [ "${enable_testing}" = "TRUE" ]; then ctest --output-on-failure; fi &&\
     /bin/true
 
 # Final production image
