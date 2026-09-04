@@ -107,6 +107,12 @@ namespace fast_daq
                     }
                     continue;
                 }
+                else if ( input_command == stream::s_exit )
+                {
+                    LDEBUG( flog, "got an s_exit on slot <" << stream_index << ">" );
+                    out_stream< 0 >().set( stream::s_exit );
+                    break;
+                }
                 else if ( input_command == stream::s_run )
                 {
                     LTRACE( flog, " got an s_run on slot <" << stream_index << ">");
