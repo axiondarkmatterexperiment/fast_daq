@@ -9,7 +9,7 @@ on:
 
 env:
   BASE_IMAGE_REPO: debian
-  BASE_IMAGE_VER: '13'
+  BASE_IMAGE_VER: '12'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
