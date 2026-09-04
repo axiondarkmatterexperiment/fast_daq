@@ -23,6 +23,11 @@ namespace fast_daq
             iq_time_data();
             virtual ~iq_time_data();
 
+            // Payload objects live in midge ring-buffer slots and are filled in place.
+            // Copying would shallow-copy the owning pointer and double-free.
+            iq_time_data( const iq_time_data& ) = delete;
+            iq_time_data& operator=( const iq_time_data& ) = delete;
+
         public:
             typedef float complex_t[2];
 
