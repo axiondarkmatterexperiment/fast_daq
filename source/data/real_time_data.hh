@@ -27,6 +27,11 @@ namespace fast_daq
             real_time_data();
             virtual ~real_time_data();
 
+            // Payload objects live in midge ring-buffer slots and are filled in place.
+            // Copying would shallow-copy the owning pointer and double-free.
+            real_time_data( const real_time_data& ) = delete;
+            real_time_data& operator=( const real_time_data& ) = delete;
+
         // member varaible macros
         mv_accessible( U16*, time_series );
         mv_accessible( unsigned, array_size );

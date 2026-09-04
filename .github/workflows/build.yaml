@@ -9,7 +9,7 @@ on:
 
 env:
   BASE_IMAGE_REPO: debian
-  BASE_IMAGE_VER: '13'
+  BASE_IMAGE_VER: '12'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
@@ -41,8 +41,8 @@ jobs:
           context: .
           push: false
           build-args: |
-            img_repo=${{ env.BASE_IMAGE_REPO }}
-            img_tag=${{ env.BASE_IMAGE_VER }}
+            base_image=${{ env.BASE_IMAGE_REPO }}
+            base_tag=${{ env.BASE_IMAGE_VER }}
           platforms: linux/amd64
 
 # For debugging
@@ -115,13 +115,13 @@ jobs:
         id: build_push
         uses: docker/build-push-action@v7
         env:
-          BASE_IMAGE_TAG: ${{ env.BASE_IMAGE_VER }}${{ matrix.tag-suffix }}
+          BASE_IMAGE_TAG: ${{ env.BASE_IMAGE_VER }}
         with:
           context: .
           push: ${{ github.event_name == 'push' }}  # limited to develop, main, and tags; don't push on PR
-          build-args: | 
-            img_repo=${{ env.BASE_IMAGE_REPO }}
-            img_tag=${{ env.BASE_IMAGE_TAG }}
+          build-args: |
+            base_image=${{ env.BASE_IMAGE_REPO }}
+            base_tag=${{ env.BASE_IMAGE_TAG }}
           tags: ${{ steps.docker_meta.outputs.tags }}
 #          platforms: linux/amd64,linux/arm64
           platforms: linux/amd64,linux/arm64
