@@ -115,7 +115,7 @@ jobs:
         id: build_push
         uses: docker/build-push-action@v7
         env:
-          BASE_IMAGE_TAG: ${{ env.BASE_IMAGE_VER }}${{ matrix.tag-suffix }}
+          BASE_IMAGE_TAG: ${{ env.BASE_IMAGE_VER }}
         with:
           context: .
           push: ${{ github.event_name == 'push' }}  # limited to develop, main, and tags; don't push on PR
