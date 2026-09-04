@@ -122,8 +122,9 @@ namespace fast_daq
                 LWARN( flog, "averager end of loop" );
             }
         }
-        catch( std::exception )
+        catch( const std::exception& e )
         {
+            LERROR( flog, "exception in execute: " << e.what() );
             a_midge->throw_ex( std::current_exception() );
         }
     }
@@ -149,12 +150,9 @@ namespace fast_daq
 
         if (data_in->get_array_size() != f_average_spectrum.size())
         {
-            LERROR( flog, "input array size [" << data_in->get_array_size() <<"] != output array size ["<<f_average_spectrum.size()<<"]");
-            //TODO throw something smart please
-	    f_average_spectrum.resize(data_in->get_array_size(), 0.);
-            f_avg_spectrum_bytes = f_average_spectrum.size() * sizeof(float);
-            LPROG( flog, "Resized average spectrum to match input: " << data_in->get_array_size() );
-            //throw 1;
+            throw midge::node_nonfatal_error() << "Input spectrum size [" << data_in->get_array_size()
+                << "] does not match configured spectrum-size [" << f_average_spectrum.size()
+                << "]; check configuration";
         }
 
         for (unsigned i_bin=0; i_bin < data_in->get_array_size(); ++i_bin)
@@ -213,9 +211,7 @@ namespace fast_daq
         LINFO( flog, "sending out a spectrum" );
         if (! out_stream< 0 >().set( stream::s_run))
         {
-            LERROR( flog, "unable to set s_run on output stream" );
-            //TODO this should be something smarter
-            throw 1;
+            throw midge::node_nonfatal_error() << "Stream 0 error while sending s_run";
         }
     }
 

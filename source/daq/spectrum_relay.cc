@@ -98,8 +98,9 @@ namespace fast_daq
                 }
             }
         }
-        catch( std::exception )
+        catch( const std::exception& e )
         {
+            LERROR( flog, "exception in execute: " << e.what() );
             a_midge->throw_ex( std::current_exception() );
         }
     }
