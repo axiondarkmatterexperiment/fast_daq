@@ -38,6 +38,7 @@ TEST_CASE( "data_producer emits real_time_data records", "[data_producer]" )
 
     t_prod->set_data_size( t_data_size );
     t_prod->set_data_value( static_cast< uint16_t >( t_data_value ) );
+    t_prod->write_primary_packet();  // refresh the packet after changing data_value/data_size
     t_prod->set_delay_time_ms( 0 );  // must be 0 -- default is 500 ms
 
     t_cons->set_expect_records( t_want );

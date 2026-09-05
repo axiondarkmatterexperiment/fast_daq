@@ -31,7 +31,7 @@ namespace fast_daq
 
     // power_averager methods
     power_averager::power_averager() :
-        f_num_output_buffers( 1 ),
+        f_num_output_buffers( 5 ),
         f_spectrum_size(),
         f_num_to_average( 0 ),
         f_bin_width(),
