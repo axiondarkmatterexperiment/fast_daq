@@ -11,6 +11,7 @@ ARG build_type=DEBUG
 ARG narg=2
 ARG enable_ats=FALSE
 
+ENV BUILD_TYPE=${build_type}
 ENV NARG=${narg}
 ENV ENABLE_ATS=${enable_ats}
 
@@ -62,7 +63,7 @@ COPY . /tmp_source
 ARG extra_cmake_args=""
 ARG enable_testing=FALSE
 ENV CMAKE_CONFIG_ARGS_LIST="\
-      -D CMAKE_BUILD_TYPE=$build_type \
+      -D CMAKE_BUILD_TYPE=$BUILD_TYPE \
       -D CMAKE_INSTALL_PREFIX:PATH=$INSTALL_PREFIX \
       -D FastDAQ_ENABLE_ATS=$ENABLE_ATS \
       -D FastDaq_ENABLE_TESTING=${enable_testing} \
