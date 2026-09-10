@@ -40,10 +40,21 @@ jobs:
         with:
           context: .
           push: false
+          # load the intermediate build stage so the test step can run in it:
+          # the test executables live in /build and are not in the final image
+          load: true
+          target: build
+          tags: fast_daq:test
           build-args: |
             base_image=${{ env.BASE_IMAGE_REPO }}
             base_tag=${{ env.BASE_IMAGE_VER }}
+            enable_testing=TRUE
           platforms: linux/amd64
+
+      - name: Run the tests
+        id: test
+        # the build stage sets no WORKDIR, so cd into the build dir explicitly
+        run: docker run --rm --workdir /build fast_daq:test ctest --output-on-failure
 
 # For debugging
 #      - name: Setup tmate session
