@@ -10,28 +10,13 @@
 namespace fast_daq
 {
     power_data::power_data() :
-        f_data_array(),
-        f_array_size(),
         f_bin_width(),
         f_minimum_frequency()
     {
     }
 
-    power_data::~power_data()
-    {
-        if (f_data_array != nullptr)
-        {
-            delete f_data_array;
-            f_data_array = nullptr;
-        }
-    }
-
     void power_data::allocate_array( unsigned n_samples )
     {
-        if (f_data_array == nullptr )
-        {
-            f_data_array = new float[n_samples];
-        }
-        f_array_size = n_samples;
+        f_data_array.resize( n_samples, 0. );
     }
 } /* namespace fast_daq */

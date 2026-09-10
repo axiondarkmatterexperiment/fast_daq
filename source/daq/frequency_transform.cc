@@ -284,7 +284,7 @@ namespace fast_daq
                         switch (f_input_type)
                         {
                             case input_type_t::real:
-                                std::copy(&f_fftwf_output[first_output_index()][0], &f_fftwf_output[first_output_index()+num_output_bins()][1], &freq_data_out->get_data_array()[0][0] );
+                                std::copy(&f_fftwf_output[first_output_index()][0], &f_fftwf_output[first_output_index()+num_output_bins()][0], &freq_data_out->get_data_array()[0][0] );
                                 freq_data_out->set_chunk_counter( real_time_data_in->get_chunk_counter() );
                                 break;
                             case input_type_t::complex:

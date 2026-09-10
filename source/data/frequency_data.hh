@@ -18,6 +18,11 @@ namespace fast_daq
             frequency_data();
             virtual ~frequency_data();
 
+            // Payload objects live in midge ring-buffer slots and are filled in place.
+            // Copying would shallow-copy the owning pointer and double-free.
+            frequency_data( const frequency_data& ) = delete;
+            frequency_data& operator=( const frequency_data& ) = delete;
+
         public:
             typedef float complex_t[2];
 
